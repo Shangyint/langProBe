@@ -10,13 +10,13 @@ NUM_TESTS = 5
 
 # Code Generator
 
+
 class CodeProblem(dspy.Signature):
     prompt = dspy.InputField(format=str)
     code = dspy.OutputField()
 
 
 class NaiveCodeGenerator(dspy.Module):
-
     def __init__(self):
         self.prog = dspy.ChainOfThought("prompt -> code")
 
@@ -26,6 +26,7 @@ class NaiveCodeGenerator(dspy.Module):
 
 
 # Test Generator
+
 
 class GenerateTests(dspy.Signature):
     prompt = dspy.InputField(format=str)
@@ -45,6 +46,7 @@ class ExtractTests(dspy.Signature):
         desc="Executable tests using assert, you should directly extract the test from the prompt. \
                              Do not invent your own tests!"
     )
+
 
 def generate_tests(prompt):
     test_gen = dspy.ChainOfThought(GenerateTests)
@@ -68,5 +70,3 @@ def generate_tests_lists(prompt):
         tests.append(post_process_tests(post_process_code(raw_tests)))
     result = list(chain(*tests))
     return result
-
-
