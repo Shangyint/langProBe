@@ -66,7 +66,10 @@ class EvaluateBench(ABC):
         self.optimizer = optimizer
         self.num_threads = num_threads
         self.evaluate_prog = Evaluate(
-            devset=self.benchmark.get_test_set(), metric=self.metric, num_threads=self.num_threads, display_progress=True
+            devset=self.benchmark.get_dev_set(),
+            metric=self.metric,
+            num_threads=self.num_threads,
+            display_progress=True,
         )
 
         if self.optimizer is not None:
