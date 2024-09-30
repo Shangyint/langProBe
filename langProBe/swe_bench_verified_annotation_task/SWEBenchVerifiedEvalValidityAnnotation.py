@@ -1,6 +1,6 @@
 import dspy.teleprompt
 from ..benchmark import EvaluateBench
-from .DatasetUtils import SWEBenchVerifiedAnnotationTaskBench
+from .swe_bench_verified_annotation_task_data import SWEBenchVerifiedAnnotationTaskBench
 
 import re
 import dspy
