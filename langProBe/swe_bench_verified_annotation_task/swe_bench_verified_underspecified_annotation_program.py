@@ -1,17 +1,7 @@
 import dspy.teleprompt
 
-from .swe_bench_verified_annotation_task_data import SWEBenchVerifiedAnnotationTaskBench
-from ..benchmark import EvaluateBench
-
 import re
 import dspy
-import json
-import os
-import time
-
-expr_dir_results_name = f"langProBe/SweBenchVerifiedAnnotationTask/saved_outputs/underspecified_{time.strftime('%Y-%m-%d_%H-%M-%S')}"
-
-os.makedirs(expr_dir_results_name, exist_ok=False)
 
 class UnderspecifiedSignature(dspy.Signature):
     """You are considering an issue from an open source Python repository. The issue has an associated test_patch that provides a set of tests to check whether the issue is resolved. The issue also has a corresponding gold_patch that provides a fix for the issue. Your task is to evaluate if this issue should be included in a question bank to benchmark coding ability. To evaluate an engineer's coding ability, the issue will be provided to them without the gold_patch and they will be tasked with writing code to resolve the issue. The test_patch will then be used to check whether the engineer's solution passes the tests in the test_patch. However, to be a fair evaluation, the issue must have a well-specified issue description that is clear and unambiguous about what is required for a successful solution. The engineer should have complete information about what is required to resolve the issue, just by reading the issue description. Please read the issue description and the test_patch carefully.
@@ -57,23 +47,3 @@ class UnderspecifiedAnnotationGenerator(dspy.Module):
             output["underspecification_" + k] = v
         
         return dspy.Prediction(**output)
-
-def swe_bench_verified_annotation_evaluate(
-    example: dspy.Example, pred: dspy.Prediction, target: str = None
-):
-    score = 0
-    if pred.underspecification_score in example.underspecified:
-        score += 1
-    
-    with open(os.path.join(expr_dir_results_name, f"{example.instance_id}.json"), "w") as f:
-        json.dump({"example": {**example}, "pred": {**pred}}, f)
-
-    return score
-
-bench = SWEBenchVerifiedAnnotationTaskBench()
-evaluate_naive_program = EvaluateBench(
-    bench, UnderspecifiedAnnotationGenerator(), swe_bench_verified_annotation_evaluate, optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch(metric=swe_bench_verified_annotation_evaluate)
-)
-
-with dspy.context(lm=dspy.OpenAI(model="gpt-4o-mini", max_tokens=16000)):
-    evaluate_naive_program.evaluate()

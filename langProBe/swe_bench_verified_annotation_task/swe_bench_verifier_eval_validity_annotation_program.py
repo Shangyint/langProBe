@@ -1,16 +1,7 @@
 import dspy.teleprompt
-from ..benchmark import EvaluateBench
-from .swe_bench_verified_annotation_task_data import SWEBenchVerifiedAnnotationTaskBench
 
 import re
 import dspy
-import json
-import time
-import os
-
-expr_dir_results_name = f"langProBe/SweBenchVerifiedAnnotationTask/saved_outputs/eval_validity_{time.strftime('%Y-%m-%d_%H-%M-%S')}"
-
-os.makedirs(expr_dir_results_name, exist_ok=False)
 
 class EvaluationValiditySignature(dspy.Signature):
     """You are now considering an issue from an open source Python repository. The issue has an associated test_patch that provides a set of tests to check whether the issue is resolved. The issue also has a corresponding gold_patch that provides a solution to the issue. Your task is to evaluate if this issue should be included in a benchmark for coding ability. The issue will be provided to an engineer (without the gold_patch) and the engineer will be asked to write code to resolve the issue. The test_patch will then be used to check whether the engineer's solution passes the tests in the test_patch. However, to be included in the benchmark, the issue must have tests that are correctly scoped to the issue, such that all reasonable solutions to the issue should pass the tests. The tests should not rely on any details that are not present in the issue description. The tests must check for a solution exactly as described in the issue description, and do not test any other unrelated functionality, like specifics of the gold_patch.
@@ -57,23 +48,3 @@ class EvaluationValidityModule(dspy.Module):
             output["evaluation_validity_" + k] = v
         
         return dspy.Prediction(**output)
-
-def swe_bench_verified_annotation_evaluate(
-    example: dspy.Example, pred: dspy.Prediction, target: str = None
-):
-    score = 0
-    if pred.evaluation_validity_score in example.false_negative:
-        score += 1
-    
-    with open(os.path.join(expr_dir_results_name, f"{example.instance_id}.json"), "w") as f:
-        json.dump({"example": {**example}, "pred": {**pred}}, f)
-
-    return score
-
-bench = SWEBenchVerifiedAnnotationTaskBench()
-evaluate_naive_program = EvaluateBench(
-    bench, EvaluationValidityModule(), swe_bench_verified_annotation_evaluate, optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch(metric=swe_bench_verified_annotation_evaluate)
-)
-
-with dspy.context(lm=dspy.OpenAI(model="gpt-4o-mini", max_tokens=16000)):
-    evaluate_naive_program.evaluate()
