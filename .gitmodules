@@ -1,0 +1,3 @@
+[submodule "langProBe/webarena/webarena"]
+	path = langProBe/webarena/webarena
+	url = https://github.com/web-arena-x/webarena
