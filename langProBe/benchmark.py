@@ -78,10 +78,10 @@ class EvaluateBench(ABC):
         if has_assertions:
             self.features.append(DSPyFeatures.ASSERTION)
 
-    def evaluate_baseline(self) -> None:
+    def evaluate_baseline(self) -> float:
         return self.evaluate_prog(self.program)
 
-    def evaluate_optimizer(self) -> None:
+    def evaluate_optimizer(self) -> float:
         # TODO(shangyin): we need to pass additional arguments to the optimizer
         # one way is to create partial functions for optimizer in Teleprompter class, e.g.,
         # from functools import partial
@@ -96,18 +96,21 @@ class EvaluateBench(ABC):
 
         return self.evaluate_prog(self.optimized_program)
 
-    def evaluate_assertion(self) -> None:
+    def evaluate_assertion(self) -> float:
         self.program.activate_assertions()
         return self.evaluate_prog(self.program)
 
-    def evaluate(self) -> None:
-        result: dict[DSPyFeatures, float] = {}
-        for feature in self.features:
-            match feature:
-                case DSPyFeatures.BASELINE:
-                    result[feature] = self.evaluate_baseline()
-                case DSPyFeatures.OPTIMIZER:
-                    result[feature] = self.evaluate_optimizer()
-                case DSPyFeatures.ASSERTION:
-                    result[feature] = self.evaluate_assertion()
-        return result
+    def evaluate(self, dspy_config=None) -> dict[DSPyFeatures, float]:
+        if dspy_config is None:
+            dspy_config = {}
+        with dspy.context(**dspy_config):
+            result: dict[DSPyFeatures, float] = {}
+            for feature in self.features:
+                match feature:
+                    case DSPyFeatures.BASELINE:
+                        result[feature] = self.evaluate_baseline()
+                    case DSPyFeatures.OPTIMIZER:
+                        result[feature] = self.evaluate_optimizer()
+                    case DSPyFeatures.ASSERTION:
+                        result[feature] = self.evaluate_assertion()
+            return result
