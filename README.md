@@ -46,5 +46,5 @@ This file defines utility functions for this benchmark.
 #### Formatting
 For simplicity, we use `black` formatter with the following command:
 ```bash
-black --fast **/*.py
+black --fast langProBe/*.py langProBe/*/*.py
 ```

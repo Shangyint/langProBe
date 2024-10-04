@@ -93,10 +93,15 @@ class EvaluateBench(ABC):
         #
         # and then we can pass optimizer.compile_partial as self.optimizer
 
-        self.optimized_programs = [optimizer(self.program) for optimizer in self.optimizers]
+        self.optimized_programs = [
+            optimizer(self.program) for optimizer in self.optimizers
+        ]
 
-        return [self.evaluate_prog(optimized_program) for optimized_program in self.optimized_programs]
-    
+        return [
+            self.evaluate_prog(optimized_program)
+            for optimized_program in self.optimized_programs
+        ]
+
     def evaluate_with_optimizer(self, optimizer: Teleprompter) -> float:
         optimized_program = optimizer(self.program)
         return self.evaluate_prog(optimized_program)
