@@ -12,25 +12,35 @@ There are essentially two ways to load data - one is to put everything into `dsp
 ```
 langProBe/
     bench_name/
+        __init__.py
         bench_name_data.py
-        bench_name_eval.py
         bench_name_program.py
         bench_name_utils.py
     ...
+```
+
+#### `__init__.py`
+This file should define `benchmark` to the class handling the dataset `BenchNameBench`, i.e.
+```python
+from .bench_name_data import BenchNameBench
+benchmark = BenchNameBench
+```
+
+In addition, this file should define `programs` to all the programs available for this benchmark, i.e.
+```python
+from .bench_name_program import Program1, Program2, ...
+programs = [Program1, Program2, ...]
 ```
 
 #### `bench_name_data.py`
 This file defines the data used for this benchmark. It should download the data, preprocess it, and create a `Benchmark` subclass called `BenchNameBench`. 
 
 #### `bench_name_program.py`
-This file defines DSPy programs for this benchmark.
-TODO(@shangyin): We can potentially requires this file to define an `Enum` class for program names, or even a dictornary that maps program names to their available features (including optimizers).
+This file defines DSPy programs for this benchmark. Each program should be a subclass of `dspy.Module`. For simplicity, we require each program to be initialized directly, i.e. `Program()`.
 
 #### `bench_name_utils.py`
 This file defines utility functions for this benchmark.
 
-#### `bench_name_eval.py`
-This file first defines optimizers for this benchmark. Then, it defines the evaluation script.
 
 ### Contributing
 #### Formatting
