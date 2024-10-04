@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import dspy
-from typing import Callable
+from typing import Any, Callable
 
 from dspy.evaluate import Evaluate
 from dspy.teleprompt import Teleprompter
@@ -55,7 +55,7 @@ class EvaluateBench(ABC):
         benchmark: Benchmark,
         program: dspy.Module,
         metric: Callable,
-        optimizer: Teleprompter = None,
+        optimizers: list[Teleprompter] = None,
         has_assertions: bool = False,
         num_threads: int = 1,
     ):
@@ -63,7 +63,7 @@ class EvaluateBench(ABC):
         self.benchmark = benchmark
         self.program = program
         self.metric = metric
-        self.optimizer = optimizer
+        self.optimizers = optimizers
         self.num_threads = num_threads
         self.evaluate_prog = Evaluate(
             devset=self.benchmark.get_dev_set(),
@@ -78,10 +78,13 @@ class EvaluateBench(ABC):
         if has_assertions:
             self.features.append(DSPyFeatures.ASSERTION)
 
+    def set_optimizer(self, optimizers: list[Teleprompter]) -> None:
+        self.optimizers = optimizers
+
     def evaluate_baseline(self) -> float:
         return self.evaluate_prog(self.program)
 
-    def evaluate_optimizer(self) -> float:
+    def evaluate_optimizers(self) -> list[float]:
         # TODO(shangyin): we need to pass additional arguments to the optimizer
         # one way is to create partial functions for optimizer in Teleprompter class, e.g.,
         # from functools import partial
@@ -90,17 +93,27 @@ class EvaluateBench(ABC):
         #
         # and then we can pass optimizer.compile_partial as self.optimizer
 
-        self.optimized_program = self.optimizer.compile(
-            student=self.program, trainset=self.benchmark.get_train_set()
-        )
+        self.optimized_programs = [optimizer(self.program) for optimizer in self.optimizers]
 
-        return self.evaluate_prog(self.optimized_program)
+        return [self.evaluate_prog(optimized_program) for optimized_program in self.optimized_programs]
+    
+    def evaluate_with_optimizer(self, optimizer: Teleprompter) -> float:
+        optimized_program = optimizer(self.program)
+        return self.evaluate_prog(optimized_program)
 
     def evaluate_assertion(self) -> float:
         self.program.activate_assertions()
         return self.evaluate_prog(self.program)
 
-    def evaluate(self, dspy_config=None) -> dict[DSPyFeatures, float]:
+    def evaluate(self, dspy_config=None) -> dict[DSPyFeatures, float | list[float]]:
+        """
+        Args:
+            dspy_config: A dictionary of configurations for dspy.context
+        Returns:
+            A dictionary of evaluation results for each feature.
+            For baseline and assertion, the value is a float.
+            For optimizer, the value is a list of floats corresponding to each optimizer.
+        """
         if dspy_config is None:
             dspy_config = {}
         with dspy.context(**dspy_config):
@@ -110,7 +123,7 @@ class EvaluateBench(ABC):
                     case DSPyFeatures.BASELINE:
                         result[feature] = self.evaluate_baseline()
                     case DSPyFeatures.OPTIMIZER:
-                        result[feature] = self.evaluate_optimizer()
+                        result[feature] = self.evaluate_optimizers()
                     case DSPyFeatures.ASSERTION:
                         result[feature] = self.evaluate_assertion()
             return result

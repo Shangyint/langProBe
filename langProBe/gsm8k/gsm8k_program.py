@@ -10,6 +10,7 @@ class NaiveProgram(dspy.Module):
         return pred
     
 
+# TODO(shangyin) finish self-critic program
 class SelfCriticGenerator(dspy.Signature):
     """
     Solve the math problem step by step. List your reasoning for each step.
