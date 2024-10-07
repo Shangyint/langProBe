@@ -41,6 +41,12 @@ This file defines DSPy programs for this benchmark. Each program should be a sub
 #### `bench_name_utils.py`
 This file defines utility functions for this benchmark.
 
+## TODO architecture-level
+1. Top-level config to enable/disable benchmarks and programs
+2. program - bench - optimizers three dimensions
+3. have summary/visualization/report after running all the experiments
+
+
 
 ### Contributing
 #### Formatting
