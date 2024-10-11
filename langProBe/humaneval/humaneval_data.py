@@ -1,5 +1,3 @@
-from .humaneval_program import NaiveCodeGenerator
-from .humaneval_utils import human_eval_evaluate
 from ..benchmark import Benchmark, EvaluateBench
 from datasets import load_dataset
 import dspy

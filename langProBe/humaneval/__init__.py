@@ -9,4 +9,3 @@ import dspy
 benchmark = HumanEvalBench
 programs = [CoT]
 metric = human_eval_evaluate
-
