@@ -1,7 +1,7 @@
 import dspy
 
 
-class NaiveProgram(dspy.Module):
+class CoT(dspy.Module):
     def __init__(self):
         self.prog = dspy.ChainOfThought("question -> answer")
 

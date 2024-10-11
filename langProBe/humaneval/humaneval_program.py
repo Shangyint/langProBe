@@ -16,7 +16,7 @@ class CodeProblem(dspy.Signature):
     code = dspy.OutputField()
 
 
-class NaiveCodeGenerator(dspy.Module):
+class CoT(dspy.Module):
     def __init__(self):
         self.prog = dspy.ChainOfThought("prompt -> code")
 

@@ -32,6 +32,11 @@ from .bench_name_program import Program1, Program2, ...
 programs = [Program1, Program2, ...]
 ```
 
+This file should also define `metric` that applies to this benchmark, i.e.
+```python
+metric = lambda gold_example, pred: gold_example.answer == pred.answer
+```
+
 #### `bench_name_data.py`
 This file defines the data used for this benchmark. It should download the data, preprocess it, and create a `Benchmark` subclass called `BenchNameBench`. 
 
@@ -45,7 +50,7 @@ This file defines utility functions for this benchmark.
 1. Top-level config to enable/disable benchmarks and programs
 2. program - bench - optimizers three dimensions
 3. have summary/visualization/report after running all the experiments
-
+4. Seperate between easier evaluations and harder evaluations. Easier ones require zero installation - runs on the go.
 
 
 ### Contributing
