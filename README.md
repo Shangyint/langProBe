@@ -50,7 +50,7 @@ This file defines utility functions for this benchmark.
 1. Top-level config to enable/disable benchmarks and programs
 2. program - bench - optimizers three dimensions
 3. have summary/visualization/report after running all the experiments
-4. Seperate between easier evaluations and harder evaluations. Easier ones require zero installation - runs on the go.
+4. Seperate between easier evaluations and harder evaluations. Easier ones require zero installation - runs on the go. For each benchmarks, have an easier way to output their size, easiness, time to evaluate etc.
 
 
 ### Contributing
