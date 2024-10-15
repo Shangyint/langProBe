@@ -19,9 +19,6 @@ class GenerateAnswer(dspy.Signature):
     )
 
 
-
-
-
 class CoT_with_context(dspy.Module):
     def __init__(self):
         self.prog = dspy.ChainOfThought(GenerateAnswer_with_context)
@@ -31,7 +28,7 @@ class CoT_with_context(dspy.Module):
         pred = self.prog(context=context, question=question)
         return pred
 
-class CoT_(dspy.Module):
+class CoT(dspy.Module):
     def __init__(self):
         self.prog = dspy.ChainOfThought(GenerateAnswer)
 
