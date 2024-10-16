@@ -1,12 +1,5 @@
 import dspy
-import itertools
-import re
-from .hotpot_utils import deduplicate, decide_model_type
-from dspy.retrieve.websearch import BraveSearch
-
-
-
-
+from .hotpot_utils import deduplicate
 
 class GenerateAnswer_with_context(dspy.Signature):
     """Answer multiple choice questions."""
@@ -55,9 +48,7 @@ class RAG(dspy.Module):
     
 
 class SimplifiedBaleen(dspy.Module):
-    def __init__(
-        self, passages_per_hop=2, max_hops=2, query_model=None, infer_model=None
-    ):
+    def __init__(self, passages_per_hop=2, max_hops=2):
         super().__init__()
         self.generate_query = [
             dspy.ChainOfThought(GenerateSearchQuery) for _ in range(max_hops)
