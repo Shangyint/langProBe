@@ -7,6 +7,7 @@ from dspy.retrieve.websearch import BraveSearch
 
 
 
+
 class GenerateAnswer_with_context(dspy.Signature):
     """Answer multiple choice questions."""
 
@@ -52,9 +53,13 @@ class CoT(dspy.Module):
 class RAG(dspy.Module):
     def __init__(self, num_passages=3):
         super().__init__()
+        colbertv2_wiki17_abstracts = dspy.ColBERTv2(
+            url="http://20.102.90.50:2017/wiki17_abstracts"
+        )
+        dspy.settings.configure(rm=colbertv2_wiki17_abstracts)
 
         self.retrieve = dspy.Retrieve(k=num_passages)
-        self.generate_answer = dspy.ChainOfThought(GenerateAnswer)
+        self.generate_answer = dspy.ChainOfThought(GenerateAnswer_with_context)
     
     def forward(self, question):
         context = self.retrieve(question).passages
