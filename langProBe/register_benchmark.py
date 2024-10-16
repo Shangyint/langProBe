@@ -1,8 +1,10 @@
 ########################## Benchmarks ##########################
 import importlib
 
-benchmarks = [".gsm8k", ".humaneval", ".MATH"]
+benchmarks = [".gsm8k", ".MATH", ".hotpotQA", ".humaneval"]
 
+# To use registered benchmarks, do
+# `benchmark.benchmark, benchmark.programs, benchmark.metric`
 registered_benchmarks = []
 
 
@@ -25,11 +27,7 @@ def register_benchmark(benchmark: str):
         raise AssertionError(f"{benchmark} does not have the required attributes")
 
 
-if __name__ == "__main__":
+def register_all_benchmarks(benchmarks=benchmarks):
     for benchmark in benchmarks:
         register_benchmark(benchmark)
-
-    for benchmark in registered_benchmarks:
-        print(
-            f"Registered benchmark: {benchmark.benchmark.__name__}, with programs: {[program.__name__ for program in benchmark.programs]}, with metric: {benchmark.metric}"
-        )
+    return registered_benchmarks

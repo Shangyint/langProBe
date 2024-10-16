@@ -1,16 +1,19 @@
 import dspy
 from .hotpot_utils import deduplicate
 
+
 class GenerateAnswerWithContext(dspy.Signature):
     context = dspy.InputField(desc="may contain relevant facts")
     question = dspy.InputField()
     answer = dspy.OutputField()
+
 
 class GenerateAnswer(dspy.Signature):
     """Answer multiple choice questions."""
 
     question = dspy.InputField()
     answer = dspy.OutputField()
+
 
 class GenerateSearchQuery(dspy.Signature):
     """Write a simple search query that will help answer a complex question."""
@@ -34,12 +37,12 @@ class RAG(dspy.Module):
         super().__init__()
         self.retrieve = dspy.Retrieve(k=num_passages)
         self.generate_answer = dspy.ChainOfThought(GenerateAnswerWithContext)
-    
+
     def forward(self, question):
         context = self.retrieve(question).passages
         prediction = self.generate_answer(context=context, question=question)
         return dspy.Prediction(context=context, answer=prediction.answer)
-    
+
 
 class SimplifiedBaleen(dspy.Module):
     def __init__(self, passages_per_hop=2, max_hops=2):
