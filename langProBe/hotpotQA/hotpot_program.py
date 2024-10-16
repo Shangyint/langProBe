@@ -65,20 +65,16 @@ class SimplifiedBaleen(dspy.Module):
         self.retrieve = dspy.Retrieve(k=passages_per_hop)
         self.generate_answer = dspy.ChainOfThought(GenerateAnswer)
         self.max_hops = max_hops
-        self.query_lm = decide_model_type(query_model)
-        self.infer_lm = decide_model_type(infer_model)
 
     def forward(self, question):
         context = []
         prev_queries = [question]
 
         for hop in range(self.max_hops):
-            with dspy.context(lm=self.query_lm):
-                query = self.generate_query[hop](context=context, question=question).query
-                prev_queries.append(query)
-                passages = self.retrieve(query).passages
-                context = deduplicate(context + passages)
+            query = self.generate_query[hop](context=context, question=question).query
+            prev_queries.append(query)
+            passages = self.retrieve(query).passages
+            context = deduplicate(context + passages)
 
-        with dspy.context(lm=self.infer_lm):
-            pred = self.generate_answer(context=context, question=question)
-            return pred.answer
+        pred = self.generate_answer(context=context, question=question)
+        return pred.answer
