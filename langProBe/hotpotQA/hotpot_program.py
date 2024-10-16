@@ -25,21 +25,13 @@ class GenerateAnswer(dspy.Signature):
         desc="Do not write explanations or additional text. Just select the answer."
     )
 
-class GenerateSearchQueryList(dspy.Signature):
-    """Given the question and its four options, extract the relevant keywords, phrases, or facts needed to perform an effective web search. Return three most important keywords/phrases or facts in a comma-separated format."""
+class GenerateSearchQuery(dspy.Signature):
+    """Write a simple search query that will help answer a complex question."""
 
+    context = dspy.InputField(desc="may contain relevant facts")
     question = dspy.InputField()
-    query = dspy.OutputField(desc="Please be short and concise.")
+    query = dspy.OutputField()
 
-
-class CoT_with_context(dspy.Module):
-    def __init__(self):
-        self.prog = dspy.ChainOfThought(GenerateAnswer_with_context)
-
-    def forward(self, question):
-        context = None  #TODO: how should we get the context
-        pred = self.prog(context=context, question=question)
-        return pred
 
 class CoT(dspy.Module):
     def __init__(self):
@@ -53,11 +45,6 @@ class CoT(dspy.Module):
 class RAG(dspy.Module):
     def __init__(self, num_passages=3):
         super().__init__()
-        colbertv2_wiki17_abstracts = dspy.ColBERTv2(
-            url="http://20.102.90.50:2017/wiki17_abstracts"
-        )
-        dspy.settings.configure(rm=colbertv2_wiki17_abstracts)
-
         self.retrieve = dspy.Retrieve(k=num_passages)
         self.generate_answer = dspy.ChainOfThought(GenerateAnswer_with_context)
     
@@ -66,3 +53,32 @@ class RAG(dspy.Module):
         prediction = self.generate_answer(context=context, question=question)
         return dspy.Prediction(context=context, answer=prediction.answer)
     
+
+class SimplifiedBaleen(dspy.Module):
+    def __init__(
+        self, passages_per_hop=2, max_hops=2, query_model=None, infer_model=None
+    ):
+        super().__init__()
+        self.generate_query = [
+            dspy.ChainOfThought(GenerateSearchQuery) for _ in range(max_hops)
+        ]
+        self.retrieve = dspy.Retrieve(k=passages_per_hop)
+        self.generate_answer = dspy.ChainOfThought(GenerateAnswer)
+        self.max_hops = max_hops
+        self.query_lm = decide_model_type(query_model)
+        self.infer_lm = decide_model_type(infer_model)
+
+    def forward(self, question):
+        context = []
+        prev_queries = [question]
+
+        for hop in range(self.max_hops):
+            with dspy.context(lm=self.query_lm):
+                query = self.generate_query[hop](context=context, question=question).query
+                prev_queries.append(query)
+                passages = self.retrieve(query).passages
+                context = deduplicate(context + passages)
+
+        with dspy.context(lm=self.infer_lm):
+            pred = self.generate_answer(context=context, question=question)
+            return pred.answer
