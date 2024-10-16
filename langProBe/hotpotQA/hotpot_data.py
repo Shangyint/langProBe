@@ -10,7 +10,7 @@ class HotpotQABench(Benchmark):
 
     def create_splits(self):
         total_len = len(self.dataset)
-        self.train_set = self.dataset[:int(0.8 * total_len)]
+        self.test_set = self.dataset[:int(0.8 * total_len)]
         self.dev_set = self.dataset[int(0.8 * total_len):int(0.9 * total_len)]
-        self.test_set = self.dataset[int(0.9 * total_len):]
+        self.train_set = self.dataset[int(0.9 * total_len):]
 
