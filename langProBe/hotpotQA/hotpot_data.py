@@ -7,8 +7,8 @@ class HotpotQABench(Benchmark):
     def init_dataset(self):
         raw_datasets = load_dataset("hotpot_qa", "distractor")["train"]
         self.dataset = [
-            dspy.Example(**x).with_inputs("question", "context")
-            for x in raw_datasets[: max(len(raw_datasets), 500)]
+            dspy.Example(**x).with_inputs("question")
+            for x in raw_datasets.select(range(min(500, len(raw_datasets))))
         ]
 
     def create_splits(self):

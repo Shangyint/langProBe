@@ -25,6 +25,7 @@ def register_benchmark(benchmark: str):
         registered_benchmarks.append(benchmark_module)
     else:
         raise AssertionError(f"{benchmark} does not have the required attributes")
+    return benchmark_module
 
 
 def register_all_benchmarks(benchmarks=benchmarks):
