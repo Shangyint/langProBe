@@ -72,7 +72,8 @@ class EvaluateBench(ABC):
             display_progress=True,
         )
 
-        if self.optimizer is not None:
+        self.results = None
+        if self.optimizers is not None:
             self.features.append(DSPyFeatures.OPTIMIZER)
 
         if has_assertions:
@@ -131,4 +132,5 @@ class EvaluateBench(ABC):
                         result[feature] = self.evaluate_optimizers()
                     case DSPyFeatures.ASSERTION:
                         result[feature] = self.evaluate_assertion()
+            self.results = result
             return result
