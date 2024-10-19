@@ -6,4 +6,10 @@ import dspy
 
 benchmark: Callable[[], Benchmark] = MMLUBench
 programs = [CoT, RAG, SimplifiedBaleen]
-metric = dspy.evaluate.answer_exact_match
+# programs = [ SimplifiedBaleen]
+
+def MMLU_metric(gt, pred, trace=None):
+    pred_processed = pred.answer.split(".")[0]
+    return gt.answer == pred_processed
+
+metric = MMLU_metric

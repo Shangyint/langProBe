@@ -43,8 +43,8 @@ class RAG(dspy.Module):
     
     def forward(self, question):
         context = self.retrieve(question).passages
-        prediction = self.generate_answer(context=context, question=question)
-        return dspy.Prediction(context=context, answer=prediction.answer)
+        pred = self.generate_answer(context=context, question=question)
+        return pred
     
 
 class SimplifiedBaleen(dspy.Module):
@@ -68,4 +68,4 @@ class SimplifiedBaleen(dspy.Module):
             context = deduplicate(context + passages)
 
         pred = self.generate_answer(context=context, question=question)
-        return pred.answer
+        return pred
