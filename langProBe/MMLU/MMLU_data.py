@@ -8,10 +8,6 @@ class MMLUBench(Benchmark):
         self.raw_datasets = load_dataset("cais/mmlu", "all")
         
     def create_splits(self):
-        test = self.raw_datasets['test']
-        dev = self.raw_datasets['validation']
-        train = self.raw_datasets['dev']
-        
         option_map = {
             0: "A", 
             1: "B",
