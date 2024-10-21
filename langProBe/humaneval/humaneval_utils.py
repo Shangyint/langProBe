@@ -1,3 +1,4 @@
+import multiprocessing
 from typing import Optional, Callable, Dict
 import ast
 import contextlib
@@ -129,18 +130,18 @@ def check_correctness(
         the results later even if execution finishes asynchronously.
     """
 
-    # manager = multiprocessing.Manager()
-    # result = manager.list()
+    manager = multiprocessing.Manager()
+    result = manager.list()
 
-    # p = multiprocessing.Process(target=unsafe_execute)
-    # p = multiprocessing.Process(
-    #     target=eval,
-    #     args=(problem, completion, result, timeout),
-    # )
-    # p.start()
-    # p.join(timeout=timeout + 1)
-    # if p.is_alive():
-    #     p.kill()
+    p = multiprocessing.Process(target=unsafe_execute)
+    p = multiprocessing.Process(
+        target=eval,
+        args=(problem, completion, result, timeout),
+    )
+    p.start()
+    p.join(timeout=timeout + 1)
+    if p.is_alive():
+        p.kill()
     result = []
     if verbose:
         print(problem["prompt"] + completion + "\n" + problem["test"])
