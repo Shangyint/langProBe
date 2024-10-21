@@ -9,7 +9,7 @@ import os
 import time
 import json
 
-def swe_bench_verified_annotation_evaluate(
+def underspecified_annotation_evaluate(
     example: dspy.Example, pred: dspy.Prediction, target: str = None
 ):
     score = 0
@@ -20,7 +20,7 @@ def swe_bench_verified_annotation_evaluate(
 
 bench = SWEBenchVerifiedAnnotationTaskBench()
 evaluate_naive_program = EvaluateBench(
-    bench, UnderspecifiedAnnotationGenerator(), swe_bench_verified_annotation_evaluate, optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch(metric=swe_bench_verified_annotation_evaluate)
+    bench, UnderspecifiedAnnotationGenerator(), underspecified_annotation_evaluate, optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch(metric=underspecified_annotation_evaluate)
 )
 
 with dspy.context(lm=dspy.OpenAI(model="gpt-4o-mini", max_tokens=16000)):
