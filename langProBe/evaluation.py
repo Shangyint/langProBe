@@ -76,6 +76,18 @@ def evaluate_all(lm, rm, optimizers):
 
 if __name__ == "__main__":
     evaluate(
+        benchmark_meta=register_benchmark(".IReRa")[0],
+        lm=lm,
+        rm=dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts"),
+        optimizers=[
+            dspy.teleprompt.BootstrapFewShot,
+            dspy.teleprompt.BootstrapFewShotWithRandomSearch,
+            (dspy.teleprompt.MIPROv2, {"requires_permission_to_run": False, "num_trials": 10}),
+        ],
+        num_threads=1
+    )
+
+    evaluate(
         benchmark_meta=register_benchmark(".MATH")[0],
         lm=lm,
         rm=dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts"),
