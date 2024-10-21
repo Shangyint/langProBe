@@ -41,7 +41,7 @@ This file defines utility functions for this benchmark.
 - [ ] have summary/visualization/report after running all the experiments
 - [ ] Seperate between easier evaluations and harder evaluations. Easier ones require zero installation - runs on the go. For each benchmarks, have an easier way to output their size, easiness, time to evaluate etc.
 - [ ] top-level experiment scripts that involve vanilla DSPy programs and optimizers (we need training data here).
-- [ ] Specify the equivalent classes for each dataset (`full` (not advised), `lite`==1000, `tiny`==200).
+- [ ] Specify the equivalent classes for each dataset (`full` (not advised), `lite`==500, `tiny`==200).
 - [ ] Tracking how much LLM call each dataset+program is taking, so that a better estimate (lower bound) for classes.
 
 ### Contributing

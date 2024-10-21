@@ -1,9 +1,7 @@
-import dspy.datasets
-import dspy.datasets.gsm8k
+from .MATH_utils import math_evaluate
 from langProBe.benchmark import BenchmarkMeta
 from .MATH_data import MATHBench
 from .MATH_program import CoT
-import dspy
 
 
-benchmark = [BenchmarkMeta(MATHBench, CoT, dspy.datasets.gsm8k.gsm8k_metric)]
+benchmark = [BenchmarkMeta(MATHBench, [CoT], math_evaluate)]

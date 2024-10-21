@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import random
 import dspy
 from typing import Any, Callable, List, Type
 
@@ -15,10 +16,14 @@ class DSPyFeatures(Enum):
     ASSERTION = 2
 
 
+dataset_size = {"full": None, "Lite": 500, "Tiny": 200}
+
+
 class Benchmark(ABC):
-    def __init__(self):
+    def __init__(self, dataset_mode="Lite"):
         self.dataset = None
         self.init_dataset()
+        self.trim_dataset(dataset_size[dataset_mode])
         self.create_splits()
 
     @abstractmethod
@@ -28,14 +33,21 @@ class Benchmark(ABC):
         """
         return
 
-    @abstractmethod
+    def trim_dataset(self, size: int) -> None:
+        if size is not None:
+            self.dataset = self.dataset[:size]
+
     def create_splits(self) -> None:
         """
         Creates the splits for the dataset.
         Upon completion, self.train_set, self.dev_set, and self.test_set should be set.
-        TODO(shangyin) shall we define a default split machnism?
         """
-        return
+        random.seed(0)
+        random.shuffle(self.dataset)
+        total_len = len(self.dataset)
+        self.test_set = self.dataset[: int(0.8 * total_len)]
+        self.dev_set = self.dataset[int(0.8 * total_len) : int(0.9 * total_len)]
+        self.train_set = self.dataset[int(0.9 * total_len) :]
 
     def get_dataset(self):
         return self.dataset

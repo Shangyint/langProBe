@@ -9,4 +9,8 @@ from langProBe.benchmark import Benchmark, BenchmarkMeta
 import dspy
 
 
-benchmark = [BenchmarkMeta(HotpotQABench, [CoT], dspy.evaluate.answer_exact_match)]
+benchmark = [
+    BenchmarkMeta(
+        HotpotQABench, [CoT, RAG, SimplifiedBaleen], dspy.evaluate.answer_exact_match
+    )
+]
