@@ -40,6 +40,12 @@ def llm_as_judge_evaluate(gold, pred, extract_answer_fun=lambda x: x.answer):
 
 
 def evaluate(benchmark_meta: BenchmarkMeta, lm, rm, optimizers, num_threads=8):
+    """
+    benchmark_meta: BenchmarkMeta object to evaluate
+    lm: Language model to use, should be an instance of dspy.LM
+    rm: Retrieval model to use
+    optimizers: List[type(Teleprompter) | (type(Teleprompter), kwargs_for_compile)]
+    """
     benchmark = benchmark_meta.benchmark()
     print(f"Evaluating {benchmark}")
     for program in benchmark_meta.program:
@@ -50,6 +56,10 @@ def evaluate(benchmark_meta: BenchmarkMeta, lm, rm, optimizers, num_threads=8):
             metric=benchmark_meta.metric,
             optimizers=[
                 create_optimizer(optimizer, benchmark_meta.metric)
+                if isinstance(optimizer, type)
+                else create_optimizer(
+                    optimizer[0], benchmark_meta.metric, **optimizer[1]
+                )
                 for optimizer in optimizers
             ],
             num_threads=num_threads,
@@ -72,7 +82,7 @@ if __name__ == "__main__":
         optimizers=[
             dspy.teleprompt.BootstrapFewShot,
             dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-            dspy.teleprompt.MIPROv2,
+            (dspy.teleprompt.MIPROv2, {"requires_permission_to_run": False, "num_trials": 10}),
         ],
     )
 
@@ -83,7 +93,7 @@ if __name__ == "__main__":
         optimizers=[
             dspy.teleprompt.BootstrapFewShot,
             dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-            dspy.teleprompt.MIPROv2,
+            (dspy.teleprompt.MIPROv2, {"requires_permission_to_run": False, "num_trials": 10}),
         ],
     )
 
@@ -94,6 +104,6 @@ if __name__ == "__main__":
         optimizers=[
             dspy.teleprompt.BootstrapFewShot,
             dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-            dspy.teleprompt.MIPROv2,
+            (dspy.teleprompt.MIPROv2, {"requires_permission_to_run": False, "num_trials": 10}),
         ],
     )

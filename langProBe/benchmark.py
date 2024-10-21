@@ -90,6 +90,7 @@ class EvaluateBench(ABC):
             metric=self.metric,
             num_threads=self.num_threads,
             display_progress=True,
+            max_errors=50,
         )
 
         self.results = None
@@ -115,7 +116,8 @@ class EvaluateBench(ABC):
         # and then we can pass optimizer.compile_partial as self.optimizer
 
         self.optimized_programs = [
-            optimizer(self.program) for optimizer in self.optimizers
+            optimizer(self.program, trainset=self.benchmark.train_set)
+            for optimizer in self.optimizers
         ]
 
         return [

@@ -205,7 +205,7 @@ def remove_format(s):
     return s
 
 
-def math_evaluate(gold, pred):
+def math_evaluate(gold, pred, trace=None):
     return is_equiv(
         remove_boxed(last_boxed_only_string(gold.solution)),
         remove_format(pred.answer),

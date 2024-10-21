@@ -24,6 +24,6 @@ def gsm8k_metric(gold, pred, trace=None):
     )
 
 
-def gsm8k_evaluate(gold, pred):
+def gsm8k_evaluate(gold, pred, trace=None):
     gold_answer = int(gold.answer.split()[-1].replace(",", ""))
     return gold_answer == int(parse_integer_answer(str(pred.answer)))
