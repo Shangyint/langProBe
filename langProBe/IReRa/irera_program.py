@@ -22,6 +22,8 @@ class Infer(dspy.Module):
         self.cot = dspy.ChainOfThought(InferSignatureESCO)
 
     def forward(self, text: str) -> dspy.Prediction:
+        # import pdb
+        # pdb.set_trace()
         parsed_outputs = set()
 
         output = self.cot(text=text).completions.output
@@ -31,7 +33,6 @@ class Infer(dspy.Module):
 
         return dspy.Prediction(predictions=parsed_outputs)
     
-
 
 class InferRetrieve(dspy.Module):
     """Infer-Retrieve. Sets the Retriever, initializes the prior."""

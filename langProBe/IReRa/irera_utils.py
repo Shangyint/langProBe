@@ -559,9 +559,6 @@ class Rank(dspy.Module):
 
 
 
-""" To add signatures, subclass `dspy.Signature` and add the signature to `supported_signatures` with a short-hand for easy access throughout the code.
-"""
-
 
 class InferSignatureESCO(dspy.Signature):
     __doc__ = f"""Given a snippet from a job vacancy, identify all the ESCO job skills mentioned. Always return skills."""
