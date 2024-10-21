@@ -65,4 +65,4 @@ class SimplifiedBaleen(dspy.Module):
             context = deduplicate(context + passages)
 
         pred = self.generate_answer(context=context, question=question)
-        return pred.answer
+        return pred

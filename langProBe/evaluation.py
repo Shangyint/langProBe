@@ -46,7 +46,7 @@ def evaluate(benchmark_meta: BenchmarkMeta, lm, rm, optimizers, num_threads=8):
     rm: Retrieval model to use
     optimizers: List[type(Teleprompter) | (type(Teleprompter), kwargs_for_compile)]
     """
-    benchmark = benchmark_meta.benchmark()
+    benchmark = benchmark_meta.benchmark(dataset_mode=benchmark_meta.dataset_mode)
     print(f"Evaluating {benchmark}")
     for program in benchmark_meta.program:
         print(f"Program: {program}")
@@ -100,7 +100,18 @@ if __name__ == "__main__":
     evaluate(
         benchmark_meta=register_benchmark(".gsm8k")[0],
         lm=lm,
-        rm=dspy.ColBERTv2(url="http://http://20.102.90.50:2017/wiki17_abstracts"),
+        rm=dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts"),
+        optimizers=[
+            dspy.teleprompt.BootstrapFewShot,
+            dspy.teleprompt.BootstrapFewShotWithRandomSearch,
+            (dspy.teleprompt.MIPROv2, {"requires_permission_to_run": False, "num_trials": 10}),
+        ],
+    )
+
+    evaluate(
+        benchmark_meta=register_benchmark(".humaneval")[0],
+        lm=lm,
+        rm=dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts"),
         optimizers=[
             dspy.teleprompt.BootstrapFewShot,
             dspy.teleprompt.BootstrapFewShotWithRandomSearch,
