@@ -15,14 +15,8 @@ def swe_bench_verified_annotation_evaluate(
     score = 0
     if pred.underspecification_score in example.underspecified:
         score += 1
-    
-    with open(os.path.join(expr_dir_results_name, f"{example.instance_id}.json"), "w") as f:
-        json.dump({"example": {**example}, "pred": {**pred}}, f)
 
     return score
-
-expr_dir_results_name = f"langProBe/SweBenchVerifiedAnnotationTask/saved_outputs/underspecified_{time.strftime('%Y-%m-%d_%H-%M-%S')}"
-os.makedirs(expr_dir_results_name, exist_ok=False)
 
 bench = SWEBenchVerifiedAnnotationTaskBench()
 evaluate_naive_program = EvaluateBench(

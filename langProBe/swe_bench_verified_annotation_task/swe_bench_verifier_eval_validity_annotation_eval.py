@@ -9,19 +9,12 @@ import json
 import time
 import os
 
-expr_dir_results_name = f"langProBe/SweBenchVerifiedAnnotationTask/saved_outputs/eval_validity_{time.strftime('%Y-%m-%d_%H-%M-%S')}"
-
-os.makedirs(expr_dir_results_name, exist_ok=False)
-
 def swe_bench_verified_annotation_evaluate(
     example: dspy.Example, pred: dspy.Prediction, target: str = None
 ):
     score = 0
     if pred.evaluation_validity_score in example.false_negative:
         score += 1
-    
-    with open(os.path.join(expr_dir_results_name, f"{example.instance_id}.json"), "w") as f:
-        json.dump({"example": {**example}, "pred": {**pred}}, f)
 
     return score
 

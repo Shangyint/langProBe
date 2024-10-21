@@ -9,6 +9,12 @@ import random
 random.seed(1)
 
 class SWEBenchVerifiedAnnotationTaskBench(Benchmark):
+    def __init__(self, num_train_samples=30, num_dev_samples=30, num_test_samples=30):
+        super().__init__(**kwargs)
+        self.num_train_samples = num_train_samples
+        self.num_dev_samples = num_dev_samples
+        self.num_test_samples = num_test_samples
+
     def process_df_to_examples(self, df):
         common_keys = ['instance_id', 'task_batch_name', 'base_commit', 'patch', 'test_patch', 'problem_statement', 'hints_text', 'created_at', 'version', 'FAIL_TO_PASS', 'PASS_TO_PASS', 'environment_setup_commit', 'repo']
         
@@ -41,16 +47,15 @@ class SWEBenchVerifiedAnnotationTaskBench(Benchmark):
         return dataset
 
     def init_dataset(self):
-        df_test = pd.read_csv("langProBe/SweBenchVerifiedAnnotationTask/SweBenchVerifiedAnnotationTaskDataset/test_split.csv")
+        df_test = pd.read_csv("langProBe/swe_bench_verified_annotation_task/SweBenchVerifiedAnnotationTaskDataset/test_split.csv")
         self.test_dataset = self.process_df_to_examples(df_test)
         
-        df_train_val = pd.read_csv("langProBe/SweBenchVerifiedAnnotationTask/SweBenchVerifiedAnnotationTaskDataset/trainval_split.csv")
+        df_train_val = pd.read_csv("langProBe/swe_bench_verified_annotation_task/SweBenchVerifiedAnnotationTaskDataset/trainval_split.csv")
         self.train_val_dataset = self.process_df_to_examples(df_train_val)
 
     def create_splits(self):
         self.train_set, self.dev_set, self.test_set = (
-            random.sample(self.train_val_dataset[:int(len(self.train_val_dataset)/2)], k=30), # 387
-            random.sample(self.train_val_dataset[int(len(self.train_val_dataset)/2):], k=30), # 387
-            # random.sample(self.test_dataset, k=100)
-            self.test_dataset,
+            random.sample(self.train_val_dataset[:int(len(self.train_val_dataset)/2)], k=self.num_train_samples), # 387
+            random.sample(self.train_val_dataset[int(len(self.train_val_dataset)/2):], k=self.num_dev_samples), # 387
+            random.sample(self.test_dataset, k=self.num_test_samples)
         )
