@@ -4,9 +4,7 @@ import dspy.datasets
 import dspy.datasets.gsm8k
 from .gsm8k_data import GSM8KBench
 from .gsm8k_program import CoT
-from langProBe.benchmark import Benchmark
+from langProBe.benchmark import Benchmark, BenchmarkMeta
 import dspy
 
-benchmark: Callable[[], Benchmark] = GSM8KBench
-programs = [CoT]
-metric = dspy.datasets.gsm8k.gsm8k_metric
+benchmark = [BenchmarkMeta(GSM8KBench, [CoT], dspy.datasets.gsm8k.gsm8k_metric)]

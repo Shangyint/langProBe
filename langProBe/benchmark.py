@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 import dspy
-from typing import Any, Callable
+from typing import Any, Callable, List, Type
 
 from dspy.evaluate import Evaluate
 from dspy.teleprompt import Teleprompter
@@ -47,6 +48,13 @@ class Benchmark(ABC):
 
     def get_test_set(self):
         return self.test_set
+
+
+@dataclass
+class BenchmarkMeta:
+    benchmark: Type[Benchmark]
+    program: List[Type[dspy.Module]]
+    metric: Callable
 
 
 class EvaluateBench(ABC):

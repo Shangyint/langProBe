@@ -11,8 +11,6 @@ registered_benchmarks = []
 def check_benchmark(benchmark):
     try:
         assert hasattr(benchmark, "benchmark")
-        assert hasattr(benchmark, "programs")
-        assert hasattr(benchmark, "metric")
     except AssertionError:
         return False
     return True

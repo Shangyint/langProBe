@@ -1,20 +1,20 @@
 import dspy.teleprompt
-from langProBe.benchmark import EvaluateBench
+from langProBe.benchmark import BenchmarkMeta, EvaluateBench
 from langProBe.optimizers import create_optimizer
 from .register_benchmark import register_all_benchmarks, register_benchmark
 import dspy
 
 
-def evaluate(benchmark_module, lm, rm, optimizer):
-    benchmark = benchmark_module.benchmark()
+def evaluate(benchmark_meta: BenchmarkMeta, lm, rm, optimizer):
+    benchmark = benchmark_meta.benchmark()
     print(f"Evaluating {benchmark}")
-    for program in benchmark_module.programs:
+    for program in benchmark_meta.programs:
         print(f"Program: {program}")
         evaluate_bench = EvaluateBench(
             benchmark=benchmark,
             program=program(),
-            metric=benchmark_module.metric,
-            optimizers=[create_optimizer(optimizer, benchmark_module.metric)],
+            metric=benchmark_meta.metric,
+            optimizers=[create_optimizer(optimizer, benchmark_meta.metric)],
             num_threads=8,
         )
         evaluate_bench.evaluate(dspy_config={"lm": lm, "rm": rm})
