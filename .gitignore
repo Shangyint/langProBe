@@ -6,3 +6,5 @@ temp
 scratchpad.ipynb
 langProBe/AppWorld/data/
 langProBe/AppWorld/experiments/
+*.csv
+*.png

@@ -70,3 +70,17 @@ def generate_tests_lists(prompt):
         tests.append(post_process_tests(post_process_code(raw_tests)))
     result = list(chain(*tests))
     return result
+
+
+class MultiChain(dspy.Module):
+    def __init__(self, num_chain=5):
+        self.num_chain = num_chain
+        self.reasoning_generator = dspy.ChainOfThought(
+            "prompt -> code", n=self.num_chain
+        )
+        self.prog = dspy.MultiChainComparison("prompt -> code", M=self.num_chain)
+
+    def forward(self, problem):
+        completions = self.reasoning_generator(question=problem)
+        pred = self.prog(completions.completions, question=problem)
+        return pred

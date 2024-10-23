@@ -38,10 +38,11 @@ This file defines utility functions for this benchmark.
 
 ## TODO architecture-level
 - [x] Top-level config to enable/disable benchmarks and programs
-- [ ] have summary/visualization/report after running all the experiments
-- [ ] Seperate between easier evaluations and harder evaluations. Easier ones require zero installation - runs on the go. For each benchmarks, have an easier way to output their size, easiness, time to evaluate etc.
-- [ ] top-level experiment scripts that involve vanilla DSPy programs and optimizers (we need training data here).
-- [ ] Specify the equivalent classes for each dataset (`full` (not advised), `lite`==500, `tiny`==200).
+- [x] have summary/visualization/report after running all the experiments
+- [x] Seperate between easier evaluations and harder evaluations. Easier ones require zero installation - runs on the go. For each benchmarks, have an easier way to output their size, easiness, time to evaluate etc.
+- [x] top-level experiment scripts that involve vanilla DSPy programs and optimizers (we need training data here).
+- [x] Specify the equivalent classes for each dataset (`full` (not advised), `lite`==500, `tiny`==200).
+- [ ] Better config system for specifying optimizer initialization/parameters
 - [ ] Tracking how much LLM call each dataset+program is taking, so that a better estimate (lower bound) for classes.
 
 ### Contributing

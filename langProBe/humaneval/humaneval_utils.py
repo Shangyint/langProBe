@@ -1,126 +1,68 @@
-import multiprocessing
 from typing import Optional, Callable, Dict
 import ast
 import contextlib
 import faulthandler
 import io
-from io import StringIO
 import os
+import multiprocessing
 import platform
 import signal
 import tempfile
-import json
-import sys
 import dspy
 
 
 def unsafe_execute(problem, completion, result, timeout):
-    # with create_tempdir():
-    #     # These system calls are needed when cleaning up tempdir.
-    #     import os
-    #     import shutil
+    with create_tempdir():
+        # These system calls are needed when cleaning up tempdir.
+        import os
+        import shutil
 
-    #     rmtree = shutil.rmtree
-    #     rmdir = os.rmdir
-    #     chdir = os.chdir
+        rmtree = shutil.rmtree
+        rmdir = os.rmdir
+        chdir = os.chdir
 
-    #     # Disable functionalities that can make destructive changes to the test.
-    #     reliability_guard()
+        # Disable functionalities that can make destructive changes to the test.
+        reliability_guard()
 
-    # Construct the check program and run it.
-    check_program = (
-        problem["prompt"]
-        + completion
-        + "\n"
-        + problem["test"]
-        + "\n"
-        + f"check({problem['entry_point']})"
-    )
-
-    try:
-        exec_globals = {}
-        with swallow_io():
-            with time_limit(timeout):
-                # WARNING
-                # This program exists to execute untrusted model-generated code. Although
-                # it is highly unlikely that model-generated code will do something overtly
-                # malicious in response to this test suite, model-generated code may act
-                # destructively due to a lack of model capability or alignment.
-                # Users are strongly encouraged to sandbox this evaluation suite so that it
-                # does not perform destructive actions on their host or network. For more
-                # information on how OpenAI sandboxes its code, see the accompanying paper.
-                # Once you have read this disclaimer and taken appropriate precautions,
-                # uncomment the following line and proceed at your own risk:
-                exec(check_program, exec_globals)
-        result.append("passed")
-    except TimeoutException:
-        result.append("timed out")
-    except BaseException as e:
-        result.append(f"failed: {e}")
-
-    # Needed for cleaning up.
-    # shutil.rmtree = rmtree
-    # os.rmdir = rmdir
-    # os.chdir = chdir
-
-
-def unsafe_execute_tests(problem, completion, result, timeout):
-    # with create_tempdir():
-    #     # These system calls are needed when cleaning up tempdir.
-    #     import os
-    #     import shutil
-
-    #     rmtree = shutil.rmtree
-    #     rmdir = os.rmdir
-    #     chdir = os.chdir
-
-    # Disable functionalities that can make destructive changes to the test.
-    # reliability_guard()
-
-    # Construct the check program and run it.
-    check_program = problem["prompt"] + completion + "\n" + problem["test"]
-
-    # print(check_program)
-
-    try:
-        exec_globals = {}
-        with swallow_io():
-            with time_limit(timeout):
-                # WARNING
-                # This program exists to execute untrusted model-generated code. Although
-                # it is highly unlikely that model-generated code will do something overtly
-                # malicious in response to this test suite, model-generated code may act
-                # destructively due to a lack of model capability or alignment.
-                # Users are strongly encouraged to sandbox this evaluation suite so that it
-                # does not perform destructive actions on their host or network. For more
-                # information on how OpenAI sandboxes its code, see the accompanying paper.
-                # Once you have read this disclaimer and taken appropriate precautions,
-                # uncomment the following line and proceed at your own risk:
-                exec(check_program, exec_globals)
-        result.append("passed")
-    except TimeoutException:
-        result.append("timed out")
-    except AssertionError as e:
-        actual_output = (
-            exec_globals["result"] if "result" in exec_globals else "something else"
+        # Construct the check program and run it.
+        check_program = (
+            problem["prompt"]
+            + completion
+            + "\n"
+            + problem["test"]
+            + "\n"
+            + f"check({problem['entry_point']})"
         )
-        result.append(f"Assertion Error: {e}.")
-    except BaseException as e:
-        result.append(f"failed: {e}")
 
-    # # Needed for cleaning up.
-    # shutil.rmtree = rmtree
-    # os.rmdir = rmdir
-    # os.chdir = chdir
+        try:
+            exec_globals = {}
+            with swallow_io():
+                with time_limit(timeout):
+                    # WARNING
+                    # This program exists to execute untrusted model-generated code. Although
+                    # it is highly unlikely that model-generated code will do something overtly
+                    # malicious in response to this test suite, model-generated code may act
+                    # destructively due to a lack of model capability or alignment.
+                    # Users are strongly encouraged to sandbox this evaluation suite so that it
+                    # does not perform destructive actions on their host or network. For more
+                    # information on how OpenAI sandboxes its code, see the accompanying paper.
+                    # Once you have read this disclaimer and taken appropriate precautions,
+                    # uncomment the following line and proceed at your own risk:
+                    exec(check_program, exec_globals)
+            result.append("passed")
+        except TimeoutException:
+            result.append("timed out")
+        except BaseException as e:
+            result.append(f"failed: {e}")
+
+        # Needed for cleaning up.
+        shutil.rmtree = rmtree
+        os.rmdir = rmdir
+        os.chdir = chdir
 
 
 def check_correctness(
-    problem: Dict,
-    completion: str,
-    timeout: float,
-    eval_fun=unsafe_execute,
-    completion_id: Optional[int] = None,
-    verbose: bool = False,
+    problem: Dict, completion: str, timeout: float, completion_id: Optional[int] = None
 ) -> Dict:
     """
     Evaluates the functional correctness of a completion by running the test
@@ -133,32 +75,18 @@ def check_correctness(
     manager = multiprocessing.Manager()
     result = manager.list()
 
-    p = multiprocessing.Process(target=unsafe_execute)
+    # p = multiprocessing.Process(target=unsafe_execute)
     p = multiprocessing.Process(
-        target=eval,
+        target=unsafe_execute,
         args=(problem, completion, result, timeout),
     )
     p.start()
     p.join(timeout=timeout + 1)
     if p.is_alive():
         p.kill()
-    result = []
-    if verbose:
-        print(problem["prompt"] + completion + "\n" + problem["test"])
-    eval_fun(problem, completion, result, timeout)
 
     if not result:
         result.append("timed out")
-
-    if verbose:
-        print(result)
-
-    # print(dict(
-    #     task_id=problem["task_id"],
-    #     passed=result[0] == "passed",
-    #     result=result[0],
-    #     completion_id=completion_id,
-    # ))
 
     return dict(
         task_id=problem["task_id"],
@@ -375,48 +303,48 @@ def human_eval_evaluate(
     return result["passed"]
 
 
-def filter_test(tests, canonical_solution, prompt):
-    return list(
-        filter(
-            lambda test: check_test([test], canonical_solution, 0, prompt, raw=True)[0],
-            tests,
-        )
-    )
+# def filter_test(tests, canonical_solution, prompt):
+#     return list(
+#         filter(
+#             lambda test: check_test([test], canonical_solution, 0, prompt, raw=True)[0],
+#             tests,
+#         )
+#     )
 
 
-def map_test(tests, canonical_solution, prompt):
-    return list(
-        map(
-            lambda test: check_test([test], canonical_solution, 0, prompt, raw=True)[0],
-            tests,
-        )
-    )
+# def map_test(tests, canonical_solution, prompt):
+#     return list(
+#         map(
+#             lambda test: check_test([test], canonical_solution, 0, prompt, raw=True)[0],
+#             tests,
+#         )
+#     )
 
 
-def check_test(
-    tests, pred, task_id, prompt, entry_point="dummy", raw=False, verbose=False
-):
-    code = post_process_code(pred.code) if not raw else pred
+# def check_test(
+#     tests, pred, task_id, prompt, entry_point="dummy", raw=False, verbose=False
+# ):
+#     code = post_process_code(pred.code) if not raw else pred
 
-    if len(tests) == 0:
-        return True, "No tests found", "No tests found"
-    for test in tests:
-        result = check_correctness(
-            {
-                "prompt": prompt,
-                "entry_point": entry_point,
-                "test": test,
-                "task_id": task_id,
-            },
-            code,
-            2,
-            eval_fun=unsafe_execute_tests,
-            verbose=verbose,
-        )
-        if not result["passed"]:
-            break
-    # print(result["passed"], test, result["result"])
-    return result["passed"], test, result["result"]
+#     if len(tests) == 0:
+#         return True, "No tests found", "No tests found"
+#     for test in tests:
+#         result = check_correctness(
+#             {
+#                 "prompt": prompt,
+#                 "entry_point": entry_point,
+#                 "test": test,
+#                 "task_id": task_id,
+#             },
+#             code,
+#             2,
+#             eval_fun=unsafe_execute_tests,
+#             verbose=verbose,
+#         )
+#         if not result["passed"]:
+#             break
+#     # print(result["passed"], test, result["result"])
+#     return result["passed"], test, result["result"]
 
 
 def check_test_temp(tests, pred, task_id, prompt, entry_point="dummy"):
