@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import os
 import random
 import dspy
 from typing import Any, Callable, List, Type
