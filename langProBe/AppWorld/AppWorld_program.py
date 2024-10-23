@@ -54,7 +54,10 @@ class AppWorldReact(dspy.Module):
         self.max_steps = max_steps
     
     def format_trace(self, trace: List[Tuple[str, str]]) -> str:
-        return "\n".join([f"Code: {code}\nOutput: {output}" for code, output in trace])
+        # return "\n\n".join([f"Code:\n{code}\nOutput:\n{output}" for code, output in trace])
+        if len(trace) == 0:
+            return "# No code executed"
+        return "\n\n".join([f"{code}\n```\n{output}\n```" for code, output in trace])
 
     def forward(self, task_id):
         output_experiment_name = shortuuid.uuid()
@@ -66,13 +69,25 @@ class AppWorldReact(dspy.Module):
 
             trace = []
             for i in range(self.max_steps):
-                module_gen = self.module(
-                    instruction=task['instruction'],
-                    supervisor_name=supervisor_name,
-                    supervisor_phone_number=supervisor_phone,
-                    supervisor_email=supervisor_email,
-                    past_steps=self.format_trace(trace),
-                )
+                while True:
+                    try:
+                        module_gen = self.module(
+                            instruction=task['instruction'],
+                            supervisor_name=supervisor_name,
+                            supervisor_phone_number=supervisor_phone,
+                            supervisor_email=supervisor_email,
+                            past_steps=self.format_trace(trace),
+                        )
+                        break
+                    except ValueError as ve:
+                        # TODO: This is a hack to deal with the fact that the model runs out of context window. Need better ways to resolve this
+                        if ve.args[0] == "Expected dict_keys(['code']) but got dict_keys([])":
+                            if len(trace) >= 1:
+                                trace = trace[1:]                            
+                            else:
+                                raise ve
+                        else:
+                            raise ve
                 gen_code = module_gen.code
                 gen_code_output = server.request.execute(task_id=task_id, code=gen_code)
                 trace.append((gen_code, gen_code_output))
