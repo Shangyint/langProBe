@@ -94,5 +94,6 @@ class AppWorldReact(dspy.Module):
 
                 if server.request.task_completed(task_id=task_id):
                     break
-
-            return dspy.Prediction(trace=trace, experiment_name_to_eval=output_experiment_name)
+            
+            eval_report = server.request.evaluate(task_id=task_id, suppress_errors=True, report=False)
+            return dspy.Prediction(trace=trace, experiment_name_to_eval=output_experiment_name, eval_report=eval_report)
