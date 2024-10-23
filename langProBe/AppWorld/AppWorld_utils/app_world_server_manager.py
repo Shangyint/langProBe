@@ -5,6 +5,8 @@ import threading
 import time
 from typing import Generator
 from .app_world_client import AppWorldClient
+from requests.exceptions import ConnectionError
+from urllib3.exceptions import NewConnectionError
 
 class AppWorldServer:
     def __init__(self, port: int):
@@ -58,7 +60,7 @@ class AppWorldServerManager:
                         server.request.initialize(experiment_name=experiment_name, task_id=task_id)
                         connected = True
                         break
-                    except ConnectionError as ce:
+                    except (ConnectionError, NewConnectionError) as ce:
                         time.sleep(0.1)
                 if not connected:
                     raise ConnectionError("Failed to connect to the server")

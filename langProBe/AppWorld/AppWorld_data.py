@@ -22,6 +22,8 @@ class AppWorldBench(Benchmark):
         self.dataset = self.train_set + self.dev_set + self.test_set
 
     def create_splits(self):
-        self.train_set = self.train_set[:1]
-        self.dev_set = self.dev_set[:1]
-        self.test_set = self.test_set[:1]
+        # Set the number of examples to use for training, development, and testing to full dataset size
+        # self.train_set = self.train_set[:5]
+        # self.dev_set = self.dev_set[:5]
+        # self.test_set = self.test_set[:5]
+        pass
