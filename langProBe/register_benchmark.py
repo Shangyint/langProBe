@@ -1,7 +1,7 @@
 ########################## Benchmarks ##########################
 import importlib
 
-benchmarks = [".gsm8k", ".MATH", ".hotpotQA", ".humaneval"]
+benchmarks = [".gsm8k", ".MATH", ".hotpotQA", ".humaneval", ".AppWorld"]
 
 # To use registered benchmarks, do
 # `benchmark.benchmark, benchmark.programs, benchmark.metric`

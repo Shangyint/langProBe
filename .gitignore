@@ -2,3 +2,7 @@ local_cache
 *__pycache__
 .DS_Store
 temp
+
+scratchpad.ipynb
+langProBe/AppWorld/data/
+langProBe/AppWorld/experiments/

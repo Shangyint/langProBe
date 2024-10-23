@@ -26,5 +26,5 @@ def create_benchmark_files(bench):
         pass
 
 # Usage example
-benchmark_name = "MATH"
+benchmark_name = "AppWorld"
 create_benchmark_files(benchmark_name)
