@@ -81,7 +81,7 @@ def evaluate(
     benchmark = benchmark_meta.benchmark(dataset_mode=benchmark_meta.dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     optimizers = [
-        optimizer if isinstance(optimizer, tuple) else (optimizer, {})
+        optimizer if isinstance(optimizer, tuple) else (optimizer, {}, {})
         for optimizer in optimizers
     ]
     print(f"Evaluating {benchmark.__class__.__name__}")
@@ -96,7 +96,7 @@ def evaluate(
                 metric=benchmark_meta.metric,
                 optimizers=[
                     create_optimizer(
-                        optimizer[0], benchmark_meta.metric, **optimizer[1]
+                        optimizer[0], benchmark_meta.metric, optimizer[1], optimizer[2]
                     )
                     for optimizer in optimizers
                 ],
@@ -155,10 +155,19 @@ if __name__ == "__main__":
     suppress_dspy_output = args.suppress_dspy_output
 
     optimizers = [
-        dspy.teleprompt.BootstrapFewShot,
-        dspy.teleprompt.BootstrapFewShotWithRandomSearch,
+        (
+            dspy.teleprompt.BootstrapFewShot,
+            {"max_errors": 1000, "max_labeled_demos": 0},
+            {}
+        ),
+        (
+            dspy.teleprompt.BootstrapFewShotWithRandomSearch,
+            {"max_errors": 1000, "max_labeled_demos": 0},
+            {}
+        ),
         (
             dspy.teleprompt.MIPROv2,
+            {"max_errors": 1000},
             {"requires_permission_to_run": False, "num_trials": 10, "minibatch": False},
         ),
     ]
