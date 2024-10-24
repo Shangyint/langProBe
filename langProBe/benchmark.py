@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import os
 import random
 import dspy
 from typing import Any, Callable, List, Type
@@ -67,6 +68,7 @@ class BenchmarkMeta:
     benchmark: Type[Benchmark]
     program: List[Type[dspy.Module]]
     metric: Callable
+    dataset_mode: str = "Lite"
 
 
 class EvaluateBench(ABC):

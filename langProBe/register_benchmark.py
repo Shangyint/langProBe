@@ -1,7 +1,6 @@
 ########################## Benchmarks ##########################
 import importlib
 
-benchmarks = [".gsm8k", ".MATH", ".hotpotQA", ".humaneval"]
 
 # To use registered benchmarks, do
 # `benchmark.benchmark, benchmark.programs, benchmark.metric`
@@ -26,7 +25,7 @@ def register_benchmark(benchmark: str):
     return benchmark_metas.benchmark
 
 
-def register_all_benchmarks(benchmarks=benchmarks):
+def register_all_benchmarks(benchmarks):
     for benchmark in benchmarks:
         register_benchmark(benchmark)
     return registered_benchmarks
