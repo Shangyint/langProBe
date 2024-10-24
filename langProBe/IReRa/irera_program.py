@@ -1,29 +1,25 @@
 import dspy
-
-from .irera_utils import extract_labels_from_strings
-
 import math
 import json
+from .irera_utils import Retriever, IreraConfig, Rank, Chunker, extract_labels_from_strings, supported_signatures
+import os
 
-import dspy
-from .irera_utils import Retriever
 
-from .irera_utils import IreraConfig
-from .irera_utils import Rank
-from .irera_utils import Chunker
-
-from .irera_utils import InferSignatureESCO, RankSignatureESCO, InferSignatureBioDEX, RankSignatureBioDEX, supported_signatures
+dir_path = os.path.dirname(os.path.abspath(__file__))
+state_path = os.path.join(dir_path, 'program_state.json')
+state = json.load(open(state_path, "r"))
+global_config = IreraConfig.from_dict(state["config"])
 
 
 class Infer(dspy.Module):
-    def __init__(self):
+    def __init__(self, config: IreraConfig = global_config):
         super().__init__()
-        self.config = None
-        self.cot = dspy.ChainOfThought(InferSignatureESCO)
+        self.config = config
+        self.cot = dspy.ChainOfThought(
+            supported_signatures[config.infer_signature_name]
+        )
 
     def forward(self, text: str) -> dspy.Prediction:
-        # import pdb
-        # pdb.set_trace()
         parsed_outputs = set()
 
         output = self.cot(text=text).completions.output
@@ -37,16 +33,13 @@ class Infer(dspy.Module):
 class InferRetrieve(dspy.Module):
     """Infer-Retrieve. Sets the Retriever, initializes the prior."""
 
-    def __init__(
-        self,
-        config: IreraConfig,
-    ):
+    def __init__(self, config: IreraConfig = global_config):
         super().__init__()
 
         self.config = config
 
         # set LM predictor
-        self.infer = Infer()
+        self.infer = Infer(config)
 
         # set retriever
         self.retriever = Retriever(config)
@@ -86,16 +79,12 @@ class InferRetrieve(dspy.Module):
             for label, score in scores.items()
         }
         return scores
-    
 
 
 class InferRetrieveRank(dspy.Module):
     """Infer-Retrieve-Rank, as defined in https://arxiv.org/abs/2401.12178."""
 
-    def __init__(
-        self,
-        config: IreraConfig,
-    ):
+    def __init__(self, config: IreraConfig = global_config):
         super().__init__()
 
         self.config = config
@@ -130,8 +119,6 @@ class InferRetrieveRank(dspy.Module):
 
             # Only keep options that are valid
             selected_options = [o for o in predictions if o in options]
-
-            # print(f"Rank returned {len(selected_options)} valid options.")
 
             # Supplement options
             selected_options = selected_options + [

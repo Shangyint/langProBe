@@ -8,7 +8,7 @@ import dspy
 programs = [Infer, InferRetrieve, InferRetrieveRank]
 
 # TODO: should we change the k value
-def rp_at_k(gold: list, predicted: list, k=10):
+def rp_at_k(gold: list, predicted: list, k=50):
     """s
     Calculate Rank Precision at K (RP@K)
 
@@ -20,6 +20,9 @@ def rp_at_k(gold: list, predicted: list, k=10):
     Returns:
     - RP@K (Rank Precision at K) value
     """
+
+    gold = gold.label
+    predicted = list(predicted.predictions)
 
     # Ensure k is not greater than the length of the gold list
     gold_k = min(k, len(gold))
@@ -35,29 +38,9 @@ def rp_at_k(gold: list, predicted: list, k=10):
 
     return rp_at_k
 
-def p(gold, predicted):
-    """Calculate the accuracy between two sets
-
-    Parameters:
-    - gold: The set of true labels
-    - predicted: The set of predicted labels
-
-    Returns:
-    - Accuracy value
-    """
-
-    # import pdb
-    # pdb.set_trace()
-    predicted = predicted.predictions
-    gold = set(gold.label)
-    intersection = set(gold).intersection(set(predicted))
-
-    accuracy = len(intersection) / len(gold) if len(gold) > 0 else 0.0
-
-    return accuracy
 
 benchmark = [
     BenchmarkMeta(
-        IReRaBench, programs, p
+        IReRaBench, programs, rp_at_k
     )
 ]
