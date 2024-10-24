@@ -5,9 +5,7 @@ import subprocess
 
 class IReRaBench(Benchmark):
     def init_dataset(self):
-        result = subprocess.run(['bash', 'langProBe/IReRa/load_data.sh'], capture_output=True, text=True)
-        print("STDOUT:", result.stdout)
-        print("STDERR:", result.stderr)
+        subprocess.run(['bash', 'langProBe/IReRa/load_data.sh'], capture_output=True, text=True)
 
         (train_examples,
         validation_examples,
