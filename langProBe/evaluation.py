@@ -150,6 +150,13 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
     )
+    parser.add_argument(
+        "--benchmark",
+        help="The benchmark to evaluate. If not provided, all benchmarks will be evaluated.",
+        type=str,
+        default=None,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
@@ -158,12 +165,12 @@ if __name__ == "__main__":
         (
             dspy.teleprompt.BootstrapFewShot,
             {"max_errors": 1000, "max_labeled_demos": 0},
-            {}
+            {},
         ),
         (
             dspy.teleprompt.BootstrapFewShotWithRandomSearch,
             {"max_errors": 1000, "max_labeled_demos": 0},
-            {}
+            {},
         ),
         (
             dspy.teleprompt.MIPROv2,
@@ -175,7 +182,11 @@ if __name__ == "__main__":
     lm = dspy.LM("openai/gpt-4o-mini")
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
-    benchmarks = [".IReRa", ".hotpotQA", ".gsm8k", ".MATH", ".humaneval"]
+    benchmarks = (
+        [".hotpotQA", ".gsm8k", ".MATH", ".humaneval", ".MMLU", ".IReRa"]
+        if not args.benchmark
+        else [f".{args.benchmark}"]
+    )
     # get current time to append to the file name
     import datetime
 

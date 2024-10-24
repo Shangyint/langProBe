@@ -2,7 +2,7 @@ import dspy
 from .MMLU_utils import deduplicate
 
 
-class GenerateAnswer_with_context(dspy.Signature):
+class GenerateAnswerWithContext(dspy.Signature):
     """Answer multiple choice questions."""
 
     context = dspy.InputField(desc="may contain relevant facts")
@@ -42,7 +42,7 @@ class RAG(dspy.Module):
     def __init__(self, num_passages=3):
         super().__init__()
         self.retrieve = dspy.Retrieve(k=num_passages)
-        self.generate_answer = dspy.ChainOfThought(GenerateAnswer_with_context)
+        self.generate_answer = dspy.ChainOfThought(GenerateAnswerWithContext)
 
     def forward(self, question):
         context = self.retrieve(question).passages
@@ -57,7 +57,7 @@ class SimplifiedBaleen(dspy.Module):
             dspy.ChainOfThought(GenerateSearchQuery) for _ in range(max_hops)
         ]
         self.retrieve = dspy.Retrieve(k=passages_per_hop)
-        self.generate_answer = dspy.ChainOfThought(GenerateAnswer)
+        self.generate_answer = dspy.ChainOfThought(GenerateAnswerWithContext)
         self.max_hops = max_hops
 
     def forward(self, question):

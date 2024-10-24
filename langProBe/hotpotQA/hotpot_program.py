@@ -51,7 +51,7 @@ class SimplifiedBaleen(dspy.Module):
             dspy.ChainOfThought(GenerateSearchQuery) for _ in range(max_hops)
         ]
         self.retrieve = dspy.Retrieve(k=passages_per_hop)
-        self.generate_answer = dspy.ChainOfThought(GenerateAnswer)
+        self.generate_answer = dspy.ChainOfThought(GenerateAnswerWithContext)
         self.max_hops = max_hops
 
     def forward(self, question):

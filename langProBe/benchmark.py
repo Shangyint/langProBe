@@ -31,6 +31,7 @@ class Benchmark(ABC):
     def init_dataset(self) -> None:
         """
         Initializes the dataset for the benchmark, and sets it to self.dataset.
+        Each element in the dataset should be an instance of dspy.Example.
         """
         return
 
@@ -92,7 +93,8 @@ class EvaluateBench(ABC):
             metric=self.metric,
             num_threads=self.num_threads,
             display_progress=True,
-            max_errors=50,
+            # FIXME(shangyin): find a more ergonomic way to set max_errors
+            max_errors=100,
         )
 
         self.results = None
@@ -109,14 +111,6 @@ class EvaluateBench(ABC):
         return self.evaluate_prog(self.program)
 
     def evaluate_optimizers(self) -> list[float]:
-        # TODO(shangyin): we need to pass additional arguments to the optimizer
-        # one way is to create partial functions for optimizer in Teleprompter class, e.g.,
-        # from functools import partial
-        # def compile_partial(self, **kwargs):
-        #     return partial(self.compile, **kwargs)
-        #
-        # and then we can pass optimizer.compile_partial as self.optimizer
-
         self.optimized_programs = [
             optimizer(self.program, trainset=self.benchmark.train_set)
             for optimizer in self.optimizers

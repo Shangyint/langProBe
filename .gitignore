@@ -5,3 +5,5 @@ temp
 
 *.csv
 *.png
+
+data/
