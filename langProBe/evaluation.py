@@ -175,7 +175,7 @@ if __name__ == "__main__":
     lm = dspy.LM("openai/gpt-4o-mini")
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
-    benchmarks = [".hotpotQA", ".gsm8k", ".MATH", ".humaneval"]
+    benchmarks = [".IReRa", ".hotpotQA", ".gsm8k", ".MATH", ".humaneval"]
     # get current time to append to the file name
     import datetime
 
