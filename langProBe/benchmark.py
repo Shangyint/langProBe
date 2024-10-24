@@ -92,7 +92,8 @@ class EvaluateBench(ABC):
             metric=self.metric,
             num_threads=self.num_threads,
             display_progress=True,
-            max_errors=50,
+            # FIXME(shangyin): find a more ergonomic way to set max_errors
+            max_errors=100,
         )
 
         self.results = None
