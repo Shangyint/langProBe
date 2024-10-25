@@ -25,6 +25,8 @@ def create_benchmark_files(bench):
     with open(utils_file, "w") as f:
         pass
 
-# Usage example
-benchmark_name = "AppWorld"
+
+# Get benchmark name from first command line argument
+import sys
+benchmark_name = sys.argv[1]
 create_benchmark_files(benchmark_name)

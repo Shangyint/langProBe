@@ -80,7 +80,7 @@ class MultiChain(dspy.Module):
         )
         self.prog = dspy.MultiChainComparison("prompt -> code", M=self.num_chain)
 
-    def forward(self, problem):
-        completions = self.reasoning_generator(question=problem)
-        pred = self.prog(completions.completions, question=problem)
+    def forward(self, prompt, **kargs):
+        completions = self.reasoning_generator(prompt=prompt)
+        pred = self.prog(completions.completions, prompt=prompt)
         return pred

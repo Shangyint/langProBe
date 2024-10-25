@@ -8,3 +8,5 @@ langProBe/AppWorld/data/
 langProBe/AppWorld/experiments/
 *.csv
 *.png
+
+data/

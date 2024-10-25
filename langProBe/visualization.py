@@ -62,17 +62,23 @@ def plot_benchmark_results(file_path):
         )
 
         # Titles and formatting for each subplot
-        axes[i].set_title(f"Performance for {benchmark}")
+        axes[i].set_title(f'Performance for {benchmark.split("Bench")[0]}')
         axes[i].set_ylabel("Performance (%)")
-        axes[i].legend(title="Optimizer", loc="upper right")
         axes[i].set_xticklabels(axes[i].get_xticklabels(), rotation=45)
+
+        # Remove legend from individual subplots
+        axes[i].get_legend().remove()
 
     # Remove unused subplots
     for ax in axes[len(benchmarks) :]:
         ax.remove()
 
+    # Create one shared legend
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, title="Optimizer", loc="lower right")
+
     # Adjust layout to prevent overlapping
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
 
     plt.savefig(f'{file_path.split(".")[0]}.png', dpi=300)
 
