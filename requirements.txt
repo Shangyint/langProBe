@@ -1,3 +1,7 @@
+dspy @ git+https://github.com/stanfordnlp/dspy.git
+requests
+shortuuid
+
 black==23.11.0
 sentence-transformers==2.2.2
 sentencepiece==0.1.99
