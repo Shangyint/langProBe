@@ -26,15 +26,23 @@ class Benchmark(ABC):
         self.dataset = None
         # dataset for the acutual benchmarking
         self.test_set = None
+        self.train_set = None
+        self.dev_set = None
+        self.val_set = None
+
         self.init_dataset()
         assert self.dataset is not None, "Dataset not initialized"
         assert self.test_set is not None, "Test set not initialized"
         self.max_testset_size = dataset_size[dataset_mode]
 
         self.test_set = self.trim_dataset(self.test_set, self.max_testset_size)
-        self.dataset = self.trim_dataset(self.dataset, 600)
+        
+        if not self.train_set or not self.dev_set or not self.val_set:
+            self.create_splits()
 
-        self.create_splits()
+        self.train_set = self.trim_dataset(self.train_set, 150)
+        self.dev_set = self.trim_dataset(self.dev_set, 300)
+        self.val_set = self.trim_dataset(self.val_set, 150)
 
         assert self.train_set is not None, "Train set not initialized"
         assert self.dev_set is not None, "Dev set not initialized"
