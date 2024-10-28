@@ -22,11 +22,23 @@ dataset_size = {"full": None, "Lite": 500, "Tiny": 200}
 
 class Benchmark(ABC):
     def __init__(self, dataset_mode="Lite"):
+        # dataset for training and validation
         self.dataset = None
+        # dataset for the acutual benchmarking
+        self.test_set = None
         self.init_dataset()
-        self.max_dataset_size = dataset_size[dataset_mode]
-        
+        assert self.dataset is not None, "Dataset not initialized"
+        assert self.test_set is not None, "Test set not initialized"
+        self.max_testset_size = dataset_size[dataset_mode]
+
+        self.test_set = self.trim_dataset(self.test_set, self.max_testset_size)
+        self.dataset = self.trim_dataset(self.dataset, 600)
+
         self.create_splits()
+
+        assert self.train_set is not None, "Train set not initialized"
+        assert self.dev_set is not None, "Dev set not initialized"
+        assert self.val_set is not None, "Val set not initialized"
 
     @abstractmethod
     def init_dataset(self) -> None:
@@ -36,24 +48,21 @@ class Benchmark(ABC):
         """
         return
 
-    def trim_dataset(self, size: int) -> None:
-        if size is not None:
-            self.dataset = self.dataset[:size]
+    def trim_dataset(self, dataset, size: int) -> None:
+        if size <= len(dataset):
+            return dataset
+        return random.sample(dataset, size)
 
     def create_splits(self) -> None:
         """
-        Creates the splits for the dataset.
-        Upon completion, self.train_set, self.dev_set, and self.test_set should be set.
+        Creates the splits for the dataset (not including test).
+        Upon completion, self.train_set, self.dev_set, and self.val_set should be set.
         """
-        self.trim_dataset(self.max_dataset_size)
-        
-        random.seed(0)
-        random.shuffle(self.dataset)
 
         total_len = len(self.dataset)
-        self.test_set = self.dataset[: int(0.8 * total_len)]
-        self.dev_set = self.dataset[int(0.8 * total_len) : int(0.9 * total_len)]
-        self.train_set = self.dataset[int(0.9 * total_len) :]
+        self.dev_set = self.dataset[: int(0.5 * total_len)]
+        self.val_set = self.dataset[int(0.5 * total_len) : int(0.75 * total_len)]
+        self.train_set = self.dataset[int(0.75 * total_len) :]
 
     def get_dataset(self):
         return self.dataset
@@ -116,7 +125,11 @@ class EvaluateBench(ABC):
 
     def evaluate_optimizers(self) -> list[float]:
         self.optimized_programs = [
-            optimizer(self.program, trainset=self.benchmark.train_set)
+            optimizer(
+                self.program,
+                trainset=self.benchmark.train_set,
+                valset=self.benchmark.val_set,
+            )
             for optimizer in self.optimizers
         ]
 
