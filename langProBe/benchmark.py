@@ -57,7 +57,7 @@ class Benchmark(ABC):
         return
 
     def trim_dataset(self, dataset, size: int) -> None:
-        if size <= len(dataset):
+        if size is None or size <= len(dataset):
             return dataset
         return random.sample(dataset, size)
 
