@@ -24,7 +24,8 @@ class Benchmark(ABC):
     def __init__(self, dataset_mode="Lite"):
         self.dataset = None
         self.init_dataset()
-        self.trim_dataset(dataset_size[dataset_mode])
+        self.max_dataset_size = dataset_size[dataset_mode]
+        
         self.create_splits()
 
     @abstractmethod
@@ -44,8 +45,11 @@ class Benchmark(ABC):
         Creates the splits for the dataset.
         Upon completion, self.train_set, self.dev_set, and self.test_set should be set.
         """
+        self.trim_dataset(max_dataset_size)
+        
         random.seed(0)
         random.shuffle(self.dataset)
+
         total_len = len(self.dataset)
         self.test_set = self.dataset[: int(0.8 * total_len)]
         self.dev_set = self.dataset[int(0.8 * total_len) : int(0.9 * total_len)]
