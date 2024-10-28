@@ -4,10 +4,10 @@ from copy import deepcopy
 from dsp.utils import deduplicate
 
 
-#################################### Common Adapters ####################################
+#################################### Common Programs ####################################
 
 
-def CoTAdapter(signature):
+def CoT(signature):
     return dspy.ChainOfThought(signature)
 
 
@@ -20,7 +20,7 @@ def default_input_to_query(**kwargs):
         )
 
 
-class RAGAdapter(dspy.Module):
+class RAG(dspy.Module):
     def __init__(
         self,
         signature,
@@ -42,7 +42,7 @@ class RAGAdapter(dspy.Module):
         return pred
 
 
-class SimplifiedBaleenAdapter(dspy.Module):
+class SimplifiedBaleen(dspy.Module):
     def __init__(
         self, signature, query_gen_input=None, retriever=dspy.Retrieve(k=2), max_hops=2
     ):
@@ -88,10 +88,10 @@ class SimplifiedBaleenAdapter(dspy.Module):
         return pred
 
 
-#################################### Archon Adapters ####################################
+#################################### Archon Programs ####################################
 
 
-class ArchonGeneratorAdapter(dspy.Module):
+class ArchonGenerator(dspy.Module):
     # https://github.com/ScalingIntelligence/Archon/blob/main/src/archon/completions/components/Generator.py
 
     def __init__(self, signature, n=5):
@@ -105,15 +105,19 @@ class ArchonGeneratorAdapter(dspy.Module):
         self.prog = dspy.ChainOfThought(verified_signature, n=n)
         self.output_field = list(verified_signature.output_fields.keys())[0]
 
-    def forward(self, **kwargs):
+    def forward(self, **kwargs) -> dspy.Prediction:
         return self.prog(**kwargs)
 
-    def get_responses(self, **kwargs):
+    def get_responses(self, **kwargs) -> list[str]:
         responses = self.prog(**kwargs).completions.__getattr__(self.output_field)
         return responses
 
+    def get_formatted_responses(self, **kwargs) -> str:
+        responses = self.get_responses(**kwargs)
+        return responses_formatter(responses)
 
-def critic_responses_formatter(responses):
+
+def responses_formatter(responses):
     if not isinstance(responses, list):
         dspy.logger.warning(
             "Responses of CriticGenerator should be a list of responses. "
@@ -138,16 +142,13 @@ class CriticGenerator(dspy.Signature):
     )
     responses = dspy.InputField(
         desc="The generated responses to critize. Each response will start with a numerical identifier in [], like [1].",
-        format=critic_responses_formatter,
     )
-    critics = dspy.OutputField(
-        desc="The critic for each response. Structure each response's analysis as\
-                                follows: [1]\nStrengths:\n- <strength #1>\n- <strength #2>\n- <strength #n>\
-                                \nWeaknesses:\n- <weakness #1>\n- <weakness #2>\n- <weakness #n>\n\n"
+    critics: list[str] = dspy.OutputField(
+        desc="The critique for each response. Discuss the strengths and weaknesses of each response."
     )
 
 
-class ArchonCriticAdapter(dspy.Module):
+class ArchonCritic(dspy.Module):
     # https://github.com/ScalingIntelligence/Archon/blob/main/src/archon/completions/components/Critic.py
 
     def __init__(self, signature, n=5):
@@ -187,16 +188,14 @@ class RankerGenerator(dspy.Signature):
 
     responses = dspy.InputField(
         desc="The responses to rank. Each response will start with a numerical identifier in [], like [1].",
-        format=critic_responses_formatter,
     )
 
-    ranking = dspy.OutputField(
-        desc="The ranking of the responses. List the responses in descending order of relevance to the instructions.\
-            Your output format should be a single line with [] > [], e.g., [4] > [2] > ... > [1]."
+    ranking: list[int] = dspy.OutputField(
+        desc="The ranking of the responses. List the responses in descending order of relevance to the instructions."
     )
 
 
-class ArchonRankerAdapter(dspy.Module):
+class ArchonRanker(dspy.Module):
     # https://github.com/ScalingIntelligence/Archon/blob/main/src/archon/completions/components/prompts.py#L68
     def __init__(self, signature, n=5):
         verified_signature = dspy.ensure_signature(signature)
@@ -207,37 +206,26 @@ class ArchonRankerAdapter(dspy.Module):
         self.instructions = verified_signature.instructions
 
         self.ranker = dspy.ChainOfThought(RankerGenerator)
+        RankerGeneratorWithCritics = deepcopy(RankerGenerator)
+        RankerGeneratorWithCritics = RankerGeneratorWithCritics.append(
+            "critics",
+            dspy.InputField(desc="The critics (strength/weakness) for each response."),
+        )
+        RankerGeneratorWithCritics.instructions += (
+            "and their provided critiques of strengths and weaknesses."
+        )
+        self.ranker_with_critics = dspy.ChainOfThought(RankerGeneratorWithCritics)
 
     def forward(self, responses, **kwargs):
         if kwargs.get("critics", None):
-            new_signature = self.ranker.extended_signature.append(
-                "critics",
-                dspy.InputField(
-                    desc="The critics (strength/weakness) for each response."
-                ),
-            )
-            new_signature.instructions += (
-                "and their provided critiques of strengths and weaknesses."
-            )
-
-            return self.ranker(
-                new_signature=new_signature,
-                task_instructions=self.instructions,
-                responses=responses,
-                **kwargs,
+            return self.ranker_with_critics(
+                task_instructions=self.instructions, responses=responses, **kwargs
             )
         else:
             return self.ranker(task_instructions=self.instructions, responses=responses)
 
     def get_ranking(self, responses, **kwargs):
-        raw_ranking = self.forward(responses, **kwargs).ranking
-        ranks_str = re.findall(r"\[(\d+)\]", raw_ranking)
-        ranks = [int(r) for r in ranks_str]
-        if len(ranks) != len(responses):
-            dspy.logger.warning(
-                "ArchonRanker: the number of responses and the number of ranks do not match."
-            )
-        return ranks
+        return self.forward(responses, **kwargs).ranking
 
 
 # TODO(shangyin) new adapters from Archon to be added: Fuser, Verifier
@@ -251,15 +239,15 @@ class ArchonPipelineExample1(dspy.Module):
         ), "ArchonExample only supports a single output field"
         self.signature = verified_signature
 
-        self.generator = ArchonGeneratorAdapter(self.signature, n)
-        self.critic = ArchonCriticAdapter(self.signature, n)
-        self.ranker = ArchonRankerAdapter(self.signature, n)
+        self.generator = ArchonGenerator(self.signature, n)
+        self.critic = ArchonCritic(self.signature, n)
+        self.ranker = ArchonRanker(self.signature, n)
 
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
-        print(responses)
-        critics = self.critic.get_critics(responses)
-        ranking = self.ranker.get_ranking(responses, critics=critics)
+        formatted_responses = responses_formatter(responses)
+        critics = self.critic.get_critics(formatted_responses)
+        ranking = self.ranker.get_ranking(formatted_responses, critics=critics)
         return responses[ranking[0]]
 
 
@@ -275,19 +263,19 @@ if __name__ == "__main__":
 
     # CoT
     print("======== CoT =========")
-    cot = CoTAdapter("question, context -> answer")
+    cot = CoT("question, context -> answer")
     cot(question=question, context=context)
     dspy.settings.lm.inspect_history()
 
     # RAG
     print("======== RAG =========")
-    rag = RAGAdapter("question -> answer")
+    rag = RAG("question -> answer")
     rag(question=question)
     dspy.settings.lm.inspect_history()
 
     # SimplifiedBaleen
     print("======== SimplifiedBaleen =========")
-    simplified_baleen = SimplifiedBaleenAdapter("question -> answer")
+    simplified_baleen = SimplifiedBaleen("question -> answer")
     simplified_baleen(question=question)
     dspy.settings.lm.inspect_history(n=3)
 
