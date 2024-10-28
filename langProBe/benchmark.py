@@ -45,7 +45,7 @@ class Benchmark(ABC):
         Creates the splits for the dataset.
         Upon completion, self.train_set, self.dev_set, and self.test_set should be set.
         """
-        self.trim_dataset(max_dataset_size)
+        self.trim_dataset(self.max_dataset_size)
         
         random.seed(0)
         random.shuffle(self.dataset)
