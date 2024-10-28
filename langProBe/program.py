@@ -3,6 +3,8 @@ from copy import deepcopy
 from dsp.utils import deduplicate
 
 
+#################################### Common Adapters ####################################
+
 def CoTAdapter(signature):
     return dspy.ChainOfThought(signature)
 
@@ -48,7 +50,7 @@ def SimplifiedBaleenAdapter(signature, query_gen_input=None, retriever=dspy.Retr
             verified_signature = verified_signature.append("context", dspy.InputField(desc="may contain relevant facts"))
 
             # remove the output field from the generate query signature
-            # generate query should use a default instruction rather than instruction for the original signature
+            # generate_query should use a default instruction rather than instruction from the original signature
             # FIXME (shangyin) fix the default signature.instructions
             input_fields = verified_signature.input_fields
             generate_query_signature = dspy.Signature(input_fields)
@@ -72,6 +74,49 @@ def SimplifiedBaleenAdapter(signature, query_gen_input=None, retriever=dspy.Retr
             return pred
 
     return SimplifiedBaleen()
+
+
+#################################### Archon Adapters ####################################
+
+def ArchonGeneratorAdapter(signature, n=5):
+    # https://github.com/ScalingIntelligence/Archon/blob/main/src/archon/completions/components/Generator.py
+    # For dspy, n responses are generated with a single model now.
+    # If desired, we can create a new module in dspy that uses multiple models to generate n responses.
+    class ArchonGenerator(dspy.Module):
+        def __init__(self):
+            verified_signature = dspy.ensure_signature(signature)
+            assert len(verified_signature.output_fields) == 1, "ArchonGenerator only supports a single output field"
+
+            self.prog = dspy.ChainOfThought(verified_signature, n=n)
+            self.output_field = list(verified_signature.output_fields.keys())[0]
+
+        def forward(self, **kwargs):
+            return self.prog(**kwargs)
+        
+        def get_responses(self, **kwargs):
+            responses = self.prog(**kwargs).get(self.output_field)
+            return responses
+
+    return ArchonGenerator()
+
+def ArchonCriticAdapter(signature, n=5):
+    """signature should be the signature to the original generator module"""
+    
+    class ArchonCritic(dspy.Module):
+        def __init__(self):
+            verified_signature = dspy.ensure_signature(signature)
+            assert len(verified_signature.output_fields) == 1, "ArchonCritic only supports a single output field"
+
+            pass
+
+        def forward(self, **kwargs):
+            return self.prog(**kwargs)
+        
+        def get_critics(self, **kwargs):
+            scores = self.prog(**kwargs).get(self.output_field)
+            return scores
+    
+    return ArchonCritic()
 
 
 if __name__ == "__main__":
@@ -100,4 +145,4 @@ if __name__ == "__main__":
     print("======== SimplifiedBaleen =========")
     simplified_baleen = SimplifiedBaleenAdapter("question -> answer")
     simplified_baleen(question=question)
-    dspy.settings.lm.inspect_history()
+    dspy.settings.lm.inspect_history(n=3)
