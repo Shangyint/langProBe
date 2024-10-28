@@ -128,12 +128,11 @@ def responses_formatter(responses):
     return "\n".join(responses)
 
 
-class CriticGenerator(dspy.Signature):
+class FeedbackGenerator(dspy.Signature):
     """
     Evaluate all responses based on their relevance to the instructions.
     All the responses should be included and evaluated using identifiers.
     You must include both strengths and weaknesses, even if there are more of one than the other.
-    Do not include any preface or text after the critiques. Do not include any references to previous critiques within a critique.
     Start with the analysis for the first response and end with the analysis for the last response.
     """
 
@@ -143,8 +142,8 @@ class CriticGenerator(dspy.Signature):
     responses = dspy.InputField(
         desc="The generated responses to critize. Each response will start with a numerical identifier in [], like [1].",
     )
-    critics: list[str] = dspy.OutputField(
-        desc="The critique for each response. Discuss the strengths and weaknesses of each response."
+    feedback: list[str] = dspy.OutputField(
+        desc="The feedback for each response. Discuss the strengths and weaknesses of each response."
     )
 
 
@@ -161,25 +160,16 @@ class ArchonCritic(dspy.Module):
 
         self.instructions = verified_signature.instructions
 
-        self.critic = dspy.Predict(CriticGenerator)
+        self.feedback_gen = dspy.Predict(FeedbackGenerator)
 
     def forward(self, responses):
-        return self.critic(task_instructions=self.instructions, responses=responses)
+        return self.feedback_gen(task_instructions=self.instructions, responses=responses)
 
-    def get_critics(self, responses):
-        critics = self.critic(
-            task_instructions=self.instructions, responses=responses
-        ).critics
-        return critics
-
-    def parse_critics(self, critics):
-        segments = re.split(r"\[\d+\]", critics)
-        pass  # we may not need to parse the critics for now
-
+    def get_feedback(self, responses):
+        return self.forward(responses).feedback
 
 class RankerGenerator(dspy.Signature):
     """
-    I will provide you with responses, each indicated by a numerical identifier [].
     Rank the responses based on their relevance to the instruction"""
 
     task_instructions = dspy.InputField(
@@ -197,7 +187,7 @@ class RankerGenerator(dspy.Signature):
 
 class ArchonRanker(dspy.Module):
     # https://github.com/ScalingIntelligence/Archon/blob/main/src/archon/completions/components/prompts.py#L68
-    def __init__(self, signature, n=5):
+    def __init__(self, signature, n=5, use_critic=False):
         verified_signature = dspy.ensure_signature(signature)
         assert (
             len(verified_signature.output_fields) == 1
@@ -205,24 +195,24 @@ class ArchonRanker(dspy.Module):
         self.signature = verified_signature
         self.instructions = verified_signature.instructions
 
-        self.ranker = dspy.ChainOfThought(RankerGenerator)
-        RankerGeneratorWithCritics = deepcopy(RankerGenerator)
-        RankerGeneratorWithCritics = RankerGeneratorWithCritics.append(
-            "critics",
-            dspy.InputField(desc="The critics (strength/weakness) for each response."),
-        )
-        RankerGeneratorWithCritics.instructions += (
-            "and their provided critiques of strengths and weaknesses."
-        )
-        self.ranker_with_critics = dspy.ChainOfThought(RankerGeneratorWithCritics)
+        ranker_signature = RankerGenerator
+        if use_critic:
+            ranker_signature = ranker_signature.append(
+                "feedback",
+                dspy.InputField(
+                    desc="The feedback (strength/weakness) for each response."
+                ),
+            )
+            ranker_signature.instructions += (
+                "and their provided critiques of strengths and weaknesses."
+            )
+
+        self.ranker = dspy.ChainOfThought(ranker_signature)
 
     def forward(self, responses, **kwargs):
-        if kwargs.get("critics", None):
-            return self.ranker_with_critics(
-                task_instructions=self.instructions, responses=responses, **kwargs
-            )
-        else:
-            return self.ranker(task_instructions=self.instructions, responses=responses)
+        return self.ranker(
+            task_instructions=self.instructions, responses=responses, **kwargs
+        )
 
     def get_ranking(self, responses, **kwargs):
         return self.forward(responses, **kwargs).ranking
@@ -241,13 +231,13 @@ class ArchonPipelineExample1(dspy.Module):
 
         self.generator = ArchonGenerator(self.signature, n)
         self.critic = ArchonCritic(self.signature, n)
-        self.ranker = ArchonRanker(self.signature, n)
+        self.ranker = ArchonRanker(self.signature, n, use_critic=True)
 
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
         formatted_responses = responses_formatter(responses)
-        critics = self.critic.get_critics(formatted_responses)
-        ranking = self.ranker.get_ranking(formatted_responses, critics=critics)
+        feedback = self.critic.get_feedback(formatted_responses)
+        ranking = self.ranker.get_ranking(formatted_responses, feedback=feedback)
         return responses[ranking[0]]
 
 
