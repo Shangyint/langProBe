@@ -34,6 +34,3 @@ class AlfWorldBench(Benchmark):
         self.test_set = [dspy.Example(game_file=filepath) for filepath in valid_unseen_filepaths] # Use for final testing
 
         self.dataset = self.train_set + self.val_set + self.dev_set + self.test_set
-    
-    def create_splits(self) -> None:
-        pass

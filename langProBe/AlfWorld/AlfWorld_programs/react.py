@@ -67,7 +67,7 @@ class AlfWorldEnvTool(DSPyTool):
             return "Task completed successfully. You can now call Finish[]."
         return obs
 
-class AlfWorldReactSolver(dspy.Module):
+class AlfWorldReAct(dspy.Module):
     def __init__(self, max_steps=40):
         self.tool = AlfWorldEnvTool()
         self.module = dspy.ReAct(signature=AlfWorldReactSignature, tools=[self.tool], max_iters=max_steps)
