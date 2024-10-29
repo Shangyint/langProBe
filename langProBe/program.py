@@ -273,7 +273,7 @@ class ArchonFuser(dspy.Module):
 
 #################################### Archon Example Programs ####################################
 
-class GeneratorCtiticRanker(dspy.Module):
+class GeneratorCriticRanker(dspy.Module):
     def __init__(self, signature, n=5):
         verified_signature = dspy.ensure_signature(signature)
         assert (
@@ -375,9 +375,9 @@ if __name__ == "__main__":
     simplified_baleen(question=question)
     dspy.settings.lm.inspect_history(n=3)
 
-    # GeneratorCtiticRanker
-    print("======== GeneratorCtiticRanker =========")
-    archon_example = GeneratorCtiticRanker("question -> answer")
+    # GeneratorCriticRanker
+    print("======== GeneratorCriticRanker =========")
+    archon_example = GeneratorCriticRanker("question -> answer")
     archon_example(question=question)
     dspy.settings.lm.inspect_history(n=3)
 
@@ -398,5 +398,5 @@ if __name__ == "__main__":
     generator_fuser = GeneratorFuser("question -> answer")
     generator_fuser(question=question)
     dspy.settings.lm.inspect_history(n=3)
-    
+
 
