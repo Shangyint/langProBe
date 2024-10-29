@@ -10,6 +10,7 @@ from dspy.teleprompt import Teleprompter
 
 from enum import Enum
 
+random.seed(1, version=2)
 
 class DSPyFeatures(Enum):
     BASELINE = 0
@@ -24,7 +25,7 @@ class Benchmark(ABC):
     def __init__(self, dataset_mode="Lite"):
         # dataset for training and validation
         self.dataset = None
-        # dataset for the acutual benchmarking
+        # dataset for the actual benchmarking
         self.test_set = None
         self.train_set = None
         self.dev_set = None
@@ -57,7 +58,7 @@ class Benchmark(ABC):
         return
 
     def trim_dataset(self, dataset, size: int) -> None:
-        if size is None or size <= len(dataset):
+        if size is None or size >= len(dataset):
             return dataset
         return random.sample(dataset, size)
 

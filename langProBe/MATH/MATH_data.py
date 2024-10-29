@@ -2,8 +2,6 @@ from ..benchmark import Benchmark
 import dspy
 
 from datasets import load_dataset
-import random
-
 
 class MATHBench(Benchmark):
     def init_dataset(self):

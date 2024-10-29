@@ -17,11 +17,3 @@ def underspecified_annotation_evaluate(
         score += 1
 
     return score
-
-bench = SWEBenchVerifiedAnnotationTaskBench()
-evaluate_naive_program = EvaluateBench(
-    bench, UnderspecifiedAnnotationGenerator(), underspecified_annotation_evaluate, optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch(metric=underspecified_annotation_evaluate)
-)
-
-with dspy.context(lm=dspy.OpenAI(model="gpt-4o-mini", max_tokens=16000)):
-    evaluate_naive_program.evaluate()
