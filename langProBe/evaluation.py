@@ -183,7 +183,7 @@ if __name__ == "__main__":
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     benchmarks = (
-        [".hotpotQA", ".gsm8k", ".MATH", ".humaneval", ".MMLU", ".IReRa"]
+        [".hotpotQA", ".gsm8k", ".MATH", ".humaneval", ".MMLU", ".IReRa", "Iris"]
         if not args.benchmark
         else [f".{args.benchmark}"]
     )
