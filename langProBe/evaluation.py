@@ -92,7 +92,7 @@ def evaluate(
         with suppress_output(suppress=suppress_dspy_output):
             evaluate_bench = EvaluateBench(
                 benchmark=benchmark,
-                program=program(),
+                program=program,
                 metric=benchmark_meta.metric,
                 optimizers=[
                     create_optimizer(

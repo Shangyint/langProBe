@@ -14,6 +14,6 @@ from .swe_bench_verifier_eval_validity_annotation_eval import evaluation_validit
 import dspy
 
 benchmark = [
-    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [UnderspecifiedAnnotationGenerator], underspecified_annotation_evaluate),
-    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [EvaluationValidityModule], evaluation_validity_evaluate),
+    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [UnderspecifiedAnnotationGenerator()], underspecified_annotation_evaluate),
+    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [EvaluationValidityModule()], evaluation_validity_evaluate),
 ]

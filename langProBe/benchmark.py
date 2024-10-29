@@ -89,7 +89,7 @@ class Benchmark(ABC):
 @dataclass
 class BenchmarkMeta:
     benchmark: Type[Benchmark]
-    program: List[Type[dspy.Module]]
+    program: List[dspy.Module]
     metric: Callable
     dataset_mode: str = "Lite"
 
