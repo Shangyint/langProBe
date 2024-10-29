@@ -28,13 +28,12 @@ class RAG(dspy.Module):
         input_to_query=default_input_to_query,
     ):
         self.retriver = retriever
-        self.prog = dspy.ChainOfThought(signature)
-        self.input_to_query = input_to_query
-
-        self.prog._predict.signature = self.prog._predict.signature.prepend(
+        verified_signature = dspy.ensure_signature(signature)
+        verified_signature = verified_signature.prepend(
             "context", dspy.InputField(desc="may contain relevant facts")
         )
-        self.prog._predict.extended_signature = self.prog._predict.signature
+        self.prog = dspy.ChainOfThought(verified_signature)
+        self.input_to_query = input_to_query
 
     def forward(self, **kwargs):
         context = self.retriver(self.input_to_query(**kwargs)).passages
@@ -240,7 +239,7 @@ class FuserGeneratorSignature(dspy.Signature):
 
 
 class ArchonFuser(dspy.Module):
-    def __init__(self, signature, n=5, use_critic=False):
+    def __init__(self, signature, use_critic=False):
         verified_signature = dspy.ensure_signature(signature)
         assert (
             len(verified_signature.output_fields) == 1
@@ -303,7 +302,7 @@ class GeneratorCriticFuser(dspy.Module):
 
         self.generator = ArchonGenerator(self.signature, n)
         self.critic = ArchonCritic(self.signature, n)
-        self.fuser = ArchonFuser(self.signature, n, use_critic=True)
+        self.fuser = ArchonFuser(self.signature, use_critic=True)
     
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
@@ -321,7 +320,7 @@ class GeneratorRanker(dspy.Module):
         self.signature = verified_signature
 
         self.generator = ArchonGenerator(self.signature, n)
-        self.ranker = ArchonRanker(self.signature, n, use_critic=False)
+        self.ranker = ArchonRanker(self.signature, use_critic=False)
 
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
@@ -338,7 +337,7 @@ class GeneratorFuser(dspy.Module):
         self.signature = verified_signature
 
         self.generator = ArchonGenerator(self.signature, n)
-        self.fuser = ArchonFuser(self.signature, n, use_critic=False)
+        self.fuser = ArchonFuser(self.signature, use_critic=False)
     
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
@@ -351,6 +350,7 @@ if __name__ == "__main__":
     # Example usage
     dspy.configure(
         lm=dspy.LM("openai/gpt-4o-mini"),
+        # example rm for RAG w. passages from wikipedia dump
         rm=dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts"),
     )
 
