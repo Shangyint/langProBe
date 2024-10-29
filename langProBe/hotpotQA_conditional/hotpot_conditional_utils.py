@@ -13,6 +13,7 @@ def preprocess_text(text):
         ].strip()  # Remove the last 'peace!' and strip any trailing spaces
     return text
 
+
 def check_conditions(example, pred, trace=None, debug=False):
     category = example.category
     answer = pred.answer

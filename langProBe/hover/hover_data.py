@@ -11,7 +11,7 @@ class hoverBench(Benchmark):
         dataset = load_dataset("hover")
 
         hf_trainset = dataset["train"]
-        hf_testset = dataset["validation"]
+        hf_testset = dataset["test"]
 
         reformatted_hf_trainset = []
         reformatted_hf_testset = []
@@ -47,6 +47,5 @@ class hoverBench(Benchmark):
         trainset = [dspy.Example(**x).with_inputs("claim") for x in trainset]
         testset = [dspy.Example(**x).with_inputs("claim") for x in testset]
 
-        self.dataset = trainset + testset
-        import pdb
-        pdb.set_trace()
+        self.dataset = trainset
+        self.test_set = testset
