@@ -15,6 +15,7 @@ from functools import lru_cache
 
 random.seed(1, version=2)
 
+
 def normalize(
     label: str,
     do_lower: bool = True,
@@ -41,7 +42,8 @@ def normalize(
         return label.strip().lower()
     else:
         return label.strip()
-    
+
+
 def extract_labels_from_string(
     labels: str,
     do_lower: bool = True,
@@ -52,6 +54,7 @@ def extract_labels_from_string(
         normalize(r, do_lower=do_lower, strip_punct=strip_punct)
         for r in labels.split(",")
     ]
+
 
 def extract_labels_from_strings(
     labels: list[str],
@@ -297,6 +300,7 @@ def load_data(dataset="esco_tech"):
         ontology_prior,
     )
 
+
 class IreraConfig:
     """Every option in config should be serializable. No attribute should start with '_', since these are not saved."""
 
@@ -353,7 +357,7 @@ class IreraConfig:
         with open(filename, "r") as file:
             config_dict = json.load(file)
         return cls.from_dict(config_dict)
-    
+
 
 class Retriever:
     def __init__(self, config: IreraConfig):
@@ -379,10 +383,13 @@ class Retriever:
 
     def _load_embeddings(self) -> torch.Tensor:
         """Load or create embeddings for all query terms."""
-        embedding_dir = os.path.join('.', 'data', 'embeddings')
+        embedding_dir = os.path.join(".", "data", "embeddings")
         if not os.path.exists(embedding_dir):
             os.makedirs(embedding_dir)
-        ontology_embeddings_filename = os.path.join(embedding_dir,f"{self.ontology_name}_embeddings[{self.friendly_model_name}].pt")
+        ontology_embeddings_filename = os.path.join(
+            embedding_dir,
+            f"{self.ontology_name}_embeddings[{self.friendly_model_name}].pt",
+        )
 
         # If the file exists, load. Else, create embeddings.
         if os.path.isfile(ontology_embeddings_filename):
@@ -460,7 +467,6 @@ class Infer(dspy.Module):
         )
 
         return dspy.Prediction(predictions=parsed_outputs)
-    
 
 
 class Chunker:
@@ -490,7 +496,6 @@ class Chunker:
             snippet_idx += 1
 
 
-
 class Rank(dspy.Module):
     def __init__(self, config: IreraConfig):
         super().__init__()
@@ -508,9 +513,6 @@ class Rank(dspy.Module):
         )
 
         return dspy.Prediction(predictions=parsed_outputs)
-    
-
-
 
 
 class InferSignatureESCO(dspy.Signature):
@@ -565,6 +567,7 @@ class RankSignatureBioDEX(dspy.Signature):
         desc="list of comma-separated adverse drug reactions",
         format=lambda x: ", ".join(x) if isinstance(x, list) else x,
     )
+
 
 supported_signatures = {
     "infer_esco": InferSignatureESCO,

@@ -1,4 +1,6 @@
 import dspy
+import langProBe.program as program
+
 
 class Sig(dspy.Signature):
     "Given the petal and sepal dimensions in cm, predict the iris species."
@@ -10,16 +12,6 @@ class Sig(dspy.Signature):
     answer = dspy.OutputField(desc="setosa, versicolor, or virginica")
 
 
-class Classify(dspy.Module):
-    def __init__(self):
-        self.pred = dspy.ChainOfThought(Sig)
-
-    def forward(self, petal_length, petal_width, sepal_length, sepal_width):
-        return self.pred(
-            petal_length=petal_length,
-            petal_width=petal_width,
-            sepal_length=sepal_length,
-            sepal_width=sepal_width,
-        )
-    
-
+IrisCot = program.CoT(Sig)
+IrisGeneratorCriticRanker = program.GeneratorCriticRanker(Sig)
+IrisGeneratorCriticFuser = program.GeneratorCriticFuser(Sig)
