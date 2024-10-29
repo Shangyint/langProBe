@@ -12,10 +12,12 @@ from enum import Enum
 
 random.seed(1, version=2)
 
+
 class DSPyFeatures(Enum):
     BASELINE = 0
     OPTIMIZER = 1
     ASSERTION = 2
+
 
 dataset_size = {"full": None, "Lite": 500, "Tiny": 200}
 
@@ -41,7 +43,7 @@ class Benchmark(ABC):
         if dataset_mode == "Test":
             self.dataset = self.trim_dataset(self.dataset, 60)
             self.test_set = self.trim_dataset(self.test_set, 50)
-        
+
         if not self.train_set or not self.dev_set or not self.val_set:
             self.create_splits()
 

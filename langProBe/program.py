@@ -272,6 +272,7 @@ class ArchonFuser(dspy.Module):
 
 #################################### Archon Example Programs ####################################
 
+
 class GeneratorCriticRanker(dspy.Module):
     def __init__(self, signature, n=5):
         verified_signature = dspy.ensure_signature(signature)
@@ -303,7 +304,7 @@ class GeneratorCriticFuser(dspy.Module):
         self.generator = ArchonGenerator(self.signature, n)
         self.critic = ArchonCritic(self.signature, n)
         self.fuser = ArchonFuser(self.signature, use_critic=True)
-    
+
     def forward(self, **kwargs):
         formatted_responses = self.generator.get_formatted_responses(**kwargs)
         feedback = self.critic.get_feedback(formatted_responses)
@@ -337,11 +338,10 @@ class GeneratorFuser(dspy.Module):
 
         self.generator = ArchonGenerator(self.signature, n)
         self.fuser = ArchonFuser(self.signature, use_critic=False)
-    
+
     def forward(self, **kwargs):
         formatted_responses = self.generator.get_formatted_responses(**kwargs)
         return self.fuser.get_response(formatted_responses)
-
 
 
 if __name__ == "__main__":
@@ -396,5 +396,3 @@ if __name__ == "__main__":
     generator_fuser = GeneratorFuser("question -> answer")
     generator_fuser(question=question)
     dspy.settings.lm.inspect_history(n=3)
-
-

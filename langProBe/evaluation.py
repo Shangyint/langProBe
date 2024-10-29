@@ -3,9 +3,9 @@ import os
 import sys
 import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
-from langProBe.optimizers import create_optimizer
+from langProBe.optimizers import create_optimizer, default_optimizers
 from langProBe.visualization import plot_benchmark_results
-from langProBe.register_benchmark import register_all_benchmarks, register_benchmark
+from langProBe.register_benchmark import register_all_benchmarks
 import dspy
 
 
@@ -71,6 +71,7 @@ def evaluate(
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
+    dataset_mode=None,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -78,7 +79,8 @@ def evaluate(
     rm: Retrieval model to use
     optimizers: List[type(Teleprompter) | (type(Teleprompter), kwargs_for_compile)]
     """
-    benchmark = benchmark_meta.benchmark(dataset_mode=benchmark_meta.dataset_mode)
+    dataset_mode = dataset_mode or benchmark_meta.dataset_mode
+    benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     optimizers = [
         optimizer if isinstance(optimizer, tuple) else (optimizer, {}, {})
@@ -125,6 +127,7 @@ def evaluate_all(
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
+    dataset_mode=None,
 ):
     benchmarks = register_all_benchmarks(benchmarks)
     for benchmark_meta in benchmarks:
@@ -136,6 +139,7 @@ def evaluate_all(
             num_threads,
             suppress_dspy_output,
             file_path,
+            dataset_mode,
         )
 
 
@@ -161,29 +165,28 @@ if __name__ == "__main__":
 
     suppress_dspy_output = args.suppress_dspy_output
 
-    optimizers = [
-        (
-            dspy.teleprompt.BootstrapFewShot,
-            {"max_errors": 1000, "max_labeled_demos": 0},
-            {},
-        ),
-        (
-            dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-            {"max_errors": 1000, "max_labeled_demos": 0},
-            {},
-        ),
-        (
-            dspy.teleprompt.MIPROv2,
-            {"max_errors": 1000},
-            {"requires_permission_to_run": False, "num_trials": 10, "minibatch": False},
-        ),
-    ]
+    optimizers = default_optimizers
 
     lm = dspy.LM("openai/gpt-4o-mini")
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     benchmarks = (
-        [".hotpotQA", ".gsm8k", ".MATH", ".humaneval", ".MMLU", ".IReRa", "Iris"]
+        [
+            ".hover",
+            ".AlfWorld",
+            ".humaneval",
+            ".Iris",
+            ".IReRa",
+            ".hotpotQA",
+            ".MATH",
+            ".gsm8k",
+            ".AppWorld",
+            ".RAGQAArenaTech",
+            ".MMLU",
+            ".swe_bench_verified_annotation_task",
+            ".scone",
+            ".hotpotQA_conditional",
+        ]
         if not args.benchmark
         else [f".{args.benchmark}"]
     )
