@@ -221,7 +221,7 @@ class ArchonRanker(dspy.Module):
 # TODO(shangyin) new adapters from Archon to be added: Fuser, Verifier
 
 
-class ArchonPipelineExample1(dspy.Module):
+class GeneratorCtiticRanker(dspy.Module):
     def __init__(self, signature, n=5):
         verified_signature = dspy.ensure_signature(signature)
         assert (
@@ -238,6 +238,22 @@ class ArchonPipelineExample1(dspy.Module):
         formatted_responses = responses_formatter(responses)
         feedback = self.critic.get_feedback(formatted_responses)
         ranking = self.ranker.get_ranking(formatted_responses, feedback=feedback)
+        return responses[ranking[0]]
+    
+class GeneratorRanker(dspy.Module):
+    def __init__(self, signature, n=5):
+        verified_signature = dspy.ensure_signature(signature)
+        assert (
+            len(verified_signature.output_fields) == 1
+        ), "GeneratorRanker only supports a single output field"
+        self.signature = verified_signature
+
+        self.generator = ArchonGenerator(self.signature, n)
+        self.ranker = ArchonRanker(self.signature, n, use_critic=False)
+
+    def forward(self, **kwargs):
+        responses = self.generator.get_responses(**kwargs)
+        ranking = self.ranker.get_ranking(responses)
         return responses[ranking[0]]
 
 
@@ -269,8 +285,14 @@ if __name__ == "__main__":
     simplified_baleen(question=question)
     dspy.settings.lm.inspect_history(n=3)
 
-    # ArchonPipelineExample1
-    print("======== ArchonPipelineExample1 =========")
-    archon_example = ArchonPipelineExample1("question -> answer")
+    # GeneratorCtiticRanker
+    print("======== GeneratorCtiticRanker =========")
+    archon_example = GeneratorCtiticRanker("question -> answer")
     archon_example(question=question)
+    dspy.settings.lm.inspect_history(n=3)
+
+    # GeneratorRanker
+    print("======== GeneratorRanker =========")
+    generator_ranker = GeneratorRanker("question -> answer")
+    generator_ranker(question=question)
     dspy.settings.lm.inspect_history(n=3)
