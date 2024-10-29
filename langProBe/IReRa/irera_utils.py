@@ -13,6 +13,7 @@ import sentence_transformers
 from sentence_transformers import SentenceTransformer
 from functools import lru_cache
 
+random.seed(1, version=2)
 
 def normalize(
     label: str,
@@ -235,7 +236,6 @@ def load_data(dataset="esco_tech"):
 
     # shuffle
     # NOTE: pull out this seed to get confidence intervals
-    random.seed(42)
     random.shuffle(validation_examples)
     random.shuffle(test_examples)
 
@@ -274,7 +274,6 @@ def load_data(dataset="esco_tech"):
         # validation_examples = house_val + tech_val
         validation_examples = house_val
         # shuffle train and val again
-        random.seed(42)
         random.shuffle(train_examples)
         random.shuffle(validation_examples)
     elif dataset == "biodex_reactions":
