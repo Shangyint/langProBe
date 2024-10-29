@@ -305,8 +305,7 @@ class GeneratorCriticFuser(dspy.Module):
         self.fuser = ArchonFuser(self.signature, use_critic=True)
     
     def forward(self, **kwargs):
-        responses = self.generator.get_responses(**kwargs)
-        formatted_responses = responses_formatter(responses)
+        formatted_responses = self.generator.get_formatted_responses(**kwargs)
         feedback = self.critic.get_feedback(formatted_responses)
         return self.fuser.get_response(formatted_responses, feedback=feedback)
 
@@ -340,8 +339,7 @@ class GeneratorFuser(dspy.Module):
         self.fuser = ArchonFuser(self.signature, use_critic=False)
     
     def forward(self, **kwargs):
-        responses = self.generator.get_responses(**kwargs)
-        formatted_responses = responses_formatter(responses)
+        formatted_responses = self.generator.get_formatted_responses(**kwargs)
         return self.fuser.get_response(formatted_responses)
 
 
