@@ -128,7 +128,7 @@ def responses_formatter(responses):
     return "\n".join(responses)
 
 
-class FeedbackGenerator(dspy.Signature):
+class FeedbackGeneratorSignature(dspy.Signature):
     """
     Evaluate all responses based on their relevance to the instructions.
     All the responses should be included and evaluated using identifiers.
@@ -160,15 +160,18 @@ class ArchonCritic(dspy.Module):
 
         self.instructions = verified_signature.instructions
 
-        self.feedback_gen = dspy.Predict(FeedbackGenerator)
+        self.feedback_gen = dspy.Predict(FeedbackGeneratorSignature)
 
     def forward(self, responses):
-        return self.feedback_gen(task_instructions=self.instructions, responses=responses)
+        return self.feedback_gen(
+            task_instructions=self.instructions, responses=responses
+        )
 
     def get_feedback(self, responses):
         return self.forward(responses).feedback
 
-class RankerGenerator(dspy.Signature):
+
+class RankerGeneratorSignature(dspy.Signature):
     """
     Rank the responses based on their relevance to the instruction"""
 
@@ -195,7 +198,7 @@ class ArchonRanker(dspy.Module):
         self.signature = verified_signature
         self.instructions = verified_signature.instructions
 
-        ranker_signature = RankerGenerator
+        ranker_signature = RankerGeneratorSignature
         if use_critic:
             ranker_signature = ranker_signature.append(
                 "feedback",
@@ -218,8 +221,57 @@ class ArchonRanker(dspy.Module):
         return self.forward(responses, **kwargs).ranking
 
 
-# TODO(shangyin) new adapters from Archon to be added: Fuser, Verifier
+class FuserGeneratorSignature(dspy.Signature):
+    """
+    Compile a list of responses into a single high-quality response.
+    For each response, you should include its strengths and avoid its weaknesses."""
 
+    task_instructions = dspy.InputField(
+        desc="The instructions to how the responses are generated."
+    )
+
+    responses = dspy.InputField(
+        desc="The responses to synthesize.",
+    )
+
+    final_response = dspy.OutputField(
+        desc="The final response, synthesized from the input responses."
+    )
+
+
+class ArchonFuser(dspy.Module):
+    def __init__(self, signature, n=5, use_critic=False):
+        verified_signature = dspy.ensure_signature(signature)
+        assert (
+            len(verified_signature.output_fields) == 1
+        ), "ArchonFuser only supports a single output field"
+        self.signature = verified_signature
+        self.instructions = verified_signature.instructions
+
+        fuser_signature = FuserGeneratorSignature
+        if use_critic:
+            fuser_signature = fuser_signature.append(
+                "feedback",
+                dspy.InputField(
+                    desc="The feedback (strength/weakness) for each response."
+                ),
+            )
+            fuser_signature.instructions += "For each response, we also provide critiques of strengths and weaknesses."
+
+        self.fuser = dspy.ChainOfThought(fuser_signature)
+
+    def forward(self, responses, **kwargs):
+        return self.fuser(
+            task_instructions=self.instructions, responses=responses, **kwargs
+        )
+
+    def get_response(self, responses, **kwargs):
+        return self.forward(responses, **kwargs).final_response
+
+
+# TODO(shangyin) new adapters from Archon to be added: Verifier
+
+#################################### Archon Example Programs ####################################
 
 class GeneratorCtiticRanker(dspy.Module):
     def __init__(self, signature, n=5):
@@ -239,7 +291,27 @@ class GeneratorCtiticRanker(dspy.Module):
         feedback = self.critic.get_feedback(formatted_responses)
         ranking = self.ranker.get_ranking(formatted_responses, feedback=feedback)
         return responses[ranking[0]]
+
+
+class GeneratorCriticFuser(dspy.Module):
+    def __init__(self, signature, n=5):
+        verified_signature = dspy.ensure_signature(signature)
+        assert (
+            len(verified_signature.output_fields) == 1
+        ), "GeneratorCriticFuser only supports a single output field"
+        self.signature = verified_signature
+
+        self.generator = ArchonGenerator(self.signature, n)
+        self.critic = ArchonCritic(self.signature, n)
+        self.fuser = ArchonFuser(self.signature, n, use_critic=True)
     
+    def forward(self, **kwargs):
+        responses = self.generator.get_responses(**kwargs)
+        formatted_responses = responses_formatter(responses)
+        feedback = self.critic.get_feedback(formatted_responses)
+        return self.fuser.get_response(formatted_responses, feedback=feedback)
+
+
 class GeneratorRanker(dspy.Module):
     def __init__(self, signature, n=5):
         verified_signature = dspy.ensure_signature(signature)
@@ -255,6 +327,24 @@ class GeneratorRanker(dspy.Module):
         responses = self.generator.get_responses(**kwargs)
         ranking = self.ranker.get_ranking(responses)
         return responses[ranking[0]]
+
+
+class GeneratorFuser(dspy.Module):
+    def __init__(self, signature, n=5):
+        verified_signature = dspy.ensure_signature(signature)
+        assert (
+            len(verified_signature.output_fields) == 1
+        ), "GeneratorFuser only supports a single output field"
+        self.signature = verified_signature
+
+        self.generator = ArchonGenerator(self.signature, n)
+        self.fuser = ArchonFuser(self.signature, n, use_critic=False)
+    
+    def forward(self, **kwargs):
+        responses = self.generator.get_responses(**kwargs)
+        formatted_responses = responses_formatter(responses)
+        return self.fuser.get_response(formatted_responses)
+
 
 
 if __name__ == "__main__":
@@ -296,3 +386,17 @@ if __name__ == "__main__":
     generator_ranker = GeneratorRanker("question -> answer")
     generator_ranker(question=question)
     dspy.settings.lm.inspect_history(n=3)
+
+    # GeneratorCriticFuser
+    print("======== GeneratorCriticFuser =========")
+    generator_critic_fuser = GeneratorCriticFuser("question -> answer")
+    generator_critic_fuser(question=question)
+    dspy.settings.lm.inspect_history(n=3)
+
+    # GeneratorFuser
+    print("======== GeneratorFuser =========")
+    generator_fuser = GeneratorFuser("question -> answer")
+    generator_fuser(question=question)
+    dspy.settings.lm.inspect_history(n=3)
+    
+
