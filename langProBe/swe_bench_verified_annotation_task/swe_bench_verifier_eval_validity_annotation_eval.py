@@ -17,11 +17,3 @@ def evaluation_validity_evaluate(
         score += 1
 
     return score
-
-bench = SWEBenchVerifiedAnnotationTaskBench()
-evaluate_naive_program = EvaluateBench(
-    bench, EvaluationValidityModule(), evaluation_validity_evaluate, optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch(metric=evaluation_validity_evaluate)
-)
-
-with dspy.context(lm=dspy.OpenAI(model="gpt-4o-mini", max_tokens=16000)):
-    evaluate_naive_program.evaluate()
