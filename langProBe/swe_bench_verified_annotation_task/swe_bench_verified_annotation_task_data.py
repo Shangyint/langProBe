@@ -5,9 +5,6 @@ import pandas as pd
 
 import dspy
 
-import random
-random.seed(1, version=2)
-
 class SWEBenchVerifiedAnnotationTaskBench(Benchmark):
     def process_df_to_examples(self, df):
         common_keys = ['instance_id', 'task_batch_name', 'base_commit', 'patch', 'test_patch', 'problem_statement', 'hints_text', 'created_at', 'version', 'FAIL_TO_PASS', 'PASS_TO_PASS', 'environment_setup_commit', 'repo']

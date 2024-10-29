@@ -11,7 +11,8 @@ class SconeBench(Benchmark):
 
         all_train = load_scone("langProBe/scone/ScoNe/scone_nli/train")
 
-        random.seed(1, version=2)
-        random.shuffle(all_train)
+        rng = random.Random()
+        rng.seed(1, version=2)
+        rng.shuffle(all_train)
 
         self.dataset = all_train

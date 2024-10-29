@@ -25,5 +25,7 @@ class IrisBench(Benchmark):
             x.with_inputs("petal_length", "petal_width", "sepal_length", "sepal_width")
             for x in self.dataset
         ]
-        random.Random(0).shuffle(self.dataset)
+        rng = random.Random()
+        rng.seed(0, version=2)
+        rng.shuffle(self.dataset)
         
