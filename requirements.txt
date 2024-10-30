@@ -1,4 +1,4 @@
-dspy @ git+https://github.com/stanfordnlp/dspy.git
+dspy>=2.5.18
 requests
 shortuuid
 

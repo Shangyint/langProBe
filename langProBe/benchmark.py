@@ -123,6 +123,7 @@ class EvaluateBench(ABC):
             display_progress=True,
             # FIXME(shangyin): find a more ergonomic way to set max_errors
             max_errors=100,
+            provide_traceback=False,
         )
 
         self.results = None
