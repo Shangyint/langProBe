@@ -123,7 +123,10 @@ def evaluate(
                     else:
                         result_list.append(scores)
                 f.write(
-                    f"{benchmark.__class__.__name__},{program.__name__},{','.join(optimizer_names)},{','.join(map(str, result_list))}\n"
+                    f"{benchmark.__class__.__name__},"
+                    f"{program.__class__.__name__},"
+                    f"{','.join(optimizer_names)},"
+                    f"{','.join(map(str, result_list))}\n"
                 )
 
 
