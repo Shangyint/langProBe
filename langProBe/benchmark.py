@@ -10,6 +10,8 @@ from dspy.teleprompt import Teleprompter
 
 from enum import Enum
 
+random.seed(1, version=2)
+
 
 class DSPyFeatures(Enum):
     BASELINE = 0
@@ -17,15 +19,42 @@ class DSPyFeatures(Enum):
     ASSERTION = 2
 
 
-dataset_size = {"full": None, "Lite": 500, "Tiny": 200}
+dataset_size = {"full": None, "lite": 500, "tiny": 200, "test": 50}
 
 
 class Benchmark(ABC):
-    def __init__(self, dataset_mode="Lite"):
+    def __init__(self, dataset_mode="lite"):
+        # dataset for training and validation
         self.dataset = None
+        # dataset for the actual benchmarking
+        self.test_set = None
+        self.train_set = None
+        self.dev_set = None
+        self.val_set = None
+
         self.init_dataset()
-        self.trim_dataset(dataset_size[dataset_mode])
-        self.create_splits()
+        assert self.dataset is not None, "Dataset not initialized"
+        assert self.test_set is not None, "Test set not initialized"
+        self.max_testset_size = dataset_size[dataset_mode]
+
+        self.test_set = self.trim_dataset(self.test_set, self.max_testset_size)
+
+        # TODO: FIXME: "test" option is for debugging purposes only, should be removed for final release
+        if dataset_mode == "test":
+            self.dataset = self.trim_dataset(self.dataset, 60)
+            self.create_splits()
+            self.test_set = self.trim_dataset(self.test_set, 50)
+
+        if not self.train_set or not self.dev_set or not self.val_set:
+            self.create_splits()
+
+        self.train_set = self.trim_dataset(self.train_set, 150)
+        self.dev_set = self.trim_dataset(self.dev_set, 300)
+        self.val_set = self.trim_dataset(self.val_set, 150)
+
+        assert self.train_set is not None, "Train set not initialized"
+        assert self.dev_set is not None, "Dev set not initialized"
+        assert self.val_set is not None, "Val set not initialized"
 
     @abstractmethod
     def init_dataset(self) -> None:
@@ -35,21 +64,21 @@ class Benchmark(ABC):
         """
         return
 
-    def trim_dataset(self, size: int) -> None:
-        if size is not None:
-            self.dataset = self.dataset[:size]
+    def trim_dataset(self, dataset, size: int) -> None:
+        if size is None or size >= len(dataset):
+            return dataset
+        return random.sample(dataset, size)
 
     def create_splits(self) -> None:
         """
-        Creates the splits for the dataset.
-        Upon completion, self.train_set, self.dev_set, and self.test_set should be set.
+        Creates the splits for the dataset (not including test).
+        Upon completion, self.train_set, self.dev_set, and self.val_set should be set.
         """
-        random.seed(0)
-        random.shuffle(self.dataset)
+
         total_len = len(self.dataset)
-        self.test_set = self.dataset[: int(0.8 * total_len)]
-        self.dev_set = self.dataset[int(0.8 * total_len) : int(0.9 * total_len)]
-        self.train_set = self.dataset[int(0.9 * total_len) :]
+        self.dev_set = self.dataset[: int(0.5 * total_len)]
+        self.val_set = self.dataset[int(0.5 * total_len) : int(0.75 * total_len)]
+        self.train_set = self.dataset[int(0.75 * total_len) :]
 
     def get_dataset(self):
         return self.dataset
@@ -67,9 +96,9 @@ class Benchmark(ABC):
 @dataclass
 class BenchmarkMeta:
     benchmark: Type[Benchmark]
-    program: List[Type[dspy.Module]]
+    program: List[dspy.Module]
     metric: Callable
-    dataset_mode: str = "Lite"
+    dataset_mode: str = "lite"
 
 
 class EvaluateBench(ABC):
@@ -78,7 +107,7 @@ class EvaluateBench(ABC):
         benchmark: Benchmark,
         program: dspy.Module,
         metric: Callable,
-        optimizers: list[Teleprompter] = None,
+        optimizers: list[(Teleprompter, dict)] = None,
         has_assertions: bool = False,
         num_threads: int = 1,
     ):
@@ -95,6 +124,7 @@ class EvaluateBench(ABC):
             display_progress=True,
             # FIXME(shangyin): find a more ergonomic way to set max_errors
             max_errors=100,
+            provide_traceback=False,
         )
 
         self.results = None
@@ -112,8 +142,14 @@ class EvaluateBench(ABC):
 
     def evaluate_optimizers(self) -> list[float]:
         self.optimized_programs = [
-            optimizer(self.program, trainset=self.benchmark.train_set)
-            for optimizer in self.optimizers
+            optimizer(
+                self.program,
+                trainset=self.benchmark.train_set,
+                valset=self.benchmark.val_set,
+            )
+            if config.get("use_valset", False)
+            else optimizer(self.program, trainset=self.benchmark.train_set)
+            for optimizer, config in self.optimizers
         ]
 
         return [

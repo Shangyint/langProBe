@@ -3,9 +3,9 @@ import os
 import sys
 import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
-from langProBe.optimizers import create_optimizer
+from langProBe.optimizers import create_optimizer, default_optimizers
 from langProBe.visualization import plot_benchmark_results
-from langProBe.register_benchmark import register_all_benchmarks, register_benchmark
+from langProBe.register_benchmark import register_all_benchmarks
 import dspy
 
 
@@ -71,6 +71,7 @@ def evaluate(
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
+    dataset_mode=None,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -78,25 +79,34 @@ def evaluate(
     rm: Retrieval model to use
     optimizers: List[type(Teleprompter) | (type(Teleprompter), kwargs_for_compile)]
     """
-    benchmark = benchmark_meta.benchmark(dataset_mode=benchmark_meta.dataset_mode)
+    dataset_mode = dataset_mode or benchmark_meta.dataset_mode
+    benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     optimizers = [
-        optimizer if isinstance(optimizer, tuple) else (optimizer, {}, {})
+        optimizer
+        if isinstance(optimizer, tuple)
+        else (optimizer, {}, {}, dict(use_valset=False))
         for optimizer in optimizers
     ]
     print(f"Evaluating {benchmark.__class__.__name__}")
     for program in benchmark_meta.program:
-        print(f"Program: {program.__name__}")
+        print(f"Program: {program.__class__.__name__}")
         optimizer_names = [optimizer[0].__name__ for optimizer in optimizers]
         print(f"Optimizers: {'; '.join(optimizer_names)}")
         with suppress_output(suppress=suppress_dspy_output):
             evaluate_bench = EvaluateBench(
                 benchmark=benchmark,
-                program=program(),
+                program=program,
                 metric=benchmark_meta.metric,
                 optimizers=[
-                    create_optimizer(
-                        optimizer[0], benchmark_meta.metric, optimizer[1], optimizer[2]
+                    (
+                        create_optimizer(
+                            optimizer[0],
+                            benchmark_meta.metric,
+                            optimizer[1],
+                            optimizer[2],
+                        ),
+                        optimizer[3],
                     )
                     for optimizer in optimizers
                 ],
@@ -113,7 +123,10 @@ def evaluate(
                     else:
                         result_list.append(scores)
                 f.write(
-                    f"{benchmark.__class__.__name__},{program.__name__},{','.join(optimizer_names)},{','.join(map(str, result_list))}\n"
+                    f"{benchmark.__class__.__name__},"
+                    f"{program.__class__.__name__},"
+                    f"{','.join(optimizer_names)},"
+                    f"{','.join(map(str, result_list))}\n"
                 )
 
 
@@ -125,6 +138,7 @@ def evaluate_all(
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
+    dataset_mode=None,
 ):
     benchmarks = register_all_benchmarks(benchmarks)
     for benchmark_meta in benchmarks:
@@ -136,6 +150,7 @@ def evaluate_all(
             num_threads,
             suppress_dspy_output,
             file_path,
+            dataset_mode,
         )
 
 
@@ -157,33 +172,41 @@ if __name__ == "__main__":
         default=None,
     )
 
+    parser.add_argument(
+        "--dataset_mode",
+        help="The dataset mode to use for evaluation. Options are: full, lite (500), tiny (200), test (20).\
+        when not provided, the default dataset mode in BenchmarkMeta will be used.",
+        type=str,
+        default=None,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
+    dataset_mode = args.dataset_mode
 
-    optimizers = [
-        (
-            dspy.teleprompt.BootstrapFewShot,
-            {"max_errors": 1000, "max_labeled_demos": 0},
-            {},
-        ),
-        (
-            dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-            {"max_errors": 1000, "max_labeled_demos": 0},
-            {},
-        ),
-        (
-            dspy.teleprompt.MIPROv2,
-            {"max_errors": 1000},
-            {"requires_permission_to_run": False, "num_trials": 10, "minibatch": False},
-        ),
-    ]
+    optimizers = default_optimizers
 
     lm = dspy.LM("openai/gpt-4o-mini")
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     benchmarks = (
-        [".hotpotQA", ".gsm8k", ".MATH", ".humaneval", ".MMLU", ".IReRa"]
+        [
+            ".hover",
+            ".AlfWorld",
+            ".humaneval",
+            ".Iris",
+            ".IReRa",
+            ".hotpotQA",
+            ".MATH",
+            ".gsm8k",
+            ".AppWorld",
+            ".RAGQAArenaTech",
+            ".MMLU",
+            ".swe_bench_verified_annotation_task",
+            ".scone",
+            ".hotpotQA_conditional",
+        ]
         if not args.benchmark
         else [f".{args.benchmark}"]
     )
@@ -199,6 +222,7 @@ if __name__ == "__main__":
         optimizers,
         suppress_dspy_output=suppress_dspy_output,
         file_path=file_path,
+        dataset_mode=dataset_mode,
     )
 
     plot_benchmark_results(file_path)

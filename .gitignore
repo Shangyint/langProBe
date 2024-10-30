@@ -3,6 +3,10 @@ local_cache
 .DS_Store
 temp
 
+scratchpad.ipynb
+langProBe/AppWorld/data/
+langProBe/AppWorld/experiments/
+langProBe/AppWorld/.conda/
 *.csv
 *.png
 
