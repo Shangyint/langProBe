@@ -7,8 +7,8 @@ class GenerateAnswerBasic(dspy.Signature):
     Solve the problem step by step. List your reasoning for each step.
     """
 
-    question = dspy.InputField(format=str)
-    answer = dspy.OutputField(desc="The answer to the problem")
+    problem = dspy.InputField(format=str)
+    answer = dspy.OutputField(desc="The answer to the problem only, no text or explanations.")
 
 
 MATHCoT = program.CoT(GenerateAnswerBasic)

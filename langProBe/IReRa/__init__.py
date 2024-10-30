@@ -4,5 +4,5 @@ from .irera_utils import rp_at_k
 from langProBe.benchmark import BenchmarkMeta
 
 
-programs = [Infer, InferRetrieve, InferRetrieveRank]
+programs = [Infer(), InferRetrieve(), InferRetrieveRank()]
 benchmark = [BenchmarkMeta(IReRaBench, programs, rp_at_k)]

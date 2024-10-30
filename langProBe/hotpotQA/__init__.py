@@ -1,7 +1,6 @@
 from typing import Any, Callable
 
 import dspy.datasets
-from dspy.datasets.hotpotqa import HotPotQA
 import dspy.evaluate
 from .hotpot_data import HotpotQABench
 from .hotpot_program import (
@@ -11,7 +10,7 @@ from .hotpot_program import (
     HotPotQAGeneratorCriticRanker,
     HotPotQAGeneratorCriticFuser,
 )
-from langProBe.benchmark import Benchmark, BenchmarkMeta
+from langProBe.benchmark import BenchmarkMeta
 import dspy
 
 
