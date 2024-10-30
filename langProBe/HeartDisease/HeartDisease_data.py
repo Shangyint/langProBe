@@ -42,3 +42,4 @@ class HeartDiseaseBench(Benchmark):
 
         random.Random(0).shuffle(fullset)
         self.dataset = fullset
+        self.test_set = self.dataset
