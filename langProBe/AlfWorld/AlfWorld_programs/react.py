@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 from langProBe.AlfWorld.AlfWorld_utils.alfworld_server_manager import alfworld_manager
-from langProBe.AlfWorld.AlfWorld_utils.alfredtwenv_wrapper import AlfredTWEnvOneGame
 
 import dspy
 
@@ -100,6 +99,5 @@ class AlfWorldReAct(dspy.Module):
             objective = "You are in the middle of a room. Looking quickly around you, you see " + room_description + "\n\n" + "Your task is to: " + task_instruction
 
             output = self.module(objective=objective)
-            print(output.keys())
             
-        return dspy.Prediction(success=self.tool.won, trace=output['observations'])
+        return dspy.Prediction(success=self.tool.won)

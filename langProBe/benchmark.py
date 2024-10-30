@@ -42,6 +42,7 @@ class Benchmark(ABC):
         # TODO: FIXME: "test" option is for debugging purposes only, should be removed for final release
         if dataset_mode == "test":
             self.dataset = self.trim_dataset(self.dataset, 60)
+            self.create_splits()
             self.test_set = self.trim_dataset(self.test_set, 50)
 
         if not self.train_set or not self.dev_set or not self.val_set:

@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 from langProBe.AlfWorld.AlfWorld_utils.alfworld_server_manager import alfworld_manager
-from langProBe.AlfWorld.AlfWorld_utils.alfredtwenv_wrapper import AlfredTWEnvOneGame
 
 import dspy
 
@@ -106,4 +105,4 @@ class AlfWorldPredict(dspy.Module):
                 if won:
                     break
             
-        return dspy.Prediction(trace=trace, success=won)
+        return dspy.Prediction(success=won)
