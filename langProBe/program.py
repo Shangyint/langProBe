@@ -125,9 +125,10 @@ def responses_formatter(responses):
             "Responses of CriticGenerator should be a list of responses. "
         )
         responses = [responses]
+    formatted_responses = []
     for i, response in enumerate(responses):
-        responses[i] = f"[{i+1}] {response}"
-    return "\n".join(responses)
+        formatted_responses.append(f"[{i+1}] {response}")
+    return "\n".join(formatted_responses)
 
 
 class FeedbackGeneratorSignature(dspy.Signature):
@@ -324,7 +325,7 @@ class GeneratorCriticRanker(dspy.Module):
 
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
-        formatted_responses = responses_formatter(responses, **kwargs)
+        formatted_responses = responses_formatter(responses)
         feedback = self.critic.get_feedback(formatted_responses, **kwargs)
         return self.ranker.get_prediction(responses, feedback=feedback, **kwargs)
 
