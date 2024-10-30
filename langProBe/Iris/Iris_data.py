@@ -1,3 +1,4 @@
+import copy
 from ..benchmark import Benchmark
 import dspy
 from datasets import load_dataset
@@ -26,22 +27,4 @@ class IrisBench(Benchmark):
             for x in self.dataset
         ]
 
-        self.test_set = [
-            dspy.Example(**{k: str(round(v, 2)) for k, v in example.items()})
-            for example in raw_dataset["test"]
-        ]
-
-        self.test_set = [
-            dspy.Example(
-                **{
-                    **x,
-                    "answer": ["setosa", "versicolor", "virginica"][int(x["species"])],
-                }
-            )
-            for x in self.test_set
-        ]
-
-        self.test_set = [
-            x.with_inputs("petal_length", "petal_width", "sepal_length", "sepal_width")
-            for x in self.test_set
-        ]
+        self.test_set = copy.deepcopy(self.dataset)

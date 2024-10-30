@@ -83,12 +83,14 @@ def evaluate(
     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     optimizers = [
-        optimizer if isinstance(optimizer, tuple) else (optimizer, {}, {})
+        optimizer
+        if isinstance(optimizer, tuple)
+        else (optimizer, {}, {}, dict(use_valset=False))
         for optimizer in optimizers
     ]
     print(f"Evaluating {benchmark.__class__.__name__}")
     for program in benchmark_meta.program:
-        print(f"Program: {program.__name__}")
+        print(f"Program: {program.__class__.__name__}")
         optimizer_names = [optimizer[0].__name__ for optimizer in optimizers]
         print(f"Optimizers: {'; '.join(optimizer_names)}")
         with suppress_output(suppress=suppress_dspy_output):
@@ -97,8 +99,14 @@ def evaluate(
                 program=program,
                 metric=benchmark_meta.metric,
                 optimizers=[
-                    create_optimizer(
-                        optimizer[0], benchmark_meta.metric, optimizer[1], optimizer[2]
+                    (
+                        create_optimizer(
+                            optimizer[0],
+                            benchmark_meta.metric,
+                            optimizer[1],
+                            optimizer[2],
+                        ),
+                        optimizer[3],
                     )
                     for optimizer in optimizers
                 ],
@@ -161,9 +169,18 @@ if __name__ == "__main__":
         default=None,
     )
 
+    parser.add_argument(
+        "--dataset_mode",
+        help="The dataset mode to use for evaluation. Options are: full, lite (500), tiny (200), test (20).\
+        when not provided, the default dataset mode in BenchmarkMeta will be used.",
+        type=str,
+        default=None,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
+    dataset_mode = args.dataset_mode
 
     optimizers = default_optimizers
 
@@ -202,6 +219,7 @@ if __name__ == "__main__":
         optimizers,
         suppress_dspy_output=suppress_dspy_output,
         file_path=file_path,
+        dataset_mode=dataset_mode,
     )
 
     plot_benchmark_results(file_path)

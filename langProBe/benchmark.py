@@ -19,11 +19,11 @@ class DSPyFeatures(Enum):
     ASSERTION = 2
 
 
-dataset_size = {"full": None, "Lite": 500, "Tiny": 200}
+dataset_size = {"full": None, "lite": 500, "tiny": 200, "test": 50}
 
 
 class Benchmark(ABC):
-    def __init__(self, dataset_mode="Lite"):
+    def __init__(self, dataset_mode="lite"):
         # dataset for training and validation
         self.dataset = None
         # dataset for the actual benchmarking
@@ -39,8 +39,8 @@ class Benchmark(ABC):
 
         self.test_set = self.trim_dataset(self.test_set, self.max_testset_size)
 
-        # TODO: FIXME: "Test" option is for debugging purposes only, should be removed for final release
-        if dataset_mode == "Test":
+        # TODO: FIXME: "test" option is for debugging purposes only, should be removed for final release
+        if dataset_mode == "test":
             self.dataset = self.trim_dataset(self.dataset, 60)
             self.test_set = self.trim_dataset(self.test_set, 50)
 
@@ -97,7 +97,7 @@ class BenchmarkMeta:
     benchmark: Type[Benchmark]
     program: List[dspy.Module]
     metric: Callable
-    dataset_mode: str = "Lite"
+    dataset_mode: str = "lite"
 
 
 class EvaluateBench(ABC):
@@ -106,7 +106,7 @@ class EvaluateBench(ABC):
         benchmark: Benchmark,
         program: dspy.Module,
         metric: Callable,
-        optimizers: list[Teleprompter] = None,
+        optimizers: list[(Teleprompter, dict)] = None,
         has_assertions: bool = False,
         num_threads: int = 1,
     ):
@@ -145,7 +145,9 @@ class EvaluateBench(ABC):
                 trainset=self.benchmark.train_set,
                 valset=self.benchmark.val_set,
             )
-            for optimizer in self.optimizers
+            if config.get("use_valset", False)
+            else optimizer(self.program, trainset=self.benchmark.train_set)
+            for optimizer, config in self.optimizers
         ]
 
         return [
