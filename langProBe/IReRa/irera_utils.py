@@ -93,7 +93,7 @@ def _prepare_esco_dataframe(path):
 
 def _load_esco(task, validation_file, test_file):
     # base_dir = "./data"
-    base_dir = "/Users/harry/Desktop/Nothing/sky/langProBe/langProBe/IReRa/data"
+    base_dir = "./langProBe/IReRa/data"
     esco_dir = os.path.join(base_dir, "esco")
 
     task_files = {
