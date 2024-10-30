@@ -99,6 +99,5 @@ class AlfWorldReAct(dspy.Module):
             objective = "You are in the middle of a room. Looking quickly around you, you see " + room_description + "\n\n" + "Your task is to: " + task_instruction
 
             output = self.module(objective=objective)
-            print(output.keys())
             
-        return dspy.Prediction(success=self.tool.won, trace=output['observations'])
+        return dspy.Prediction(success=self.tool.won)

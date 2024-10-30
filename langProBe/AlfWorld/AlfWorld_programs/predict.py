@@ -105,4 +105,4 @@ class AlfWorldPredict(dspy.Module):
                 if won:
                     break
             
-        return dspy.Prediction(trace=trace, success=won)
+        return dspy.Prediction(success=won)
