@@ -180,7 +180,7 @@ class ArchonCritic(dspy.Module):
 
 class RankerGeneratorSignature(dspy.Signature):
     """
-    Rank the responses based on their relevance to the instruction"""
+    Rank the responses based on their relevance to the instruction, in descending order (from most relevant to least relevant)."""
 
     task_instructions = dspy.InputField(
         desc="The instructions on how the responses are generated."
