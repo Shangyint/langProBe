@@ -92,6 +92,7 @@ class SimplifiedBaleen(dspy.Module):
 # Note Ranker and Fuser are equipped with self.get_prediction() method to return a Prediction object
 # in the original signature
 
+
 class ArchonGenerator(dspy.Module):
     # https://github.com/ScalingIntelligence/Archon/blob/main/src/archon/completions/components/Generator.py
 
@@ -138,7 +139,7 @@ class FeedbackGeneratorSignature(dspy.Signature):
     """
 
     task_instructions = dspy.InputField(
-        desc="The instructions to how the responses are generated."
+        desc="The instructions on how the responses are generated."
     )
     responses = dspy.InputField(
         desc="The generated responses to critize. Each response will start with a numerical identifier in [], like [1].",
@@ -160,16 +161,20 @@ class ArchonCritic(dspy.Module):
         self.signature = verified_signature
 
         self.instructions = verified_signature.instructions
+        feedback_gen_signature = FeedbackGeneratorSignature
+        # add all inputfields from the original signature to the feedback_gen_signature
+        for name, field in reversed(verified_signature.input_fields.items()):
+            feedback_gen_signature = feedback_gen_signature.prepend(name, field)
 
-        self.feedback_gen = dspy.Predict(FeedbackGeneratorSignature)
+        self.feedback_gen = dspy.ChainOfThought(feedback_gen_signature)
 
-    def forward(self, formatted_responses) -> dspy.Prediction:
+    def forward(self, formatted_responses, **kwargs) -> dspy.Prediction:
         return self.feedback_gen(
-            task_instructions=self.instructions, responses=formatted_responses
+            task_instructions=self.instructions, responses=formatted_responses, **kwargs
         )
 
-    def get_feedback(self, formatted_responses: str) -> list[str]:
-        return self.forward(formatted_responses).feedback
+    def get_feedback(self, formatted_responses: str, **kwargs) -> list[str]:
+        return self.forward(formatted_responses, **kwargs).feedback
 
 
 class RankerGeneratorSignature(dspy.Signature):
@@ -177,7 +182,7 @@ class RankerGeneratorSignature(dspy.Signature):
     Rank the responses based on their relevance to the instruction"""
 
     task_instructions = dspy.InputField(
-        desc="The instructions to how the responses are generated."
+        desc="The instructions on how the responses are generated."
     )
 
     responses = dspy.InputField(
@@ -211,6 +216,10 @@ class ArchonRanker(dspy.Module):
                 "and their provided critiques of strengths and weaknesses."
             )
 
+        # add all inputfields from the original signature to the feedback_gen_signature
+        for name, field in reversed(verified_signature.input_fields.items()):
+            ranker_signature = ranker_signature.prepend(name, field)
+
         self.ranker = dspy.ChainOfThought(ranker_signature)
 
     def forward(self, formatted_responses: str, **kwargs):
@@ -220,7 +229,7 @@ class ArchonRanker(dspy.Module):
 
     def get_ranking(self, formatted_responses: str, **kwargs) -> list[int]:
         return self.forward(formatted_responses, **kwargs).ranking
-    
+
     def get_prediction(self, responses: list[str], **kwargs) -> dspy.Prediction:
         formatted_responses = responses_formatter(responses)
         ranking = self.get_ranking(formatted_responses, **kwargs)
@@ -232,11 +241,11 @@ class ArchonRanker(dspy.Module):
 
 class FuserGeneratorSignature(dspy.Signature):
     """
-    Compile a list of responses into a single high-quality response.
-    For each response, you should include its strengths and avoid its weaknesses."""
+    Your task is to synthesize a list of responses to a task into a single, high-quality response of the same format. Do not include explanations.
+    """
 
     task_instructions = dspy.InputField(
-        desc="The instructions to how the responses are generated."
+        desc="The instructions on how the responses are generated. Your final response should FOLLOW these instructions."
     )
 
     responses = dspy.InputField(
@@ -244,7 +253,9 @@ class FuserGeneratorSignature(dspy.Signature):
     )
 
     final_response = dspy.OutputField(
-        desc="The final response, synthesized from the input responses."
+        desc="""The final response, compiled from the input responses. 
+        Please provide a single response with the same format as all previous responses, excluding the number identifier. 
+        Ensure your response is well-structured, coherent, and adheres to the highest standards of accuracy and reliability. """
     )
 
 
@@ -266,6 +277,16 @@ class ArchonFuser(dspy.Module):
                 ),
             )
             fuser_signature.instructions += "For each response, we also provide critiques of strengths and weaknesses."
+        output_field_desc = list(verified_signature.output_fields.values())[
+            0
+        ].json_schema_extra["desc"]
+        fuser_signature.output_fields["final_response"].json_schema_extra[
+            "desc"
+        ] += f"{output_field_desc}"
+
+        # add all inputfields from the original signature to the feedback_gen_signature
+        for name, field in reversed(verified_signature.input_fields.items()):
+            fuser_signature = fuser_signature.prepend(name, field)
 
         self.fuser = dspy.ChainOfThought(fuser_signature)
 
@@ -276,7 +297,7 @@ class ArchonFuser(dspy.Module):
 
     def get_response(self, formatted_responses: str, **kwargs) -> str:
         return self.forward(formatted_responses, **kwargs).final_response
-    
+
     def get_prediction(self, formatted_responses: str, **kwargs) -> dspy.Prediction:
         final_response = self.get_response(formatted_responses, **kwargs)
         pred = dspy.Prediction()
@@ -303,9 +324,9 @@ class GeneratorCriticRanker(dspy.Module):
 
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
-        formatted_responses = responses_formatter(responses)
-        feedback = self.critic.get_feedback(formatted_responses)
-        return self.ranker.get_prediction(responses, feedback=feedback)
+        formatted_responses = responses_formatter(responses, **kwargs)
+        feedback = self.critic.get_feedback(formatted_responses, **kwargs)
+        return self.ranker.get_prediction(responses, feedback=feedback, **kwargs)
 
 
 class GeneratorCriticFuser(dspy.Module):
@@ -322,8 +343,10 @@ class GeneratorCriticFuser(dspy.Module):
 
     def forward(self, **kwargs):
         formatted_responses = self.generator.get_formatted_responses(**kwargs)
-        feedback = self.critic.get_feedback(formatted_responses)
-        return self.fuser.get_prediction(formatted_responses, feedback=feedback)
+        feedback = self.critic.get_feedback(formatted_responses, **kwargs)
+        return self.fuser.get_prediction(
+            formatted_responses, feedback=feedback, **kwargs
+        )
 
 
 class GeneratorRanker(dspy.Module):
@@ -339,7 +362,7 @@ class GeneratorRanker(dspy.Module):
 
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
-        return self.ranker.get_top_ranked_prediction(responses)
+        return self.ranker.get_prediction(responses)
 
 
 class GeneratorFuser(dspy.Module):
@@ -355,7 +378,7 @@ class GeneratorFuser(dspy.Module):
 
     def forward(self, **kwargs):
         formatted_responses = self.generator.get_formatted_responses(**kwargs)
-        return self.fuser(formatted_responses)
+        return self.fuser.get_prediction(formatted_responses)
 
 
 if __name__ == "__main__":
