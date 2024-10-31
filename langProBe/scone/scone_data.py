@@ -1,6 +1,5 @@
 from ..benchmark import Benchmark
 from .scone_utils import load_scone
-import random
 import os
 
 

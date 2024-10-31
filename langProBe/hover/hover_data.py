@@ -35,9 +35,11 @@ class hoverBench(Benchmark):
                 dict(claim=claim, supporting_facts=supporting_facts, label=label)
             )
 
-        rng = random.Random(0)
+        rng = random.Random()
+        rng.seed(0)
         rng.shuffle(reformatted_hf_trainset)
-        rng = random.Random(1)
+        rng = random.Random()
+        rng.seed(1)
         rng.shuffle(reformatted_hf_testset)
 
         trainset = reformatted_hf_trainset

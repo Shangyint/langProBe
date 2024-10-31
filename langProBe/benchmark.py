@@ -11,9 +11,6 @@ from dspy.teleprompt import Teleprompter
 
 from enum import Enum
 
-random.seed(1, version=2)
-
-
 class DSPyFeatures(Enum):
     BASELINE = 0
     OPTIMIZER = 1
@@ -68,7 +65,9 @@ class Benchmark(ABC):
     def trim_dataset(self, dataset, size: int) -> None:
         if size is None or size >= len(dataset):
             return dataset
-        return random.sample(dataset, size)
+        rng = random.Random()
+        rng.seed(1)
+        return rng.sample(dataset, size)
 
     def create_splits(self) -> None:
         """
