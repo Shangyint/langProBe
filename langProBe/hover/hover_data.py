@@ -11,7 +11,7 @@ class hoverBench(Benchmark):
         dataset = load_dataset("hover")
 
         hf_trainset = dataset["train"]
-        hf_testset = dataset["validation"]
+        hf_testset = dataset["test"]
 
         reformatted_hf_trainset = []
         reformatted_hf_testset = []
@@ -31,16 +31,15 @@ class hoverBench(Benchmark):
             supporting_facts = example["supporting_facts"]
             label = example["label"]
 
-            if count_unique_docs(example) == 3:
-                reformatted_hf_testset.append(
-                    dict(claim=claim, supporting_facts=supporting_facts, label=label)
-                )
+            reformatted_hf_testset.append(
+                dict(claim=claim, supporting_facts=supporting_facts, label=label)
+            )
 
         rng = random.Random()
-        rng.seed(0, version=2)
+        rng.seed(0)
         rng.shuffle(reformatted_hf_trainset)
         rng = random.Random()
-        rng.seed(1, version=2)
+        rng.seed(1)
         rng.shuffle(reformatted_hf_testset)
 
         trainset = reformatted_hf_trainset
@@ -49,6 +48,5 @@ class hoverBench(Benchmark):
         trainset = [dspy.Example(**x).with_inputs("claim") for x in trainset]
         testset = [dspy.Example(**x).with_inputs("claim") for x in testset]
 
-        self.dataset = trainset + testset
-        import pdb
-        pdb.set_trace()
+        self.dataset = trainset
+        self.test_set = testset

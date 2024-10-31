@@ -1,12 +1,19 @@
 import dspy
 import math
 import json
-from .irera_utils import Retriever, IreraConfig, Rank, Chunker, extract_labels_from_strings, supported_signatures
+from .irera_utils import (
+    Retriever,
+    IreraConfig,
+    Rank,
+    Chunker,
+    extract_labels_from_strings,
+    supported_signatures,
+)
 import os
 
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
-state_path = os.path.join(dir_path, 'program_state.json')
+state_path = os.path.join(dir_path, "program_state.json")
 state = json.load(open(state_path, "r"))
 global_config = IreraConfig.from_dict(state["config"])
 
@@ -28,7 +35,7 @@ class Infer(dspy.Module):
         )
 
         return dspy.Prediction(predictions=parsed_outputs)
-    
+
 
 class InferRetrieve(dspy.Module):
     """Infer-Retrieve. Sets the Retriever, initializes the prior."""
@@ -133,7 +140,7 @@ class InferRetrieveRank(dspy.Module):
 
     def dump_state(self):
         """Dump the state. Uses the DSPy dump_state but also adds the config file."""
-        return super().dump_state() | {"config": self.config.to_dict()}
+        return super().dump_state(False) | {"config": self.config.to_dict()}
 
     def load_state(self, state: dict):
         super().load_state(state)
@@ -157,5 +164,3 @@ class InferRetrieveRank(dspy.Module):
         state = self.dump_state()
         with open(path, "w") as fp:
             json.dump(state, fp)
-
-

@@ -6,7 +6,12 @@ temp
 scratchpad.ipynb
 langProBe/AppWorld/data/
 langProBe/AppWorld/experiments/
+langProBe/AppWorld/.conda/
 *.csv
 *.png
 
 data/
+
+# result files
+*.txt
+*.model

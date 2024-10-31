@@ -1,10 +1,10 @@
 from typing import Any, Callable
 from .MMLU_data import MMLUBench
-from .MMLU_program import CoT, RAG, SimplifiedBaleen
+from .MMLU_program import MMLUCoT, MMLURAG, MMLUSimplifiedBaleen, MMLUGeneratorCriticRanker, MMLUGeneratorCriticFuser 
 from langProBe.benchmark import Benchmark, BenchmarkMeta
 
 benchmark: Callable[[], Benchmark] = MMLUBench
-programs = [CoT, RAG, SimplifiedBaleen]
+programs = [MMLUCoT, MMLURAG, MMLUSimplifiedBaleen, MMLUGeneratorCriticRanker, MMLUGeneratorCriticFuser ]
 
 
 def MMLU_metric(gt, pred, trace=None):

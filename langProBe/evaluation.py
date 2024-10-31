@@ -1,11 +1,12 @@
 from contextlib import contextmanager
 import os
+from pathlib import Path
 import sys
 import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
-from langProBe.optimizers import create_optimizer
+from langProBe.optimizers import create_optimizer, default_optimizers
 from langProBe.visualization import plot_benchmark_results
-from langProBe.register_benchmark import register_all_benchmarks, register_benchmark
+from langProBe.register_benchmark import register_all_benchmarks
 import dspy
 
 
@@ -71,6 +72,7 @@ def evaluate(
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
+    dataset_mode=None,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -78,25 +80,41 @@ def evaluate(
     rm: Retrieval model to use
     optimizers: List[type(Teleprompter) | (type(Teleprompter), kwargs_for_compile)]
     """
-    benchmark = benchmark_meta.benchmark(dataset_mode=benchmark_meta.dataset_mode)
+    dataset_mode = dataset_mode or benchmark_meta.dataset_mode
+    benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     optimizers = [
-        optimizer if isinstance(optimizer, tuple) else (optimizer, {}, {})
+        optimizer
+        if isinstance(optimizer, tuple)
+        else (optimizer, {}, {}, dict(use_valset=False))
         for optimizer in optimizers
     ]
     print(f"Evaluating {benchmark.__class__.__name__}")
+    print(f"Train set size: {len(benchmark.train_set)}")
+    print(f"Validation set size: {len(benchmark.val_set)}")
+    print(f"Test set size: {len(benchmark.test_set)}")
     for program in benchmark_meta.program:
-        print(f"Program: {program.__name__}")
+        print(f"Program: {program.__class__.__name__}")
         optimizer_names = [optimizer[0].__name__ for optimizer in optimizers]
+        for i, (_, _, _, optimizer_config) in enumerate(optimizers):
+            if "name" not in optimizer_config:
+                optimizer_config["name"] = optimizer_names[i]
+
         print(f"Optimizers: {'; '.join(optimizer_names)}")
         with suppress_output(suppress=suppress_dspy_output):
             evaluate_bench = EvaluateBench(
                 benchmark=benchmark,
-                program=program(),
+                program=program,
                 metric=benchmark_meta.metric,
                 optimizers=[
-                    create_optimizer(
-                        optimizer[0], benchmark_meta.metric, optimizer[1], optimizer[2]
+                    (
+                        create_optimizer(
+                            optimizer[0],
+                            benchmark_meta.metric,
+                            optimizer[1],
+                            optimizer[2],
+                        ),
+                        optimizer[3],
                     )
                     for optimizer in optimizers
                 ],
@@ -105,16 +123,30 @@ def evaluate(
             evaluate_bench.evaluate(dspy_config={"lm": lm, "rm": rm})
         print(f"Results: {evaluate_bench.results}")
         if file_path:
-            with open(file_path, "a") as f:
-                result_list = []
-                for scores in evaluate_bench.results.values():
-                    if isinstance(scores, list):
-                        result_list.extend(scores)
-                    else:
-                        result_list.append(scores)
-                f.write(
-                    f"{benchmark.__class__.__name__},{program.__name__},{','.join(optimizer_names)},{','.join(map(str, result_list))}\n"
-                )
+            Path(file_path).mkdir(parents=True, exist_ok=True)
+            for evaluation_result in evaluate_bench.results:
+                file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}_{evaluation_result.optimizer}"
+                if evaluation_result.optimizer:
+                    optimizer_header = "optimizer,optimizer_cost,optimizer_input_tokens,optimizer_output_tokens"
+                    optimizer_values = (
+                        f"{evaluation_result.optimizer},{evaluation_result.optimizer_cost},"
+                        f"{evaluation_result.optimizer_input_tokens},{evaluation_result.optimizer_output_tokens},"
+                    )
+                else:
+                    optimizer_header = ""
+                    optimizer_values = ""
+                with open(os.path.join(file_path, f"{file_name}.txt"), "w") as f:
+                    f.write(
+                        f"score,cost,input_tokens,output_tokens,{optimizer_header}\n"
+                    )
+                    f.write(
+                        f"{evaluation_result.score},{evaluation_result.cost},{evaluation_result.input_tokens},"
+                        f"{evaluation_result.output_tokens},{optimizer_values}\n"
+                    )
+                if evaluation_result.optimizer:
+                    evaluation_result.optimized_program.save(
+                        os.path.join(file_path, f"{file_name}.model")
+                    )
 
 
 def evaluate_all(
@@ -125,6 +157,7 @@ def evaluate_all(
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
+    dataset_mode=None,
 ):
     benchmarks = register_all_benchmarks(benchmarks)
     for benchmark_meta in benchmarks:
@@ -136,6 +169,7 @@ def evaluate_all(
             num_threads,
             suppress_dspy_output,
             file_path,
+            dataset_mode,
         )
 
 
@@ -157,33 +191,48 @@ if __name__ == "__main__":
         default=None,
     )
 
+    parser.add_argument(
+        "--dataset_mode",
+        help="The dataset mode to use for evaluation. Options are: full, lite (500), tiny (200), test (20).\
+        when not provided, the default dataset mode in BenchmarkMeta will be used.",
+        type=str,
+        default=None,
+    )
+
+    parser.add_argument(
+        "--file_path",
+        help="The file path to save the evaluation results",
+        type=str,
+        default=None,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
+    dataset_mode = args.dataset_mode
 
-    optimizers = [
-        (
-            dspy.teleprompt.BootstrapFewShot,
-            {"max_errors": 1000, "max_labeled_demos": 0},
-            {},
-        ),
-        (
-            dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-            {"max_errors": 1000, "max_labeled_demos": 0},
-            {},
-        ),
-        (
-            dspy.teleprompt.MIPROv2,
-            {"max_errors": 1000},
-            {"requires_permission_to_run": False, "num_trials": 10, "minibatch": False},
-        ),
-    ]
+    optimizers = default_optimizers
 
     lm = dspy.LM("openai/gpt-4o-mini")
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     benchmarks = (
-        [".hotpotQA", ".gsm8k", ".MATH", ".humaneval", ".MMLU", ".IReRa", "Iris"]
+        [
+            ".hover",
+            ".AlfWorld",
+            ".humaneval",
+            ".Iris",
+            ".IReRa",
+            ".hotpotQA",
+            ".MATH",
+            ".gsm8k",
+            ".AppWorld",
+            ".RAGQAArenaTech",
+            ".MMLU",
+            ".swe_bench_verified_annotation_task",
+            ".scone",
+            ".hotpotQA_conditional",
+        ]
         if not args.benchmark
         else [f".{args.benchmark}"]
     )
@@ -191,7 +240,7 @@ if __name__ == "__main__":
     import datetime
 
     current_time = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    file_path = f"evaluation_{current_time}.csv"
+    file_path = args.file_path or f"evaluation_{current_time}"
     evaluate_all(
         benchmarks,
         lm,
@@ -199,6 +248,7 @@ if __name__ == "__main__":
         optimizers,
         suppress_dspy_output=suppress_dspy_output,
         file_path=file_path,
+        dataset_mode=dataset_mode,
     )
 
     plot_benchmark_results(file_path)

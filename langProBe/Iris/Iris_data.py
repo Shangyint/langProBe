@@ -1,14 +1,13 @@
+import copy
 from ..benchmark import Benchmark
 import dspy
 from datasets import load_dataset
-import random
-
 
 class IrisBench(Benchmark):
     def init_dataset(self):
         raw_dataset = load_dataset("hitorilabs/iris")
 
-        self.dataset = [                         
+        self.dataset = [
             dspy.Example(**{k: str(round(v, 2)) for k, v in example.items()})
             for example in raw_dataset["train"]
         ]
@@ -25,7 +24,9 @@ class IrisBench(Benchmark):
             x.with_inputs("petal_length", "petal_width", "sepal_length", "sepal_width")
             for x in self.dataset
         ]
-        rng = random.Random()
-        rng.seed(0, version=2)
-        rng.shuffle(self.dataset)
-        
+
+        self.test_set = self.dataset[len(self.dataset) // 2 :]
+        self.dataset = self.dataset[: len(self.dataset) // 2]
+        self.train_set = self.dataset[:15]
+        self.val_set = self.dataset[15:]
+        self.dev_set = self.dataset
