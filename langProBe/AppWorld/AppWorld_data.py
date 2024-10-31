@@ -28,7 +28,7 @@ class AppWorldBench(Benchmark):
         num_scenarios_in_val = int((len(unique_scenario_ids_in_trainval)+1)/2)
 
         rng = random.Random()
-        rng.seed(1, version=2)
+        rng.seed(1)
         train_scenarios = rng.sample(unique_scenario_ids_in_trainval, len(unique_scenario_ids_in_trainval)-num_scenarios_in_val)
 
         self.train_set = [dspy.Example(task_id=task_id).with_inputs("task_id") for task_id in trainval_task_ids if task_id.split('_')[0] in train_scenarios]
