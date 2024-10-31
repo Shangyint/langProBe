@@ -140,7 +140,7 @@ class InferRetrieveRank(dspy.Module):
 
     def dump_state(self):
         """Dump the state. Uses the DSPy dump_state but also adds the config file."""
-        return super().dump_state() | {"config": self.config.to_dict()}
+        return super().dump_state(False) | {"config": self.config.to_dict()}
 
     def load_state(self, state: dict):
         super().load_state(state)
