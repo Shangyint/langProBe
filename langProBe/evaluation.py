@@ -90,6 +90,9 @@ def evaluate(
         for optimizer in optimizers
     ]
     print(f"Evaluating {benchmark.__class__.__name__}")
+    print(f"Train set size: {len(benchmark.train_set)}")
+    print(f"Validation set size: {len(benchmark.val_set)}")
+    print(f"Test set size: {len(benchmark.test_set)}")
     for program in benchmark_meta.program:
         print(f"Program: {program.__class__.__name__}")
         optimizer_names = [optimizer[0].__name__ for optimizer in optimizers]
