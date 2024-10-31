@@ -51,7 +51,7 @@ class Benchmark(ABC):
 
         self.train_set = self.trim_dataset(self.train_set, 150)
         self.dev_set = self.trim_dataset(self.dev_set, 300)
-        self.val_set = self.trim_dataset(self.val_set, 150)
+        self.val_set = self.trim_dataset(self.val_set, 300)
 
         assert self.train_set is not None, "Train set not initialized"
         assert self.dev_set is not None, "Dev set not initialized"
@@ -77,9 +77,9 @@ class Benchmark(ABC):
         """
 
         total_len = len(self.dataset)
-        self.dev_set = self.dataset[: int(0.5 * total_len)]
-        self.val_set = self.dataset[int(0.5 * total_len) : int(0.75 * total_len)]
-        self.train_set = self.dataset[int(0.75 * total_len) :]
+        self.dev_set = self.dataset[: int(0.4 * total_len)]
+        self.val_set = self.dataset[int(0.4 * total_len) : int(0.8 * total_len)]
+        self.train_set = self.dataset[int(0.8 * total_len) :]
 
     def get_dataset(self):
         return self.dataset
