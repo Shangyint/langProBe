@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import os
+from pathlib import Path
 import sys
 import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
@@ -115,19 +116,30 @@ def evaluate(
             evaluate_bench.evaluate(dspy_config={"lm": lm, "rm": rm})
         print(f"Results: {evaluate_bench.results}")
         if file_path:
-            with open(file_path, "a") as f:
-                result_list = []
-                for scores in evaluate_bench.results.values():
-                    if isinstance(scores, list):
-                        result_list.extend(scores)
-                    else:
-                        result_list.append(scores)
-                f.write(
-                    f"{benchmark.__class__.__name__},"
-                    f"{program.__class__.__name__},"
-                    f"{','.join(optimizer_names)},"
-                    f"{','.join(map(str, result_list))}\n"
-                )
+            Path(file_path).mkdir(parents=True, exist_ok=True)
+            for evaluation_result in evaluate_bench.results:
+                file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}_{evaluation_result.optimizer}"
+                if evaluation_result.optimizer:
+                    optimizer_header = "optimizer,optimizer_cost,optimizer_input_tokens,optimizer_output_tokens"
+                    optimizer_values = (
+                        f"{evaluation_result.optimizer},{evaluation_result.optimizer_cost},"
+                        f"{evaluation_result.optimizer_input_tokens},{evaluation_result.optimizer_output_tokens},"
+                    )
+                else:
+                    optimizer_header = ""
+                    optimizer_values = ""
+                with open(os.path.join(file_path, f"{file_name}.txt"), "w") as f:
+                    f.write(
+                        f"score,cost,input_tokens,output_tokens,{optimizer_header}\n"
+                    )
+                    f.write(
+                        f"{evaluation_result.score},{evaluation_result.cost},{evaluation_result.input_tokens},"
+                        f"{evaluation_result.output_tokens},{optimizer_values}\n"
+                    )
+                if evaluation_result.optimizer:
+                    evaluation_result.optimized_program.save(
+                        os.path.join(file_path, f"{file_name}.model")
+                    )
 
 
 def evaluate_all(
@@ -180,6 +192,13 @@ if __name__ == "__main__":
         default=None,
     )
 
+    parser.add_argument(
+        "--file_path",
+        help="The file path to save the evaluation results",
+        type=str,
+        default=None,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
@@ -214,7 +233,7 @@ if __name__ == "__main__":
     import datetime
 
     current_time = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    file_path = f"evaluation_{current_time}.csv"
+    file_path = args.file_path or f"evaluation_{current_time}"
     evaluate_all(
         benchmarks,
         lm,

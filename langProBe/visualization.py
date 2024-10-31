@@ -17,7 +17,9 @@ def plot_benchmark_results(file_path):
 
     # Dynamically adjust rows and columns for better layout
     n_cols = min(3, n_benchmarks)  # Limit columns to 3 for a more vertical layout
-    n_rows = (n_benchmarks + n_cols - 1) // n_cols  # Calculate rows based on total tasks
+    n_rows = (
+        n_benchmarks + n_cols - 1
+    ) // n_cols  # Calculate rows based on total tasks
 
     # Set up a larger figure for multiple subplots
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, n_rows * 3), sharex=False)
