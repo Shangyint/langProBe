@@ -11,13 +11,13 @@ default_optimizers = [
         dspy.teleprompt.BootstrapFewShot,
         dict(max_errors=1000, max_labeled_demos=2),
         dict(),
-        dict(use_valset=False),
+        dict(use_valset=False, name="BootstrapFewShot"),
     ),
     (
         dspy.teleprompt.BootstrapFewShotWithRandomSearch,
         dict(max_errors=1000, max_labeled_demos=2),
         dict(),
-        dict(use_valset=True),
+        dict(use_valset=True, name="BootstrapFewShotWithRandomSearch"),
     ),
     (
         dspy.teleprompt.MIPROv2,
@@ -25,10 +25,10 @@ default_optimizers = [
         dict(
             requires_permission_to_run=False,
             num_trials=20,
-            max_bootstrapped_demos=2,
+            max_bootstrapped_demos=4,
             max_labeled_demos=2,
         ),
-        dict(use_valset=True),
+        dict(use_valset=True, name="MIPROv2"),
     ),
 ]
 

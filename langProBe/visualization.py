@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-# Update the function to properly use optimizer names in the legend
 def plot_benchmark_results(file_path):
     # Read the CSV file
     df = pd.read_csv(file_path, header=None)
@@ -16,12 +15,14 @@ def plot_benchmark_results(file_path):
     benchmarks = df[0].unique()  # List of all benchmarks
     n_benchmarks = len(benchmarks)
 
-    # Adjust the number of rows and columns to make the figure more square-shaped
-    n_cols = 2  # Number of columns
-    n_rows = (n_benchmarks + 1) // n_cols  # Calculate rows needed
+    # Dynamically adjust rows and columns for better layout
+    n_cols = min(3, n_benchmarks)  # Limit columns to 3 for a more vertical layout
+    n_rows = (
+        n_benchmarks + n_cols - 1
+    ) // n_cols  # Calculate rows based on total tasks
 
-    # Set up a figure for multiple subplots in a grid
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(12, 8), sharex=False)
+    # Set up a larger figure for multiple subplots
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, n_rows * 3), sharex=False)
     axes = axes.flatten()  # Flatten axes for easier iteration
 
     # Iterate through each benchmark and plot on its respective axis

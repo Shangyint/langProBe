@@ -13,3 +13,6 @@ HotPotQACondSimplifiedBaleen = program.SimplifiedBaleen("question->answer")
 HotPotQACondSimplifiedBaleenHandwritten = program.SimplifiedBaleen(
     GenerateAnswerInstruction
 )
+
+# setting names for HotPotQACondSimplifiedBaleenHandwritten
+HotPotQACondSimplifiedBaleenHandwritten.__class__.__name__ = "SimplifiedBaleenWithHandwrittenInstructions"
