@@ -93,6 +93,10 @@ def evaluate(
     for program in benchmark_meta.program:
         print(f"Program: {program.__class__.__name__}")
         optimizer_names = [optimizer[0].__name__ for optimizer in optimizers]
+        for i, (_, _, _, optimizer_config) in enumerate(optimizers):
+            if "name" not in optimizer_config:
+                optimizer_config["name"] = optimizer_names[i]
+
         print(f"Optimizers: {'; '.join(optimizer_names)}")
         with suppress_output(suppress=suppress_dspy_output):
             evaluate_bench = EvaluateBench(
