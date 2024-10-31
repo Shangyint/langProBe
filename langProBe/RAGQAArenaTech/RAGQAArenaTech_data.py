@@ -23,4 +23,8 @@ class RAGQAArenaBench(Benchmark):
             for x in raw_datasets
         ]
 
-        self.test_set = self.dataset
+        self.test_set = self.dataset[len(self.dataset) // 2 :]
+        self.dataset = self.dataset[: len(self.dataset) // 2]
+        self.train_set = self.dataset[:50]
+        self.val_set = self.dataset[50:]
+        self.dev_set = self.dataset

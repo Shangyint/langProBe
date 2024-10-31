@@ -46,5 +46,5 @@ class HotpotQAConditionalBench(Benchmark):
         self.dataset = trainset + testset + devset
         self.train_set = trainset
         self.dev_set = devset
-        self.val_set = trainset
+        self.val_set = devset
         self.test_set = testset

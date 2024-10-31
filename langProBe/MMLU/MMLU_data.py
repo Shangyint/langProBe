@@ -9,9 +9,7 @@ class MMLUBench(Benchmark):
 
         option_map = {0: "A", 1: "B", 2: "C", 3: "D"}
         self.dataset = []
-        self.test_set = [
-            dspy.Example(**x).with_inputs("question") for x in self.raw_datasets["test"]
-        ]
+        self.test_set = []
 
         for x in self.raw_datasets["auxiliary_train"]:
             x["question"] = "\n".join(
