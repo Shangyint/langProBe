@@ -2,6 +2,8 @@ import re
 import dspy
 from copy import deepcopy
 from dsp.utils import deduplicate
+import backoff
+import logging
 
 
 #################################### Common Programs ####################################
@@ -35,6 +37,12 @@ class RAG(dspy.Module):
         self.prog = dspy.ChainOfThought(verified_signature)
         self.input_to_query = input_to_query
 
+    @backoff.on_exception(backoff.constant, 
+                          Exception, 
+                          interval=0.3, 
+                          max_tries=5,
+                          on_backoff=lambda details: logging.warning(f"Retrival failed, retrying in {details['wait']} seconds."),
+                          on_giveup=lambda details: logging.error("Maximum retries reached. Retrieval failed."))
     def forward(self, **kwargs):
         context = self.retriver(self.input_to_query(**kwargs)).passages
         pred = self.prog(context=context, **kwargs)
@@ -75,6 +83,12 @@ class SimplifiedBaleen(dspy.Module):
         ]
         self.generate_answer = dspy.ChainOfThought(verified_signature)
 
+    @backoff.on_exception(backoff.constant, 
+                          Exception, 
+                          interval=0.3, 
+                          max_tries=5,
+                          on_backoff=lambda details: logging.warning(f"Retrival failed, retrying in {details['wait']} seconds."),
+                          on_giveup=lambda details: logging.error("Maximum retries reached. Retrieval failed."))
     def forward(self, **kwargs):
         context = []
 
