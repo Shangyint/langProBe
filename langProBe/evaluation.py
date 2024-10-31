@@ -251,4 +251,4 @@ if __name__ == "__main__":
         dataset_mode=dataset_mode,
     )
 
-    plot_benchmark_results(file_path)
+    # plot_benchmark_results(file_path)
