@@ -61,6 +61,9 @@ class AppWorldReact(dspy.Module):
 
     def forward(self, task_id):
         output_experiment_name = shortuuid.uuid()
+
+        known_apis = {}
+
         with appworld_manager.acquire_server(output_experiment_name, task_id) as server:
             task = server.request.show_task(task_id)
             supervisor_name = task['supervisor']['first_name'] + " " + task['supervisor']['last_name']
@@ -89,8 +92,19 @@ class AppWorldReact(dspy.Module):
                         else:
                             raise ve
                 gen_code = module_gen.code
+                if "```python" in gen_code:
+                    gen_code = gen_code.split("```python")[1].split("```")[0]
+                if "```" in gen_code:
+                    gen_code = gen_code.replace("```", "")
                 gen_code_output = server.request.execute(task_id=task_id, code=gen_code)
                 trace.append((gen_code, gen_code_output))
+                if "Execution failed" in gen_code_output and "apis" in gen_code_output:
+                    extract_api = gen_code_output.split("apis.")[1].split("(")[0]
+                    # if extract_api not in known_apis:
+                    extract_api_code = f"print(apis.api_docs.show_api_doc(app_name='{extract_api.split('.')[0]}', api_name='{extract_api.split('.')[1]}'))"
+                    known_apis[extract_api] = server.request.execute(task_id=task_id, code=extract_api_code)
+                    trace.append((extract_api_code, known_apis[extract_api]))
+                        # rich.print(f"APIs for {extract_api}: {known_apis[extract_api]}")
 
                 if server.request.task_completed(task_id=task_id):
                     break

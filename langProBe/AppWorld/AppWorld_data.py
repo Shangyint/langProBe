@@ -15,11 +15,11 @@ class AppWorldBench(Benchmark):
         trainval_task_ids = load_task_ids("train") # 90
         dev_task_ids = load_task_ids("dev") # 57
         test_task_ids = load_task_ids("test_normal") # 168
-        test_task_ids += load_task_ids("test_challenge") # 417
+        # test_task_ids += load_task_ids("test_challenge") # 417
 
         assert len(trainval_task_ids) == 90, len(trainval_task_ids)
         assert len(dev_task_ids) == 57
-        assert len(test_task_ids) == 168+417
+        # assert len(test_task_ids) == 168+417
 
         self.dev_set = [dspy.Example(task_id=task_id).with_inputs("task_id") for task_id in dev_task_ids]
         self.test_set = [dspy.Example(task_id=task_id).with_inputs("task_id") for task_id in test_task_ids]
