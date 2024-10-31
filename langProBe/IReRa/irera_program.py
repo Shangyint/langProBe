@@ -138,9 +138,9 @@ class InferRetrieveRank(dspy.Module):
             predictions=selected_options,
         )
 
-    def dump_state(self):
+    def dump_state(self, verbose):
         """Dump the state. Uses the DSPy dump_state but also adds the config file."""
-        return super().dump_state(False) | {"config": self.config.to_dict()}
+        return super().dump_state(verbose) | {"config": self.config.to_dict()}
 
     def load_state(self, state: dict):
         super().load_state(state)
@@ -160,7 +160,3 @@ class InferRetrieveRank(dspy.Module):
         state = json.load(open(path, "r"))
         return cls.from_state(state)
 
-    def save(self, path: str):
-        state = self.dump_state()
-        with open(path, "w") as fp:
-            json.dump(state, fp)
