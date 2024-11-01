@@ -71,11 +71,6 @@ class AppWorldReact(dspy.Module):
             supervisor_email = task['supervisor']['email']
             supervisor_phone = task['supervisor']['phone_number']
 
-            print(f"Task: {task['instruction']}")
-            print(f"Supervisor: {supervisor_name}")
-            print(f"Supervisor email: {supervisor_email}")
-            print(f"Supervisor phone: {supervisor_phone}")
-
             trace = []
             for i in range(self.max_steps):
                 while True:
@@ -101,40 +96,24 @@ class AppWorldReact(dspy.Module):
                 gen_code_output = server.request.execute(task_id=task_id, code=gen_code)
                 trace.append((gen_code, gen_code_output))
 
-                print(f"Step {i+1}:")
-                print(f"Code:\n{gen_code}")
-                print(f"Output:\n{gen_code_output}")
-
                 if "Execution failed" in gen_code_output:
-                    # if "Exception: No API named 'get_friends' found in the venmo app." in 
                     if re.search(r"No API named '(.*)' found in the (.*) app.", gen_code_output):
                         app_name = re.search(r"No API named '(.*)' found in the (.*) app.", gen_code_output).groups()[1]
                         extract_api_code = f"# Let me check the available APIs in the {app_name} app.\nprint(apis.api_docs.show_api_descriptions(app_name='{app_name}'))"
                         if app_name not in self.app_docs:
-                            # self.known_apis[extract_api] = server.request.execute(task_id=task_id, code=extract_api_code)
                             self.app_docs[app_name] = server.request.execute(task_id=task_id, code=extract_api_code)
-                        # if "Execution failed" not in self.known_apis[extract_api]:
                         if "Execution failed" not in self.app_docs[app_name]:
                             trace.append((extract_api_code, self.app_docs[app_name]))
-                            print(f"Step {i+1} free pass:")
-                            print(f"Code:\n{extract_api_code}")
-                            print(f"Output:\n{self.app_docs[app_name]}")
                     elif "apis" in gen_code_output and "KeyError" not in gen_code_output and "TypeError" not in gen_code_output and "NameError" not in gen_code_output:
                         extract_api = gen_code_output.split("apis.")[1].split("(")[0]
-                        # if extract_api not in known_apis:
                         extract_api_code = f"# There was an issue with the way I invoked the API. Let me check the documentations to fix the issue.\nprint(apis.api_docs.show_api_doc(app_name='{extract_api.split('.')[0]}', api_name='{extract_api.split('.')[1]}'))"
                         if extract_api not in self.known_apis:
                             self.known_apis[extract_api] = server.request.execute(task_id=task_id, code=extract_api_code)
                         if "Execution failed" not in self.known_apis[extract_api]:
                             trace.append((extract_api_code, self.known_apis[extract_api]))
-                            print(f"Step {i+1} free pass:")
-                            print(f"Code:\n{extract_api_code}")
-                            print(f"Output:\n{self.known_apis[extract_api]}")
 
                 if server.request.task_completed(task_id=task_id):
                     break
             
             eval_report = server.request.evaluate(task_id=task_id, suppress_errors=True, report=False)
-            print(f"Evaluation report: {eval_report}")
-            # raise ValueError("Task completed")
             return dspy.Prediction(trace=trace, experiment_name_to_eval=output_experiment_name, eval_report=eval_report)
