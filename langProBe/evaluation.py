@@ -104,6 +104,7 @@ def evaluate(
                     create_optimizer(
                         optimizer,
                         benchmark_meta.metric,
+                        num_threads=num_threads,
                     )
                     for optimizer in optimizers
                 ],
@@ -193,6 +194,13 @@ if __name__ == "__main__":
         default=None,
     )
 
+    parser.add_argument(
+        "--num_threads",
+        help="The number of threads to use for evaluation",
+        type=int,
+        default=8,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
@@ -233,6 +241,7 @@ if __name__ == "__main__":
         suppress_dspy_output=suppress_dspy_output,
         file_path=file_path,
         dataset_mode=dataset_mode,
+        num_threads=args.num_threads,
     )
 
     # plot_benchmark_results(file_path)

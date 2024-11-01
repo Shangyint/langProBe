@@ -23,7 +23,7 @@ DEFAULT_OPTIMIZERS = [
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-        init_args=dict(max_errors=1000, max_labeled_demos=2),
+        init_args=dict(max_errors=1000, max_labeled_demos=2, num_threads=8),
         compile_args=dict(),
         langProBe_configs=dict(
             use_valset=True, name="BootstrapFewShotWithRandomSearch"
@@ -31,7 +31,7 @@ DEFAULT_OPTIMIZERS = [
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.MIPROv2,
-        init_args=dict(max_errors=1000, auto="medium"),
+        init_args=dict(max_errors=1000, auto="medium", num_threads=8),
         compile_args=dict(
             requires_permission_to_run=False,
             num_trials=20,
@@ -56,10 +56,12 @@ def update_optimizer_from_list(
 
 
 def create_optimizer(
-    optimizer_config: OptimizerConfig, metric
+    optimizer_config: OptimizerConfig, metric, num_threads=None
 ) -> tuple[Callable, dict]:
     optimizer = optimizer_config.optimizer
     init_args = optimizer_config.init_args
+    if num_threads and "num_threads" in init_args:
+        init_args["num_threads"] = num_threads
     compile_args = optimizer_config.compile_args
     langProBe_configs = optimizer_config.langProBe_configs
     optimizer = optimizer(metric=metric, **init_args)
