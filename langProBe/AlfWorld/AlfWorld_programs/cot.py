@@ -72,6 +72,8 @@ class AlfWorldCoT(dspy.Module):
                     trace.append((thought, selected_action, obs))
                     if "put" in selected_action and "in/on" in selected_action:
                         trace[-1] = (thought, selected_action, "Invalid action. Do you have the object in your inventory? Are you at the right location and within reach of the target?")
+                    elif "clean" in selected_action and "with" in selected_action:
+                        trace[-1] = (thought, selected_action, "Invalid action. Are you at the right location to clean the object and trying to clean with the right tool? Do you have the object to be cleaned in your inventory?")
                     trace.append(('Let me identify what are the admissible actions.', 'admissible actions', repr(info['admissible_commands'][0])))
                 else:
                     trace.append((thought, selected_action, obs))
@@ -83,4 +85,4 @@ class AlfWorldCoT(dspy.Module):
                 if won:
                     break
             
-        return dspy.Prediction(success=won)
+        return dspy.Prediction(success=won, task_instruction=task_instruction, room_description=room_description, trace=self.format_trace(trace))
