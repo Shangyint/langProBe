@@ -68,10 +68,13 @@ class AlfWorldCoT(dspy.Module):
                     obs, score, done, info = env.step(selected_action)
 
                 print("obs", obs)
-                trace.append((thought, selected_action, obs))
-
                 if "Nothing happens." in obs:
+                    trace.append((thought, selected_action, obs))
+                    if "put" in selected_action and "in/on" in selected_action:
+                        trace[-1] = (thought, selected_action, "Invalid action. Do you have the object in your inventory? Are you at the right location and within reach of the target?")
                     trace.append(('Let me identify what are the admissible actions.', 'admissible actions', repr(info['admissible_commands'][0])))
+                else:
+                    trace.append((thought, selected_action, obs))
 
                 won = info['won'][0]
                 print("won", won)
