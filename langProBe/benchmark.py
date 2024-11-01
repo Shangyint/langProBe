@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 import random
 import dspy
@@ -10,6 +10,9 @@ from dspy.evaluate import Evaluate
 from dspy.teleprompt import Teleprompter
 
 from enum import Enum
+
+import langProBe.optimizers as langprobe_optimizers
+
 
 class DSPyFeatures(Enum):
     BASELINE = 0
@@ -116,6 +119,10 @@ class BenchmarkMeta:
     program: List[dspy.Module]
     metric: Callable
     dataset_mode: str = "lite"
+
+    optimizers: List[langprobe_optimizers.OptimizerConfig] = field(
+        default_factory=lambda: langprobe_optimizers.DEFAULT_OPTIMIZERS
+    )
 
 
 def setup_lm(dspy_config=None):

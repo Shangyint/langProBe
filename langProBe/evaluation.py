@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
-from langProBe.optimizers import create_optimizer, default_optimizers
+from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.visualization import plot_benchmark_results
 from langProBe.register_benchmark import register_all_benchmarks
 import dspy
@@ -68,7 +68,6 @@ def evaluate(
     benchmark_meta: BenchmarkMeta,
     lm,
     rm,
-    optimizers,
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
@@ -83,22 +82,17 @@ def evaluate(
     dataset_mode = dataset_mode or benchmark_meta.dataset_mode
     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
-    optimizers = [
-        optimizer
-        if isinstance(optimizer, tuple)
-        else (optimizer, {}, {}, dict(use_valset=False))
-        for optimizer in optimizers
-    ]
+    optimizers = benchmark_meta.optimizers
     print(f"Evaluating {benchmark.__class__.__name__}")
     print(f"Train set size: {len(benchmark.train_set)}")
     print(f"Validation set size: {len(benchmark.val_set)}")
     print(f"Test set size: {len(benchmark.test_set)}")
     for program in benchmark_meta.program:
         print(f"Program: {program.__class__.__name__}")
-        optimizer_names = [optimizer[0].__name__ for optimizer in optimizers]
-        for i, (_, _, _, optimizer_config) in enumerate(optimizers):
-            if "name" not in optimizer_config:
-                optimizer_config["name"] = optimizer_names[i]
+        optimizer_names = [optimizer.optimizer.__name__ for optimizer in optimizers]
+        for i, optimizer in enumerate(optimizers):
+            if "name" not in optimizer.langProBe_configs:
+                optimizer.langProBe_configs["name"] = optimizer_names[i]
 
         print(f"Optimizers: {'; '.join(optimizer_names)}")
         with suppress_output(suppress=suppress_dspy_output):
@@ -107,14 +101,9 @@ def evaluate(
                 program=program,
                 metric=benchmark_meta.metric,
                 optimizers=[
-                    (
-                        create_optimizer(
-                            optimizer[0],
-                            benchmark_meta.metric,
-                            optimizer[1],
-                            optimizer[2],
-                        ),
-                        optimizer[3],
+                    create_optimizer(
+                        optimizer,
+                        benchmark_meta.metric,
                     )
                     for optimizer in optimizers
                 ],
@@ -153,7 +142,6 @@ def evaluate_all(
     benchmarks,
     lm,
     rm,
-    optimizers,
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
@@ -165,7 +153,6 @@ def evaluate_all(
             benchmark_meta,
             lm,
             rm,
-            optimizers,
             num_threads,
             suppress_dspy_output,
             file_path,
@@ -211,8 +198,6 @@ if __name__ == "__main__":
     suppress_dspy_output = args.suppress_dspy_output
     dataset_mode = args.dataset_mode
 
-    optimizers = default_optimizers
-
     lm = dspy.LM("openai/gpt-4o-mini")
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
@@ -245,7 +230,6 @@ if __name__ == "__main__":
         benchmarks,
         lm,
         rm,
-        optimizers,
         suppress_dspy_output=suppress_dspy_output,
         file_path=file_path,
         dataset_mode=dataset_mode,
