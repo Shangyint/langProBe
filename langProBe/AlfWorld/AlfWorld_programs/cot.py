@@ -14,7 +14,7 @@ class AlfWorldCoT(dspy.Module):
     def format_trace(self, trace: List[Tuple[str, str]]) -> str:
         # return "\n\n".join([f"Code:\n{code}\nOutput:\n{output}" for code, output in trace])
         assert len(trace) > 0
-        return "\n\n".join([f"Thought: {thought}\nAction: {action}\nObservation: {obs}" for thought, action, obs in trace])
+        return "\n\n".join([f"Step {idx+1}:\nThought: {thought}\nAction: {action}\nObservation: {obs}" for idx, (thought, action, obs) in enumerate(trace)])
 
     def parse_initial_obs(self, obs_text):
         lines = [line.strip() for line in obs_text.split("\n") if len(line.strip()) > 0]
@@ -36,6 +36,9 @@ class AlfWorldCoT(dspy.Module):
             assert won == False
 
             trace = [('Let me start by looking around the room. After that, I will plan my actions.', 'look', 'You are in the middle of a room. Looking quickly around you, you see ' + room_description)]
+
+            obs  = init_obs
+            info = init_info
 
             for i in range(self.max_steps):
                 while True:
@@ -63,8 +66,13 @@ class AlfWorldCoT(dspy.Module):
                     obs = repr(info['admissible_commands'][0])
                 else:
                     obs, score, done, info = env.step(selected_action)
+
                 print("obs", obs)
                 trace.append((thought, selected_action, obs))
+
+                if "Nothing happens." in obs:
+                    trace.append(('Let me identify what are the admissible actions.', 'admissible actions', repr(info['admissible_commands'][0])))
+
                 won = info['won'][0]
                 print("won", won)
                 print("")
