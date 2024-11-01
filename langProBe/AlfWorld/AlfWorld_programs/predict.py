@@ -24,7 +24,7 @@ You can take any of the following actions:
 * look
 * admissible actions
 
-After each action, an observation will be provided from the environment. If the observation is 'Nothing happens.', it indicates that no action was executed, which could be due to an invalid action, or wrong formatting of the action. Use "admissible actions" to check if the action is valid.
+The environment will provide an observation for every action. The observation 'Nothing happens.' indicates an invalid action. Use "admissible actions" to check for valid actions.
 
 **Key instructions**:
 
