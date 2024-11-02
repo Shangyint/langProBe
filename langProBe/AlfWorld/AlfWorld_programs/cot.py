@@ -49,8 +49,6 @@ class AlfWorldCoT(dspy.Module):
                         )
                         thought = module_output.rationale.strip()
                         selected_action = module_output.action.strip()
-                        print("thought", thought)
-                        print("selected_action", selected_action)
                         break
                     except ValueError as ve:
                         # TODO: This is a hack to deal with the fact that the model runs out of context window. Need better ways to resolve this
@@ -67,7 +65,6 @@ class AlfWorldCoT(dspy.Module):
                 else:
                     obs, score, done, info = env.step(selected_action)
 
-                print("obs", obs)
                 if "Nothing happens." in obs:
                     trace.append((thought, selected_action, obs))
                     if "put" in selected_action and "in/on" in selected_action:
@@ -81,8 +78,6 @@ class AlfWorldCoT(dspy.Module):
                     trace.append((thought, selected_action, obs))
 
                 won = info['won'][0]
-                print("won", won)
-                print("")
                 assert won in [True, False]
                 if won:
                     break
