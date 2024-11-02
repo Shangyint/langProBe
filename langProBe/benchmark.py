@@ -172,7 +172,7 @@ class EvaluateBench(ABC):
             provide_traceback=False,
         )
 
-        self.program_name = self.program.__class__.__name__
+        self.program_name = getattr(self.program, "_name", self.program.__class__.__name__)
         self.benchmark_name = self.benchmark.__class__.__name__
 
         self.results: list[EvaluationResult] = []

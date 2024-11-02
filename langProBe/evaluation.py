@@ -5,7 +5,6 @@ import sys
 import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
-from langProBe.visualization import plot_benchmark_results
 from langProBe.register_benchmark import register_all_benchmarks
 import dspy
 
@@ -243,5 +242,3 @@ if __name__ == "__main__":
         dataset_mode=dataset_mode,
         num_threads=args.num_threads,
     )
-
-    # plot_benchmark_results(file_path)

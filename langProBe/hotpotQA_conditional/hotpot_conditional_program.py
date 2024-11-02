@@ -15,4 +15,4 @@ HotPotQACondSimplifiedBaleenHandwritten = program.SimplifiedBaleen(
 )
 
 # setting names for HotPotQACondSimplifiedBaleenHandwritten
-HotPotQACondSimplifiedBaleenHandwritten.__class__.__name__ = "SimplifiedBaleenWithHandwrittenInstructions"
+HotPotQACondSimplifiedBaleenHandwritten._name = "SimplifiedBaleenWithHandwrittenInstructions"
