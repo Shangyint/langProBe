@@ -12,6 +12,19 @@ class OptimizerConfig:
     compile_args: dict
     langProBe_configs: dict
 
+    def __str__(self):
+        return f"""
+[[
+    Optimizer: {self.optimizer}
+    init_args: {self.init_args}
+    compile_args: {self.compile_args}
+    langProBe_configs: {self.langProBe_configs}
+]]
+        """
+
+    def __repr__(self):
+        return self.__str__()
+
 
 # Optimizer configuration formats:
 DEFAULT_OPTIMIZERS = [

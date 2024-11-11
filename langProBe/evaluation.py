@@ -2,7 +2,6 @@ from contextlib import contextmanager
 import os
 from pathlib import Path
 import sys
-import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks
@@ -82,16 +81,31 @@ def evaluate(
     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     optimizers = benchmark_meta.optimizers
-    print(f"Evaluating {benchmark.__class__.__name__}")
+    benchmark_name = benchmark.__class__.__name__
+    print(f"Evaluating {benchmark_name}")
     print(f"Train set size: {len(benchmark.train_set)}")
     print(f"Validation set size: {len(benchmark.val_set)}")
     print(f"Test set size: {len(benchmark.test_set)}")
+
+    optimizer_names = [optimizer.optimizer.__name__ for optimizer in optimizers]
+    for i, optimizer in enumerate(optimizers):
+        if "name" not in optimizer.langProBe_configs:
+            optimizer.langProBe_configs["name"] = optimizer_names[i]
+
+    if file_path:
+        stats_file = os.path.join(file_path, f"{benchmark_name}.stat")
+        with open(stats_file, "w") as f:
+            f.write(
+                f"benchmark: {benchmark_name}\n"
+                f"train_set_size: {len(benchmark.train_set)}\n"
+                f"val_set_size: {len(benchmark.val_set)}\n"
+                f"test_set_size: {len(benchmark.test_set)}\n"
+                f"optimizers: {optimizer_names}\n"
+                f"optimizer_configs: {optimizers}\n"
+            )
+
     for program in benchmark_meta.program:
         print(f"Program: {program.__class__.__name__}")
-        optimizer_names = [optimizer.optimizer.__name__ for optimizer in optimizers]
-        for i, optimizer in enumerate(optimizers):
-            if "name" not in optimizer.langProBe_configs:
-                optimizer.langProBe_configs["name"] = optimizer_names[i]
 
         print(f"Optimizers: {'; '.join(optimizer_names)}")
         with suppress_output(suppress=suppress_dspy_output):
@@ -171,9 +185,17 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
     )
+
+    parser.add_argument(
+        "--benchmark_set",
+        help="The benchmark set to evaluate. Options are full, nonagent, agent.",
+        type=str,
+        default=None,
+    )
+
     parser.add_argument(
         "--benchmark",
-        help="The benchmark to evaluate. If not provided, all benchmarks will be evaluated.",
+        help="The benchmark to evaluate. If not provided, all benchmarks will be evaluated. Providing this argument will override the benchmark_set argument.",
         type=str,
         default=None,
     )
@@ -200,34 +222,55 @@ if __name__ == "__main__":
         default=8,
     )
 
+    parser.add_argument(
+        "--dspy_cache_path",
+        help="The cache path for dspy. THIS IS NOT IMPLEMENTED YET. NEED SUPPORT FROM DSPY.\
+            Now please use DSPY_CACHEDIR=/path/to/cache python -m ...",
+        type=str,
+        default=None,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
     dataset_mode = args.dataset_mode
 
-    lm = dspy.LM("openai/gpt-4o-mini")
+    lm = dspy.LM("openai/gpt-4o")
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
+    agent_benchmarks = [
+        ".AlfWorld",
+        ".AppWorld",
+    ]
+
+    nonagent_benchmarks = [
+        ".hover",
+        ".Iris",
+        ".IReRa",
+        ".hotpotQA",
+        ".MATH",
+        ".gsm8k",
+        ".RAGQAArenaTech",
+        ".MMLU",
+        ".swe_bench_verified_annotation_task",
+        ".scone",
+        ".hotpotQA_conditional",
+        ".humaneval",
+    ]
+
     benchmarks = (
-        [
-            ".hover",
-            ".AlfWorld",
-            ".humaneval",
-            ".Iris",
-            ".IReRa",
-            ".hotpotQA",
-            ".MATH",
-            ".gsm8k",
-            ".AppWorld",
-            ".RAGQAArenaTech",
-            ".MMLU",
-            ".swe_bench_verified_annotation_task",
-            ".scone",
-            ".hotpotQA_conditional",
-        ]
-        if not args.benchmark
-        else [f".{args.benchmark}"]
+        agent_benchmarks + nonagent_benchmarks
+        if args.benchmark_set == "full"
+        else agent_benchmarks
+        if args.benchmark_set == "agent"
+        else nonagent_benchmarks
+        if args.benchmark_set == "nonagent"
+        else agent_benchmarks + nonagent_benchmarks
     )
+
+    if args.benchmark:
+        benchmarks = [f".{args.benchmark}"]
+
     # get current time to append to the file name
     import datetime
 

@@ -15,3 +15,5 @@ data/
 # result files
 *.txt
 *.model
+
+.dspy_cache/
