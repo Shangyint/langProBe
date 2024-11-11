@@ -97,6 +97,8 @@ def evaluate(
         with open(stats_file, "w") as f:
             f.write(
                 f"benchmark: {benchmark_name}\n"
+                f"lm: {lm}\n"
+                f"rm: {rm}\n"
                 f"train_set_size: {len(benchmark.train_set)}\n"
                 f"val_set_size: {len(benchmark.val_set)}\n"
                 f"test_set_size: {len(benchmark.test_set)}\n"
@@ -187,6 +189,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--lm",
+        help="The language model to use for evaluation",
+        type=str,
+        default="openai/gpt-4o-mini",
+    )
+
+    parser.add_argument(
         "--benchmark_set",
         help="The benchmark set to evaluate. Options are full, nonagent, agent.",
         type=str,
@@ -235,7 +244,7 @@ if __name__ == "__main__":
     suppress_dspy_output = args.suppress_dspy_output
     dataset_mode = args.dataset_mode
 
-    lm = dspy.LM("openai/gpt-4o")
+    lm = dspy.LM(args.lm)
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     agent_benchmarks = [
