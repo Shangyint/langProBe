@@ -196,6 +196,20 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--lm_api_base",
+        help="The language model API base to use for evaluation",
+        type=str,
+        default=None,
+    )
+
+    parser.add_argument(
+        "--lm_api_key",
+        help="The language model API key to use for evaluation",
+        type=str,
+        default="None",
+    )
+
+    parser.add_argument(
         "--benchmark_set",
         help="The benchmark set to evaluate. Options are full, nonagent, agent.",
         type=str,
@@ -244,7 +258,7 @@ if __name__ == "__main__":
     suppress_dspy_output = args.suppress_dspy_output
     dataset_mode = args.dataset_mode
 
-    lm = dspy.LM(args.lm)
+    lm = dspy.LM(args.lm) if not args.lm_api_base else dspy.LM(args.lm, api_base=args.lm_api_base, api_key=args.lm_api_key)
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     agent_benchmarks = [

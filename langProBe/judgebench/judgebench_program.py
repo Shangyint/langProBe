@@ -1,5 +1,5 @@
 import dspy
-from langProBe.program import CoT, GeneratorCriticFuser, GeneratorCriticRanker
+import langProBe.program as program
 
 
 class LLMJudgeSignature(dspy.Signature):
@@ -13,6 +13,8 @@ class LLMJudgeSignature(dspy.Signature):
 
     answer = dspy.OutputField(desc="The better response, A>B or B>A")
 
-JudgeCoT = CoT(LLMJudgeSignature)
-JudgeGeneratorCriticFuser = GeneratorCriticFuser(LLMJudgeSignature)
-JudgeGeneratorCriticRanker = GeneratorCriticRanker(LLMJudgeSignature)
+
+JudgePredict = program.Predict(LLMJudgeSignature)
+JudgeCoT = program.CoT(LLMJudgeSignature)
+JudgeGeneratorCriticFuser = program.GeneratorCriticFuser(LLMJudgeSignature)
+JudgeGeneratorCriticRanker = program.GeneratorCriticRanker(LLMJudgeSignature)

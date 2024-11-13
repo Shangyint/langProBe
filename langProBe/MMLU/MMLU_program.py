@@ -11,6 +11,7 @@ class GenerateAnswer(dspy.Signature):
     )
 
 
+MMLUPredict = program.Predict(GenerateAnswer)
 MMLUCoT = program.CoT(GenerateAnswer)
 MMLURAG = program.RAG(GenerateAnswer)
 MMLUSimplifiedBaleen = program.SimplifiedBaleen(GenerateAnswer)

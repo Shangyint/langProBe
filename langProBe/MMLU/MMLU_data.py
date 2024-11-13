@@ -23,7 +23,7 @@ class MMLUBench(Benchmark):
             )
             x["answer"] = option_map[x["answer"]]
             self.dataset.append(dspy.Example(**x).with_inputs("question"))
-        
+
         for x in self.raw_datasets["test"]:
             x["question"] = "\n".join(
                 [

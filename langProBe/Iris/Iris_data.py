@@ -3,6 +3,7 @@ from ..benchmark import Benchmark
 import dspy
 from datasets import load_dataset
 
+
 class IrisBench(Benchmark):
     def init_dataset(self):
         raw_dataset = load_dataset("hitorilabs/iris")

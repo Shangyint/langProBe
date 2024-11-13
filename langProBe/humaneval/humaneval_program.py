@@ -17,8 +17,7 @@ class CodeProblem(dspy.Signature):
     code = dspy.OutputField()
 
 
-    
+HumanEvalPredict = program.Predict(CodeProblem)
 HumanEvalCoT = program.CoT(CodeProblem)
 HumanEvalGeneratorCriticFuser = program.GeneratorCriticFuser(CodeProblem)
 HumanEvalGeneratorCriticRanker = program.GeneratorCriticRanker(CodeProblem)
-

@@ -7,6 +7,9 @@ from dsp.utils import deduplicate
 #################################### Common Programs ####################################
 
 
+def Predict(signature):
+    return dspy.Predict(signature)
+
 def CoT(signature):
     return dspy.ChainOfThought(signature)
 

@@ -9,7 +9,7 @@ class GenerateAnswer(dspy.Signature):
     question = dspy.InputField()
     answer = dspy.OutputField()
 
-
+HotPotQAPredict = program.Predict(GenerateAnswer)
 HotPotQACoT = program.CoT(GenerateAnswer)
 HotPotQARAG = program.RAG(GenerateAnswer)
 HotPotQASimplifiedBaleen = program.SimplifiedBaleen(GenerateAnswer)

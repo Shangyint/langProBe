@@ -4,6 +4,7 @@ import dspy.datasets
 import dspy.evaluate
 from .hotpot_data import HotpotQABench
 from .hotpot_program import (
+    HotPotQAPredict,
     HotPotQACoT,
     HotPotQARAG,
     HotPotQASimplifiedBaleen,
@@ -18,6 +19,7 @@ benchmark = [
     BenchmarkMeta(
         HotpotQABench,
         [
+            HotPotQAPredict,
             HotPotQACoT,
             HotPotQARAG,
             HotPotQASimplifiedBaleen,
