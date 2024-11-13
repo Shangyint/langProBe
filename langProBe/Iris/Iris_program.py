@@ -11,7 +11,7 @@ class Sig(dspy.Signature):
     sepal_width = dspy.InputField()
     answer = dspy.OutputField(desc="setosa, versicolor, or virginica")
 
-
+IrisPredict = program.Predict(Sig)
 IrisCot = program.CoT(Sig)
 IrisGeneratorCriticRanker = program.GeneratorCriticRanker(Sig)
 IrisGeneratorCriticFuser = program.GeneratorCriticFuser(Sig)
