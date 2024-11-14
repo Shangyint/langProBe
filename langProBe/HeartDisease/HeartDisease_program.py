@@ -1,4 +1,5 @@
 import dspy
+import langProBe.program as program
 
 class HeartDiseaseInput(dspy.Signature):
     age = dspy.InputField(desc="Age in years")
@@ -79,8 +80,9 @@ class Classify(dspy.Module):
             thal=thal,
         )
 
-        # import pdb
-        # pdb.set_trace()
+        import pdb
+        pdb.set_trace()
+
         opinions = [c(**kwargs) for c in self.classify]
         opinions = [
             (opinion.rationale.replace("\n", " ").strip("."), opinion.answer.strip("."))
@@ -91,5 +93,8 @@ class Classify(dspy.Module):
             f"I'm a trainee doctor, trying to {reason}. Hence, my answer is {answer}."
             for reason, answer in opinions
         ]
+        
         return self.vote(context=opinions, **kwargs)
-    
+        
+
+heartdiseasePredict = program.Predict(HeartDiseaseSignature)
