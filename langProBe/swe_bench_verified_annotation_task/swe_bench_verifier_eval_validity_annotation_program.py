@@ -1,5 +1,5 @@
 import dspy.teleprompt
-
+from langProBe import program
 import re
 import dspy
 
@@ -26,6 +26,30 @@ Reason carefully about specific functions and classes before giving your answer.
     test_names: str = dspy.InputField(desc="The names of the tests in the test patch that will be used to evaluate the solution")
     # reasoning = dspy.OutputField(str, "Let's think step by step about the issue description and the test patch to determine if the tests are well-scoped")
     score: str = dspy.OutputField(desc="The score from 0 to 3 based on the criteria", format=lambda x: str(x))
+
+
+class EvaluationValidityModulePredict(dspy.Module):
+    def __init__(self):
+        self.evaluation_validity_predictor = program.Predict(EvaluationValiditySignature)
+
+    def forward(self, patch, test_patch, problem_statement, FAIL_TO_PASS, repo):        
+        evaluation_validity_output = self.evaluation_validity_predictor(
+            repo=repo,
+            issue_description=problem_statement,
+            gold_patch=patch,
+            test_patch=test_patch,
+            test_names=FAIL_TO_PASS,
+        )
+        
+        evaluation_validity_output['score'] = str(int(re.split(r'[^0-9]+', evaluation_validity_output['score'])[0]))
+
+        output = {}
+        
+        for k, v in evaluation_validity_output.items():
+            output["evaluation_validity_" + k] = v
+        
+        return dspy.Prediction(**output)
+
 
 class EvaluationValidityModule(dspy.Module):
     def __init__(self):
