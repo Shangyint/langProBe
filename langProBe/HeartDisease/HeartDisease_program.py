@@ -80,8 +80,6 @@ class Classify(dspy.Module):
             thal=thal,
         )
 
-        import pdb
-        pdb.set_trace()
 
         opinions = [c(**kwargs) for c in self.classify]
         opinions = [
