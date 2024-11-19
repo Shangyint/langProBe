@@ -275,7 +275,7 @@ if __name__ == "__main__":
         ".gsm8k",
         ".RAGQAArenaTech",
         ".MMLU",
-        ".swe_bench_verified_annotation_task",
+        ".swebench",
         ".scone",
         ".hotpotQA_conditional",
         ".humaneval",

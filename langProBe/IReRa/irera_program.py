@@ -19,7 +19,7 @@ state = json.load(open(state_path, "r"))
 global_config = IreraConfig.from_dict(state["config"])
 
 
-class ireraPredict(dspy.Module):
+class IReRaPredict(dspy.Module):
     def __init__(self, config: IreraConfig = global_config):
         super().__init__()
         self.config = config
@@ -35,7 +35,7 @@ class ireraPredict(dspy.Module):
         return dspy.Prediction(predictions=parsed_outputs)
 
 
-class ireraCOT(dspy.Module):
+class IReRaCOT(dspy.Module):
     def __init__(self, config: IreraConfig = global_config):
         super().__init__()
         self.config = config
@@ -54,7 +54,7 @@ class ireraCOT(dspy.Module):
         return dspy.Prediction(predictions=parsed_outputs)
 
 
-class ireraRetrieve(dspy.Module):
+class IReRaRetrieve(dspy.Module):
     """Infer-Retrieve. Sets the Retriever, initializes the prior."""
 
     def __init__(self, config: IreraConfig = global_config):
@@ -63,7 +63,7 @@ class ireraRetrieve(dspy.Module):
         self.config = config
 
         # set LM predictor
-        self.infer = ireraCOT(config)
+        self.infer = IReRaCOT(config)
 
         # set retriever
         self.retriever = Retriever(config)
@@ -105,7 +105,7 @@ class ireraRetrieve(dspy.Module):
         return scores
 
 
-class ireraRetrieveRank(dspy.Module):
+class IReRaRetrieveRank(dspy.Module):
     """Infer-Retrieve-Rank, as defined in https://arxiv.org/abs/2401.12178."""
 
     def __init__(self, config: IreraConfig = global_config):
@@ -117,7 +117,7 @@ class ireraRetrieveRank(dspy.Module):
         self.chunker = Chunker(config)
 
         # Set InferRetrieve
-        self.infer_retrieve = ireraRetrieve(config)
+        self.infer_retrieve = IReRaRetrieve(config)
 
         # Set Rank
         self.rank = Rank(config)

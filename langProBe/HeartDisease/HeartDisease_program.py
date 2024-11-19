@@ -40,7 +40,7 @@ class HeartDiseaseVote(HeartDiseaseInput):
     )
 
 
-class Classify(dspy.Module):
+class HeartDiseaseClassify(dspy.Module):
     def __init__(self):
         self.classify = [
             dspy.ChainOfThought(HeartDiseaseSignature, temperature=0.7 + i * 0.01)
@@ -95,4 +95,5 @@ class Classify(dspy.Module):
         return self.vote(context=opinions, **kwargs)
         
 
-heartdiseasePredict = program.Predict(HeartDiseaseSignature)
+HeartDiseasePredict = program.Predict(HeartDiseaseSignature)
+HeartDiseaseCoT = program.CoT(HeartDiseaseSignature)
