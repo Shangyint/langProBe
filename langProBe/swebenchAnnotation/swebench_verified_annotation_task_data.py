@@ -1,8 +1,6 @@
 import dspy.teleprompt
 from ..benchmark import Benchmark
-
 import pandas as pd
-
 import dspy
 
 class SWEBenchVerifiedAnnotationTaskBench(Benchmark):
@@ -38,12 +36,12 @@ class SWEBenchVerifiedAnnotationTaskBench(Benchmark):
         return dataset
 
     def init_dataset(self):
-        df_test = pd.read_csv("langProBe/swe_bench_verified_annotation_task/SweBenchVerifiedAnnotationTaskDataset/test_split.csv")
+        df_test = pd.read_csv("langProBe/swebenchAnnotation/SweBenchVerifiedAnnotationTaskDataset/test_split.csv")
         self.test_set = self.process_df_to_examples(df_test)
 
         assert len(self.test_set) == 400
         
-        df_train_val = pd.read_csv("langProBe/swe_bench_verified_annotation_task/SweBenchVerifiedAnnotationTaskDataset/trainval_split.csv")
+        df_train_val = pd.read_csv("langProBe/swebenchAnnotation/SweBenchVerifiedAnnotationTaskDataset/trainval_split.csv")
         self.dataset = self.process_df_to_examples(df_train_val)
 
         assert len(self.dataset) == 1289, len(self.dataset)

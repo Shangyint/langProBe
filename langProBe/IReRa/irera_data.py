@@ -1,6 +1,5 @@
 from ..benchmark import Benchmark
 from .irera_utils import load_data
-import subprocess
 
 
 class IReRaBench(Benchmark):

@@ -275,10 +275,11 @@ if __name__ == "__main__":
         ".gsm8k",
         ".RAGQAArenaTech",
         ".MMLU",
-        ".swe_bench_verified_annotation_task",
+        ".swebenchAnnotation",
         ".scone",
         ".hotpotQA_conditional",
         ".humaneval",
+        ".heartdisease"
     ]
 
     benchmarks = (

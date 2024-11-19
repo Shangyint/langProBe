@@ -1,5 +1,5 @@
 import dspy.teleprompt
-
+from langProBe import program
 import re
 import dspy
 
@@ -26,7 +26,31 @@ Reason carefully about specific functions and classes before giving your answer.
     # reasoning = dspy.OutputField(str, "Let's think step by step about the issue description and the test patch to determine if the tests are well-scoped")
     score: str = dspy.OutputField(desc="The score from 0 to 3 based on the criteria")
 
-class UnderspecifiedAnnotationGenerator(dspy.Module):
+
+class UnderspecifiedAnnotationPredict(dspy.Module):
+    def __init__(self):
+        self.underspcification_predictor = program.Predict(UnderspecifiedSignature)
+
+    def forward(self, patch, test_patch, problem_statement, FAIL_TO_PASS, repo):
+        underspecification_output = self.underspcification_predictor(
+            repo=repo,
+            issue_description=problem_statement,
+            gold_patch=patch,
+            test_patch=test_patch,
+            test_names=FAIL_TO_PASS,
+        )
+        
+        underspecification_output['score'] = str(int(re.split(r'[^0-9]+', underspecification_output['score'])[0]))
+
+        output = {}
+        
+        for k, v in underspecification_output.items():
+            output["underspecification_" + k] = v
+        
+        return dspy.Prediction(**output)
+
+
+class UnderspecifiedAnnotationCoT(dspy.Module):
     def __init__(self):
         self.underspcification_predictor = dspy.ChainOfThought(UnderspecifiedSignature)
 
