@@ -1,8 +1,6 @@
 import dspy.teleprompt
 from ..benchmark import Benchmark
-
 import pandas as pd
-
 import dspy
 
 class SWEBenchVerifiedAnnotationTaskBench(Benchmark):
