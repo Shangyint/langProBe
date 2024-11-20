@@ -55,6 +55,22 @@ class AppWorldReact(dspy.Module):
             self.module = module
         self.max_steps = max_steps
         self.add_few_shot = add_few_shot
+
+        if self.add_few_shot:
+            with open("langProBe/AppWorld/fewshot_trace.json", "r") as f:
+                past_steps_trace = json.load(f)
+
+            fewshotexample = dspy.Example(
+                instruction = "How many playlists do I have in Spotify?",
+                supervisor_name = "John Doe",
+                supervisor_phone_number = "0123456789",
+                supervisor_email = "johndoe@example.com",
+                past_steps = self.format_trace(past_steps_trace[:-1]),
+                code = past_steps_trace[-1][0],
+            ).with_inputs("instruction", "supervisor_name", "supervisor_phone_number", "supervisor_email", "past_steps")
+
+            self.module.demos.append(fewshotexample)
+
         self.known_apis = {}
         self.app_docs = {}
     
@@ -71,21 +87,6 @@ class AppWorldReact(dspy.Module):
             supervisor_name = task['supervisor']['first_name'] + " " + task['supervisor']['last_name']
             supervisor_email = task['supervisor']['email']
             supervisor_phone = task['supervisor']['phone_number']
-
-            if self.add_few_shot:
-                with open("langProBe/AppWorld/fewshot_trace.json", "r") as f:
-                    past_steps_trace = json.load(f)
-
-                fewshotexample = dspy.Example(
-                    instruction = "How many playlists do I have in Spotify?",
-                    supervisor_name = supervisor_name,
-                    supervisor_phone_number = supervisor_phone,
-                    supervisor_email = supervisor_email,
-                    past_steps = self.format_trace(past_steps_trace[:-1]),
-                    code = past_steps_trace[-1][0],
-                ).with_inputs("instruction", "supervisor_name", "supervisor_phone_number", "supervisor_email", "past_steps")
-
-                self.module.demos = [fewshotexample]
 
             trace = []
             for i in range(self.max_steps):
