@@ -74,7 +74,7 @@ def extract_information_from_files(directory_path):
 
     # Convert the list of dictionaries to a pandas DataFrame
     df = pd.DataFrame(extracted_data)
-    df["optimizer"].replace("None", "Baseline")
+    df["optimizer"] = df["optimizer"].replace("None", "Baseline")
     return df
 
 
@@ -138,8 +138,6 @@ def plot_scores_by_benchmark(directory_path: str, data_df):
 
 
 def plot_percentage_gain_by_benchmark(directory_path, data_df):
-    # Replace "None" with "Baseline" in the optimizer column
-    data_df["optimizer"] = data_df["optimizer"].replace("None", "Baseline")
 
     # Calculate the baseline score for each benchmark and program
     baseline_df = data_df[data_df["optimizer"] == "Baseline"].rename(
@@ -315,7 +313,31 @@ def get_programs(data_df):
     return programs_text
 
 
-import pandas as pd
+def display_benchmark_performance(data_df, selected_benchmarks):
+    # Filter data for the selected benchmarks
+    filtered_data = data_df[data_df['benchmark'].isin(selected_benchmarks)]
+    
+    # Sort the data for better readability
+    filtered_data = filtered_data.sort_values(by=['benchmark', 'program', 'optimizer'])
+
+    # for the same benchmark and program, None should always come first
+
+    
+    # Create a human-readable table
+    performance_table = filtered_data.pivot_table(
+        index=['benchmark', 'program'],
+        columns='optimizer',
+        values='score',
+        aggfunc='mean'
+    )
+    
+    # Reorder columns to ensure "None (Baseline)" is always first
+    if "Baseline" in performance_table.columns:
+        cols = ["Baseline"] + [col for col in performance_table.columns if col != "Baseline"]
+        performance_table = performance_table[cols]
+
+    # Return the performance table
+    return performance_table
 
 
 def compare_all_programs_with_cot_baseline(data_df):
@@ -449,8 +471,8 @@ if __name__ == "__main__":
 
     file_path = args.file_path
     data_df = extract_information_from_files(file_path)
-    plot_scores_by_benchmark(file_path, data_df)
-    plot_percentage_gain_by_benchmark(file_path, data_df)
+    # plot_scores_by_benchmark(file_path, data_df)
+    # plot_percentage_gain_by_benchmark(file_path, data_df)
     results = analyze_experiments(data_df)
     import rich
 
@@ -458,17 +480,11 @@ if __name__ == "__main__":
 
     # Example usage
     programs_list = get_programs(data_df)
-    rich.print(programs_list)
-    print(data_df)
     comparisons = compare_all_programs_with_cot_baseline(data_df)
     rich.print(comparisons)
 
     avg_score_diffs = compare_programs_with_reference_across_benchmarks(data_df)
     rich.print(avg_score_diffs)
 
-    print(
-        "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    )
-
-    underperforming_benchmarks = find_benchmarks_where_miprov2_performs_worse(data_df)
-    rich.print(underperforming_benchmarks)
+    table = display_benchmark_performance(data_df, ["HotpotQABench", "IrisBench", "GSM8KBench"])
+    print(table)
