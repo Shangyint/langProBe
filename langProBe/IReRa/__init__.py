@@ -8,5 +8,6 @@ subprocess.run(
     ["bash", "langProBe/IReRa/load_data.sh"], capture_output=True, text=True
 )
 
-programs = [IReRaPredict(), IReRaCOT(), IReRaRetrieve(), IReRaRetrieveRank()]
+# programs = [IReRaPredict(), IReRaCOT(), IReRaRetrieve(), IReRaRetrieveRank()]
+programs = [IReRaPredict()]
 benchmark = [BenchmarkMeta(IReRaBench, programs, rp_at_k)]

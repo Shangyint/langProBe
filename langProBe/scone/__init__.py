@@ -9,10 +9,17 @@ from langProBe.benchmark import BenchmarkMeta
 import dspy
 
 
+# benchmark = [
+#     BenchmarkMeta(
+#         SconeBench,
+#         [SconePredict, SconeCoT, SconeGeneratorCriticRanker, SconeGeneratorCriticFuser],
+#         dspy.evaluate.answer_exact_match,
+#     )
+# ]
 benchmark = [
     BenchmarkMeta(
         SconeBench,
-        [SconePredict, SconeCoT, SconeGeneratorCriticRanker, SconeGeneratorCriticFuser],
+        [SconePredict],
         dspy.evaluate.answer_exact_match,
     )
 ]

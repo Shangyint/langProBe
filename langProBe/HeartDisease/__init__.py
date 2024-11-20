@@ -3,7 +3,9 @@ from .HeartDisease_program import HeartDiseaseClassify, HeartDiseasePredict, Hea
 from langProBe.benchmark import BenchmarkMeta
 import dspy
 
-programs = [HeartDiseasePredict, HeartDiseaseCoT, HeartDiseaseClassify()]
+# programs = [HeartDiseasePredict, HeartDiseaseCoT, HeartDiseaseClassify()]
+programs = [HeartDiseasePredict]
 
 benchmark = [BenchmarkMeta(HeartDiseaseBench, programs, dspy.evaluate.answer_exact_match)]
+
 

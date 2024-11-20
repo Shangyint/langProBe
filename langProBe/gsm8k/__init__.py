@@ -9,10 +9,17 @@ from .gsm8k_program import (
 from langProBe.benchmark import BenchmarkMeta
 import dspy
 
+# benchmark = [
+#     BenchmarkMeta(
+#         GSM8KBench,
+#         [GSM8KPredict, GSM8KCoT, GSM8KGeneratorCriticFuser, GSM8KGeneratorCriticRanker],
+#         gsm8k_evaluate,
+#     )
+# ]
 benchmark = [
     BenchmarkMeta(
         GSM8KBench,
-        [GSM8KPredict, GSM8KCoT, GSM8KGeneratorCriticFuser, GSM8KGeneratorCriticRanker],
+        [GSM8KPredict],
         gsm8k_evaluate,
     )
 ]

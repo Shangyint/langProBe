@@ -11,15 +11,17 @@ from .MMLU_program import (
 from langProBe.benchmark import Benchmark, BenchmarkMeta
 
 benchmark: Callable[[], Benchmark] = MMLUBench
+# programs = [
+#     MMLUPredict,
+#     MMLUCoT,
+#     MMLURAG,
+#     MMLUSimplifiedBaleen,
+#     MMLUGeneratorCriticRanker,
+#     MMLUGeneratorCriticFuser,
+# ]
 programs = [
-    MMLUPredict,
-    MMLUCoT,
-    MMLURAG,
-    MMLUSimplifiedBaleen,
-    MMLUGeneratorCriticRanker,
-    MMLUGeneratorCriticFuser,
+    MMLUPredict
 ]
-
 
 def MMLU_metric(gt, pred, trace=None):
     pred_processed = pred.answer.split(".")[0]

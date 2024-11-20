@@ -22,10 +22,17 @@ def llm_judge_eval(gold, pred, target: str = None):
     return gold.label == pred_preference
 
 
+# benchmark = [
+#     BenchmarkMeta(
+#         JudgeBench,
+#         [JudgePredict, JudgeCoT, JudgeGeneratorCriticFuser, JudgeGeneratorCriticRanker],
+#         llm_judge_eval,
+#     )
+# ]
 benchmark = [
     BenchmarkMeta(
         JudgeBench,
-        [JudgePredict, JudgeCoT, JudgeGeneratorCriticFuser, JudgeGeneratorCriticRanker],
+        [JudgePredict],
         llm_judge_eval,
     )
 ]

@@ -6,8 +6,13 @@ from .RAGQAArenaTech_program import RAGQACoT, RAGQAPredict, RAGQARAG
 from langProBe.benchmark import BenchmarkMeta
 import dspy
 
+# benchmark = [
+#     BenchmarkMeta(
+#         RAGQAArenaBench, [RAGQACoT, RAGQAPredict, RAGQARAG], dspy.evaluate.SemanticF1()
+#     )
+# ]
 benchmark = [
     BenchmarkMeta(
-        RAGQAArenaBench, [RAGQACoT, RAGQAPredict, RAGQARAG], dspy.evaluate.SemanticF1()
+        RAGQAArenaBench, [RAGQAPredict], dspy.evaluate.SemanticF1()
     )
 ]

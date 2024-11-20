@@ -13,14 +13,23 @@ from .humaneval_program import (
 from .humaneval_utils import human_eval_evaluate
 import dspy
 
+# benchmark = [
+#     BenchmarkMeta(
+#         HumanEvalBench,
+#         [
+#             HumanEvalPredict,
+#             HumanEvalCoT,
+#             HumanEvalGeneratorCriticFuser,
+#             HumanEvalGeneratorCriticRanker,
+#         ],
+#         human_eval_evaluate,
+#     )
+# ]
 benchmark = [
     BenchmarkMeta(
         HumanEvalBench,
         [
-            HumanEvalPredict,
-            HumanEvalCoT,
-            HumanEvalGeneratorCriticFuser,
-            HumanEvalGeneratorCriticRanker,
+            HumanEvalPredict
         ],
         human_eval_evaluate,
     )

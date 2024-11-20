@@ -8,10 +8,17 @@ from .hotpot_conditional_utils import check_conditions
 from langProBe.benchmark import BenchmarkMeta
 
 
+# benchmark = [
+#     BenchmarkMeta(
+#         HotpotQAConditionalBench,
+#         [HotPotQACondPredict, HotPotQACondSimplifiedBaleen, HotPotQACondSimplifiedBaleenHandwritten],
+#         check_conditions,
+#     )
+# ]
 benchmark = [
     BenchmarkMeta(
         HotpotQAConditionalBench,
-        [HotPotQACondPredict, HotPotQACondSimplifiedBaleen, HotPotQACondSimplifiedBaleenHandwritten],
+        [HotPotQACondPredict],
         check_conditions,
     )
 ]

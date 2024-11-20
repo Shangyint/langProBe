@@ -9,10 +9,17 @@ from .MATH_program import (
 )
 
 
+# benchmark = [
+#     BenchmarkMeta(
+#         MATHBench,
+#         [MATHPredict, MATHCoT, MATHGeneratorCriticFuser, MATHGeneratorCriticRanker],
+#         math_evaluate,
+#     )
+# ]
 benchmark = [
     BenchmarkMeta(
         MATHBench,
-        [MATHPredict, MATHCoT, MATHGeneratorCriticFuser, MATHGeneratorCriticRanker],
+        [MATHPredict],
         math_evaluate,
     )
 ]

@@ -15,16 +15,26 @@ from langProBe.benchmark import BenchmarkMeta
 import dspy
 
 
+# benchmark = [
+#     BenchmarkMeta(
+#         HotpotQABench,
+#         [
+#             HotPotQAPredict,
+#             HotPotQACoT,
+#             HotPotQARAG,
+#             HotPotQASimplifiedBaleen,
+#             HotPotQAGeneratorCriticRanker,
+#             HotPotQAGeneratorCriticFuser,
+#         ],
+#         dspy.evaluate.answer_exact_match,
+#     )
+# ]
+
 benchmark = [
     BenchmarkMeta(
         HotpotQABench,
         [
-            HotPotQAPredict,
-            HotPotQACoT,
-            HotPotQARAG,
-            HotPotQASimplifiedBaleen,
-            HotPotQAGeneratorCriticRanker,
-            HotPotQAGeneratorCriticFuser,
+            HotPotQAPredict
         ],
         dspy.evaluate.answer_exact_match,
     )

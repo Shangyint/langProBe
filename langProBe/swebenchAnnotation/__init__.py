@@ -5,7 +5,11 @@ from .swebench_verifier_eval_validity_annotation_program import EvaluationValidi
 from .swebench_utils import evaluation_validity_evaluate, underspecified_annotation_evaluate
 
 
+# benchmark = [
+#     BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [UnderspecifiedAnnotationPredict(), UnderspecifiedAnnotationCoT()], underspecified_annotation_evaluate),
+#     BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [EvaluationValidityPredict(), EvaluationValidityCoT()], evaluation_validity_evaluate),
+# ]
 benchmark = [
-    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [UnderspecifiedAnnotationPredict(), UnderspecifiedAnnotationCoT()], underspecified_annotation_evaluate),
-    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [EvaluationValidityPredict(), EvaluationValidityCoT()], evaluation_validity_evaluate),
+    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [UnderspecifiedAnnotationPredict()], underspecified_annotation_evaluate),
+    BenchmarkMeta(SWEBenchVerifiedAnnotationTaskBench, [EvaluationValidityPredict()], evaluation_validity_evaluate),
 ]
