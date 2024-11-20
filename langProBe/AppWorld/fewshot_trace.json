@@ -1,0 +1,42 @@
+[
+    [
+        "# Okay. Lets first find which APIs are available to use in Spotify.\nprint(apis.api_docs.show_api_descriptions(app_name='spotify'))",
+        "[\n ...\n \"login\" : \"Login to your account.\",\n \"logout\" : \"Logout from your account.\",\n ...\n]"
+    ],
+    [
+        "# Okay. Looks like I can use the `login` api. Lets find its specifications.\nprint(apis.api_docs.show_api_doc(app_name='spotify', api_name='login'))",
+        "{\n \"app_name\": \"spotify\",\n \"api_name\": \"login\",\n \"path\": \"/auth/token\",\n \"method\": \"POST\",\n \"description\": \"Login to your account.\",\n \"parameters\": [\n  {\n   \"name\": \"username\",\n   \"type\": \"string\",\n   \"required\": true,\n   \"description\": \"Your account email.\",\n   \"default\": null,\n   \"constraints\": []\n  },\n  {\n   \"name\": \"password\",\n   \"type\": \"string\",\n   \"required\": true,\n   \"description\": \"Your account password.\",\n   \"default\": null,\n   \"constraints\": []\n  }\n ],\n \"response_schemas\": {\n  \"success\": {\n   \"token_type\": \"string\",\n   \"access_token\": \"string\"\n  },\n  \"failure\": {\n   \"message\": \"string\"\n  }\n }\n}"
+    ],
+    [
+        "# I need the supervisor's username and password. Lets see if any app can help me get that.\nprint(apis.api_docs.show_app_descriptions())",
+        "[\n  {\n    \"name\": \"api_docs\",\n    \"description\": \"An app to search and explore API documentation.\"\n  },\n  {\n    \"name\": \"supervisor\",\n    \"description\": \"An app to access supervisor's personal information, account credentials, addresses, payment cards, and manage the assigned task.\"\n  },\n  {\n    \"name\": \"amazon\",\n    \"description\": \"An online shopping app to buy products and manage orders, returns, etc.\"\n  },\n  {\n    \"name\": \"phone\",\n    \"description\": \"An app to find and manage contact information for friends, family members, etc., send and receive messages, and manage alarms.\"\n  },\n  {\n    \"name\": \"file_system\",\n    \"description\": \"A file system app to create and manage files and folders.\"\n  },\n  {\n    \"name\": \"spotify\",\n    \"description\": \"A music streaming app to stream songs and manage song, album and playlist libraries.\"\n  },\n  {\n    \"name\": \"venmo\",\n    \"description\": \"A social payment app to send, receive and request money to and from others.\"\n  },\n  {\n    \"name\": \"gmail\",\n    \"description\": \"An email app to draft, send, receive, and manage emails.\"\n  },\n  {\n    \"name\": \"splitwise\",\n    \"description\": \"A bill splitting app to track and split expenses with people.\"\n  },\n  {\n    \"name\": \"simple_note\",\n    \"description\": \"A note-taking app to create and manage notes\"\n  },\n  {\n    \"name\": \"todoist\",\n    \"description\": \"A task management app to manage todo lists and collaborate on them with others.\"\n  }\n]"
+    ],
+    [
+        "# Looks like the supervisor app could help me with that.\nprint(apis.api_docs.show_api_descriptions(app_name='supervisor'))",
+        "[\n  ...\n  \"show_account_passwords : Show your supervisor's account passwords.\"\n  ...\n]"
+    ],
+    [
+        "# I can use `show_account_passwords` to get the passwords. So I will call that and save it in a variable for future reference.\npasswords=apis.supervisor.show_account_passwords()\nprint(passwords)",
+        "[\n  {\n    \"account_name\": \"spotify\",\n    \"password\": \"dummy_spotify_pass\"\n  },\n  {\n    \"account_name\": \"file_system\",\n    \"password\": \"dummy_fs_pass\"\n  }\n]"
+    ],
+    [
+        "# So the Spotify password is an entry in the `passwords` list with the account_name=spotify. I can use it to login now with the provided email address: johndoe@example.com.\nspotify_password = [account_password[\"account_name\"] == \"spotify\" for account_password in passwords][0][\"password\"]\nlogin_result = apis.spotify.login(username='johndoe@example.com', password=spotify_password)\nprint(login_result)",
+        "{\n \"token_type\": \"Bearer\",\n \"access_token\": \"fake_access_token\"\n}"
+    ],
+    [
+        "# First, let's check the available APIs for the Spotify app.\nprint(apis.api_docs.show_api_descriptions(app_name='spotify'))",
+        "[\n...\n{\n  \"name\": \"show_playlist_library\",\n  \"description\": \"Get a list of playlists in the user's playlist library.\"\n},\n{\n  \"name\": \"show_playlist\",\n  \"description\": \"Get detailed information about a specific playlist. You can view your own playlists or others' playlists if they are public.\"\n },\n...\n]"
+    ],
+    [
+        "# The `show_playlist_library` API seems to be the one we need. Let's check its specifications.\nprint(apis.api_docs.show_api_doc(app_name='spotify', api_name='show_playlist_library'))",
+        "{\n \"app_name\": \"spotify\",\n \"api_name\": \"show_playlist_library\",\n \"path\": \"/private_playlists\",\n \"method\": \"GET\",\n \"description\": \"Get a list of playlists in the user's playlist library.\",\n \"parameters\": [\n  {\n   \"name\": \"access_token\",\n   \"type\": \"string\",\n   \"required\": true,\n   \"description\": \"Access token obtained from spotify app login.\",\n   \"default\": null,\n   \"constraints\": []\n  },\n  {\n   \"name\": \"page_index\",\n   \"type\": \"integer\",\n   \"required\": false,\n   \"description\": \"The index of the page to retrieve.\",\n   \"default\": 0,\n   \"constraints\": [\n    \"value >= 0.0\"\n   ]\n  },\n  {\n   \"name\": \"page_limit\",\n   \"type\": \"integer\",\n   \"required\": false,\n   \"description\": \"The maximum number of results to return per page.\",\n   \"default\": 5,\n   \"constraints\": [\n    \"value >= 1.0, <= 20.0\"\n   ]\n  },\n  {\n   \"name\": \"is_public\",\n   \"type\": \"boolean\",\n   \"required\": false,\n   \"description\": \"Whether to show public playlists or private playlists.\",\n   \"default\": null,\n   \"constraints\": []\n  }\n ],\n \"response_schema\": [\n  {\n   \"title\": \"string\",\n   \"created_at\": \"2019-01-01T00:00:00\",\n   \"is_public\": true,\n   \"rating\": 0.0,\n   \"like_count\": 1,\n   \"owner_email\": \"user@example.com\",\n   \"playlist_id\": 1,\n   \"song_ids\": [\n    1\n   ]\n  }\n ]\n}"
+    ],
+    [
+        "# I need to page through all the playlists to get the list of playlists and save it in `playlists`.\npage_index = 0\nplaylists = []\nwhile page_index < 10:\n  playlist_page = apis.spotify.show_playlist_library(access_token=spotify_access_token, page_index=page_index)\n  if playlist_page:\n    playlists.extend(playlist_page)\n    page_index += 1\n  else:\n    break\nnum_playlists = len(playlists)\nprint(num_playlists)",
+        "23"
+    ],
+    [
+        "# Now that the task is completed, I can call apis.supervisor.complete_task(). Since this task has an answer to be returned, I will pass that as an argument.\napis.supervisor.complete_task(answer=num_playlists)",
+        "Marked the active task complete."
+    ]
+]
