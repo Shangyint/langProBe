@@ -487,4 +487,6 @@ if __name__ == "__main__":
     rich.print(avg_score_diffs)
 
     table = display_benchmark_performance(data_df, ["HotpotQABench", "IrisBench", "GSM8KBench"])
-    print(table)
+    print()
+    rich.print(f"[bold red]Results for {file_path.split('_')[1]}[/bold red]")
+    rich.print(table)
