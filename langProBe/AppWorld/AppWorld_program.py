@@ -6,6 +6,15 @@ from .AppWorld_utils.app_world_server_manager import appworld_manager
 import shortuuid
 import dspy
 
+import ast
+
+def strip_comments(code_str):
+    try:
+        parsed_code = ast.parse(code_str)
+        return ast.unparse(parsed_code)
+    except:
+        return code_str
+
 class AppWorldReactSignature(dspy.Signature):
     """Your job is to achieve my day-to-day tasks completely autonomously.
 
@@ -110,7 +119,10 @@ class AppWorldReact(dspy.Module):
                         else:
                             raise ve
                 gen_code = module_gen.code
-                gen_code_output = server.request.execute(task_id=task_id, code=gen_code)
+                if "os.path.expanduser" in strip_comments(gen_code):
+                    gen_code_output = "Usage of the following os.path.expanduser is not allowed."
+                else:
+                    gen_code_output = server.request.execute(task_id=task_id, code=gen_code)
                 trace.append((gen_code, gen_code_output))
 
                 if "Execution failed" in gen_code_output:
@@ -128,6 +140,8 @@ class AppWorldReact(dspy.Module):
                             self.known_apis[extract_api] = server.request.execute(task_id=task_id, code=extract_api_code)
                         if "Execution failed" not in self.known_apis[extract_api]:
                             trace.append((extract_api_code, self.known_apis[extract_api]))
+                    elif re.search(r"Usage of the following .* is not allowed", gen_code_output):
+                        trace[-1] = (gen_code, gen_code_output + " You must use the file system app to access the file system.")
 
                 if server.request.task_completed(task_id=task_id):
                     break
