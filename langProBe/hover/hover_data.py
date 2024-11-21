@@ -11,7 +11,7 @@ class hoverBench(Benchmark):
         dataset = load_dataset("hover")
 
         hf_trainset = dataset["train"]
-        hf_testset = dataset["test"]
+        hf_testset = dataset["validation"]     # Using validation dataset because test dataset is not labeled
 
         reformatted_hf_trainset = []
         reformatted_hf_testset = []
