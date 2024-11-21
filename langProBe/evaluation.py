@@ -280,7 +280,7 @@ if __name__ == "__main__":
         ".swebenchAnnotation",
         ".scone",
         ".hotpotQA_conditional",
-        ".HeartDisease"
+        ".HeartDisease",
         ".humaneval",
     ]
 
