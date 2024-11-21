@@ -124,6 +124,10 @@ class BenchmarkMeta:
         default_factory=lambda: langprobe_optimizers.DEFAULT_OPTIMIZERS
     )
 
+    # BenchmarkMeta.num_threads has higher priority than run time argument of num_threads
+    # use this as an upper bound for the number of threads to use
+    num_threads: int = None
+
 
 def setup_lm(dspy_config=None):
     lm: dspy.LM = dspy_config.get("lm", dspy.settings.lm)
@@ -168,7 +172,7 @@ class EvaluateBench(ABC):
             num_threads=self.num_threads,
             display_progress=True,
             # FIXME(shangyin): find a more ergonomic way to set max_errors
-            max_errors=100,
+            max_errors=500,
             provide_traceback=False,
         )
 

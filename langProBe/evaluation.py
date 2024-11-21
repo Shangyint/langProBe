@@ -82,6 +82,8 @@ def evaluate(
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     optimizers = benchmark_meta.optimizers
     benchmark_name = benchmark.__class__.__name__
+
+    num_threads = benchmark_meta.num_threads or num_threads
     print(f"Evaluating {benchmark_name}")
     print(f"Train set size: {len(benchmark.train_set)}")
     print(f"Validation set size: {len(benchmark.val_set)}")
@@ -278,8 +280,8 @@ if __name__ == "__main__":
         ".swebenchAnnotation",
         ".scone",
         ".hotpotQA_conditional",
+        ".HeartDisease"
         ".humaneval",
-        ".heartdisease"
     ]
 
     benchmarks = (

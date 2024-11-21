@@ -23,5 +23,6 @@ benchmark = [
             HumanEvalGeneratorCriticRanker,
         ],
         human_eval_evaluate,
+        num_threads=1,
     )
 ]
