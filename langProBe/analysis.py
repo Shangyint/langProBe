@@ -1,11 +1,14 @@
 import math
 from matplotlib.patches import Patch
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 
 import pathlib
+
+color_schemes = ["Reds", "Greens", "Blues", "Purples", "Oranges", "YlGnBu", "coolwarm"]
 
 
 def extract_information_from_files(directory_path):
@@ -78,67 +81,220 @@ def extract_information_from_files(directory_path):
     return df
 
 
-def plot_scores_by_benchmark(directory_path: str, data_df):
+def plot_scores_by_benchmark(directory_path: str, data_dfs, model_names):
     # Get a list of unique benchmarks
-    benchmarks = data_df["benchmark"].unique()
+
+    combined_data = []
+    for df, model in zip(data_dfs, model_names):
+        df = df.copy()
+        df['model'] = model
+        combined_data.append(df)
+    combined_data = pd.concat(combined_data)
+
+    unique_optimizers = combined_data["optimizer"].unique()
+
+
+    benchmarks = combined_data["benchmark"].unique()
     num_benchmarks = len(benchmarks)
 
     # Determine the number of rows and columns based on the square root of the number of benchmarks
     cols = math.ceil(math.sqrt(num_benchmarks))
     rows = math.ceil(num_benchmarks / cols)
 
+    if cols <= 1:
+        cols = 3
+    if rows <= 1:
+        rows = 3
+
     # Set up the figure with subplots arranged in a grid
-    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows), sharey=True)
+    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows), sharey=False)
     fig.suptitle("Scores by Program and Optimizer for Each Benchmark", fontsize=16)
 
-    # Flatten axes array for easy iteration
-    axes = axes.flatten()
 
-    # Create subplots for each benchmark
+    if rows == 1 and cols == 1:
+        axes = [axes]
+
+    # Flatten axes array for easy iteration
+    axes = axes.flatten() if rows > 1 or cols > 1 else axes
+
+    hue_palette = {
+        model: sns.color_palette(color_schemes[i % len(color_schemes)], len(unique_optimizers))
+        for i, model in enumerate(model_names)
+    }
+
+    combined_data['program_model'] = combined_data['program'] + "_" + combined_data['model']
+
+    bar_width = 0.35  # Adjust bar width for each model
+
     for i, benchmark in enumerate(benchmarks):
         ax = axes[i]
-        benchmark_data = data_df[data_df["benchmark"] == benchmark]
+        benchmark_data = combined_data[combined_data['benchmark'] == benchmark].copy()
+        
+        # Get unique programs and assign numeric positions
+        programs = benchmark_data['program'].unique()
+        # sort programs based on the order of the program_order
+        programs = sorted(programs, key=lambda x: program_order.index(x) if x in program_order else len(program_order))
+        program_indices = np.arange(len(programs))  # Base positions for programs
+        
+        # Dictionary to store offsets for calculating tick positions
+        program_offsets = {program: [] for program in programs}
+        
+        # Loop through programs to group bars by program
+        for j, program in enumerate(programs):
+            program_data = benchmark_data[benchmark_data['program'] == program]
+            models_in_program = program_data['model'].unique()  # Models for this program
+            
+            # Loop through models to calculate offsets
+            for k, model in enumerate(models_in_program):
+                model_data = program_data[program_data['model'] == model].copy()
+                
+                # Calculate bar offsets for the current model
+                model_data['x_offset'] = program_indices[j] + (k - len(models_in_program) / 2) * bar_width
+                
+                # Append the offsets for this program
+                program_offsets[program].extend(model_data['x_offset'])
+                
+                # Plot bars for this model
+                sns.barplot(
+                    data=model_data,
+                    x='x_offset', y='score', hue='optimizer', dodge=True, ax=ax,
+                    palette=dict(zip(unique_optimizers, hue_palette[model]))
+                )
+                
+                # Collect actual x-offsets for each program from the plotted bars
+        for patch in ax.patches:
+            # Extract x-position of each bar
+            bar_center = patch.get_x() + patch.get_width() / 2
+            # Extract program name based on the base position
+            program_idx = int(round(bar_center))  # Round to find the closest program index
+            if 0 <= program_idx < len(programs):  # Ignore bars outside valid program range
+                program_offsets[programs[program_idx]].append(bar_center)
+        
+        # Calculate the center of all offsets for each program
+        tick_positions = [np.mean(offsets) for offsets in program_offsets.values()]
 
-        # Create a bar plot for each benchmark
-        sns.barplot(
-            data=benchmark_data,
-            x="program",
-            y="score",
-            hue="optimizer",
-            ax=ax,
-            palette="viridis",
-        )
+        
+        # Calculate the center of all offsets for each program
+        print(tick_positions)
 
-        # Set labels and title for each subplot
+        # Set x-axis ticks and labels
+        ax.set_xticks(tick_positions)
+        ax.set_xticklabels(programs, rotation=45, ha='right')
+        
+        # Set title and labels
         ax.set_title(f"Benchmark: {benchmark}")
         ax.set_xlabel("Program")
         ax.set_ylabel("Score")
-
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
-        ax.get_legend().remove()  # Remove individual legends
-
-    # Hide any unused subplots
+        
+        # Remove individual legends from subplots
+        ax.get_legend().remove()
     for j in range(i + 1, rows * cols):
         fig.delaxes(axes[j])
 
     # create a handle for unique optimizers
-    unique_optimizers = data_df["optimizer"].unique()
     legend_handles = [
         Patch(
-            color=sns.color_palette("viridis", len(unique_optimizers))[i],
+            color=sns.color_palette("Reds", len(unique_optimizers))[i],
             label=optimizer,
         )
         for i, optimizer in enumerate(unique_optimizers)
     ]
     fig.legend(title="Optimizer", handles=legend_handles, loc="upper left")
+
+    legend_handles = [Patch(color=hue_palette[model][0], label=model) for model in model_names]
+    fig.legend(handles=legend_handles, title="Language Models", loc='upper right')
+    
     # Adjust layout and add legend
-    plt.tight_layout(rect=[0, 0, 1, 0.96])  # To leave space for the suptitle
+    if rows > 1 or cols > 1:
+        plt.tight_layout(rect=[0, 0, 1, 0.96])  # To leave space for the suptitle and legend
+    else:
+        plt.subplots_adjust(top=0.85)
 
-    plt.savefig(f"{directory_path}_scores_by_benchmark.png", dpi=300)
+    plt.savefig(f"{directory_path}_{'_'.join(model_names)}_scores_by_benchmark.png", dpi=300)
 
 
-def plot_percentage_gain_by_benchmark(directory_path, data_df):
+def plot_scores_by_benchmark_model_only(directory_path: str, data_dfs, model_names):
+    # Combine all dataframes and assign model names
+    combined_data = []
+    for df, model in zip(data_dfs, model_names):
+        df = df.copy()
+        df['model'] = model
+        combined_data.append(df)
+    combined_data = pd.concat(combined_data)
 
+    # Filter the data to include only "Baseline" optimizer
+    combined_data = combined_data[combined_data["optimizer"] == "Baseline"]
+
+    benchmarks = combined_data["benchmark"].unique()
+    num_benchmarks = len(benchmarks)
+
+    # Determine rows and columns for subplots
+    cols = math.ceil(math.sqrt(num_benchmarks))
+    rows = math.ceil(num_benchmarks / cols)
+
+    # Set up the figure with subplots
+    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows), sharey=False)
+    fig.suptitle("Scores by Program for Each Benchmark (Baseline Only)", fontsize=16)
+
+    # Flatten axes array for easy iteration
+    axes = axes.flatten() if rows > 1 or cols > 1 else [axes]
+
+    # Generate color palette for models
+    color_schemes = ["Reds", "Greens", "Blues", "Purples"]
+    hue_palette = {
+        model: sns.color_palette(color_schemes[i % len(color_schemes)], 1)[0]
+        for i, model in enumerate(model_names)
+    }
+
+    for i, benchmark in enumerate(benchmarks):
+        ax = axes[i]
+        benchmark_data = combined_data[combined_data['benchmark'] == benchmark].copy()
+        
+        # Get unique programs and sort them
+        programs = benchmark_data['program'].unique()
+        benchmark_data = sort_dataframe(benchmark_data, program_order=program_order)
+        
+        # Create a bar plot comparing models across programs
+        sns.barplot(
+            data=benchmark_data,
+            x="program",
+            y="score",
+            hue="model",
+            ax=ax,
+            palette=hue_palette
+        )
+        
+        # Set title and labels
+        ax.set_title(f"Benchmark: {benchmark}")
+        ax.set_xlabel("Program")
+        ax.set_ylabel("Score")
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+    
+        # Remove individual legends from subplots
+        ax.get_legend().remove()
+
+    # Remove unused axes
+    for j in range(len(benchmarks), len(axes)):
+        fig.delaxes(axes[j])
+
+    # Add a global legend for models
+    fig.legend(
+        title="Language Models",
+        handles=[Patch(color=color, label=model) for model, color in hue_palette.items()],
+        loc="upper right"
+    )
+
+    # Adjust layout and save the figure
+    if rows > 1 or cols > 1:
+        plt.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the suptitle and legend
+    else:
+        plt.subplots_adjust(top=0.85)
+
+    plt.savefig(f"{directory_path}_{'_'.join(model_names)}_baseline_scores_by_benchmark.png", dpi=300)
+
+def plot_percentage_gain_by_benchmark(directory_path, data_dfs, model_names):
+
+    return
     # Calculate the baseline score for each benchmark and program
     baseline_df = data_df[data_df["optimizer"] == "Baseline"].rename(
         columns={"score": "baseline_score"}
@@ -167,6 +323,11 @@ def plot_percentage_gain_by_benchmark(directory_path, data_df):
     cols = math.ceil(math.sqrt(num_benchmarks))
     rows = math.ceil(num_benchmarks / cols)
 
+    if cols <= 1:
+        cols = 3
+    if rows <= 1:
+        rows = 3
+
     # Set up the figure with subplots arranged in a grid
     fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows), sharey=False)
     fig.suptitle(
@@ -177,8 +338,10 @@ def plot_percentage_gain_by_benchmark(directory_path, data_df):
     unique_optimizers = data_to_plot["optimizer"].unique()
     palette = sns.color_palette("viridis", len(unique_optimizers) + 1)[1:]
 
+    if rows == 1 and cols == 1:
+        axes = [axes]
     # Flatten axes array for easy iteration
-    axes = axes.flatten()
+    axes = axes.flatten() if rows > 1 or cols > 1 else axes
 
     # Create subplots for each benchmark
     for i, benchmark in enumerate(benchmarks):
@@ -227,8 +390,12 @@ def plot_percentage_gain_by_benchmark(directory_path, data_df):
     fig.legend(handles=legend_handles, title="Optimizer", loc="upper left")
 
     # Adjust layout and save the figure
-    plt.tight_layout(rect=[0, 0, 1, 0.96])  # To leave space for the suptitle and legend
-    plt.savefig(f"{directory_path}_percentage_gain_by_benchmark.png", dpi=300)
+    if rows > 1 or cols > 1:
+        plt.tight_layout(rect=[0, 0, 1, 0.96])  # To leave space for the suptitle and legend
+    else:
+        plt.subplots_adjust(top=1.2)
+
+    plt.savefig(f"{directory_path}_{'_'.join(model_names)}_percentage_gain_by_benchmark.png", dpi=300)
     plt.close()
 
 
@@ -340,7 +507,7 @@ def display_benchmark_performance(data_df, selected_benchmarks):
     return performance_table
 
 
-def compare_all_programs_with_cot_baseline(data_df):
+def compare_all_programs_with_predict_baseline(data_df):
     # Filter data to only include rows where optimizer is "Baseline"
     baseline_data = data_df[data_df["optimizer"] == "Baseline"]
 
@@ -352,9 +519,7 @@ def compare_all_programs_with_cot_baseline(data_df):
 
     for benchmark, group in benchmark_groups:
         # Get the score for program "CoT" with optimizer "Baseline"
-        cot_score = group[group["program"].isin(["CoT", "ChainOfThought"])][
-            "score"
-        ].values
+        cot_score = group[group["program"].str.contains("predict", case=False)]["score"].values
 
         # Ensure "CoT" exists within the benchmark
         if len(cot_score) == 0:
@@ -385,9 +550,7 @@ def compare_programs_with_reference_across_benchmarks(data_df):
 
     for benchmark, group in benchmark_groups:
         # Get the score for the reference program ("CoT" or "ChainOfThought") with optimizer "Baseline"
-        reference_score = group[group["program"].isin(["CoT", "ChainOfThought"])][
-            "score"
-        ].values
+        reference_score = group[group["program"].str.contains("predict", case=False)]["score"].values
 
         # Ensure that the reference program exists within the benchmark
         if len(reference_score) == 0:
@@ -454,6 +617,38 @@ def find_benchmarks_where_miprov2_performs_worse(data_df):
 
     return underperforming_benchmarks
 
+def sort_dataframe(df, program_order=None, optimizer_order=None):
+    """
+    Sort a DataFrame by custom order for 'program' and 'optimizer' columns.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame to be sorted.
+        program_order (list): Custom order for the 'program' column. Programs not in the list retain their original order.
+        optimizer_order (list): Custom order for the 'optimizer' column. Optimizers not in the list retain their original order.
+    
+    Returns:
+        pd.DataFrame: The sorted DataFrame.
+    """
+    # If program_order is provided, create a mapping for custom sorting
+    if program_order:
+        program_mapping = {program: i for i, program in enumerate(program_order)}
+        df['program_priority'] = df['program'].map(program_mapping).fillna(len(program_order))
+    else:
+        df['program_priority'] = 0  # Default priority for all programs
+    
+    # If optimizer_order is provided, create a mapping for custom sorting
+    if optimizer_order:
+        optimizer_mapping = {optimizer: i for i, optimizer in enumerate(optimizer_order)}
+        df['optimizer_priority'] = df['optimizer'].map(optimizer_mapping).fillna(len(optimizer_order))
+    else:
+        df['optimizer_priority'] = 0  # Default priority for all optimizers
+    
+    # Sort by the calculated priority columns
+    sorted_df = df.sort_values(by=['program_priority', 'optimizer_priority', 'program', 'optimizer']).drop(
+        ['program_priority', 'optimizer_priority'], axis=1
+    )
+    
+    return sorted_df
 
 if __name__ == "__main__":
     import argparse
@@ -462,31 +657,58 @@ if __name__ == "__main__":
 
     args.add_argument(
         "--file_path",
-        type=str,
+        nargs='+',
         required=True,
+        default=[],
         help="Path to the text files containing benchmark results",
+    )
+
+    args.add_argument(
+        "--benchmark",
+        type=str,
+        required=False,
+        default=None,
+        help="Name of the benchmark to analyze",
     )
 
     args = args.parse_args()
 
-    file_path = args.file_path
-    data_df = extract_information_from_files(file_path)
-    # plot_scores_by_benchmark(file_path, data_df)
+    file_paths = args.file_path
+    data_dfs = []
+    model_names = [file_path.split('_')[1] for file_path in file_paths]
+
+
+    # Custom order for program and optimizer
+    program_order = ['Predict', 'ChainOfThought']  # Followed by original order
+    optimizer_order = ['Baseline', 'BootstrapFewshot', 'BootstrapFewshotWithRandomSearch', 'MIPROv2']
+
+    for file_path in file_paths:
+        data_df = extract_information_from_files(file_path)
+        # exclude hoverBench, JudgeBench, and HeartDiseaseBench
+        data_df = data_df[~data_df["benchmark"].isin(["hoverBench", "JudgeBench", "HeartDiseaseBench"])]
+        data_df = sort_dataframe(data_df, program_order=program_order, optimizer_order=optimizer_order)
+        data_dfs.append(data_df)
+    # TODO FIX THIS
+    if args.benchmark:
+        data_df = data_df[data_df["benchmark"] == f"{args.benchmark}Bench"]
+    plot_scores_by_benchmark(file_path, data_dfs, model_names)
+    plot_scores_by_benchmark_model_only(file_path, data_dfs, model_names)
     # plot_percentage_gain_by_benchmark(file_path, data_df)
-    results = analyze_experiments(data_df)
-    import rich
+    for data_df, model_name in zip(data_dfs, model_names):
+        results = analyze_experiments(data_df)
+        import rich
 
-    rich.print(results)
+        rich.print(f"[bold red]Showing results for {model_name}[/bold red]")
+        rich.print(results)
+        results = analyze_experiments(data_df)
+        import rich
 
-    # Example usage
-    programs_list = get_programs(data_df)
-    comparisons = compare_all_programs_with_cot_baseline(data_df)
-    rich.print(comparisons)
+        rich.print(results)
 
-    avg_score_diffs = compare_programs_with_reference_across_benchmarks(data_df)
-    rich.print(avg_score_diffs)
+        # Example usage
+        programs_list = get_programs(data_df)
+        comparisons = compare_all_programs_with_predict_baseline(data_df)
+        rich.print(comparisons)
 
-    table = display_benchmark_performance(data_df, ["HotpotQABench", "IrisBench", "GSM8KBench"])
-    print()
-    rich.print(f"[bold red]Results for {file_path.split('_')[1]}[/bold red]")
-    rich.print(table)
+        avg_score_diffs = compare_programs_with_reference_across_benchmarks(data_df)
+        rich.print(avg_score_diffs)
