@@ -172,7 +172,7 @@ class EvaluateBench(ABC):
             num_threads=self.num_threads,
             display_progress=True,
             # FIXME(shangyin): find a more ergonomic way to set max_errors
-            max_errors=500,
+            max_errors=5000,
             provide_traceback=False,
         )
 
