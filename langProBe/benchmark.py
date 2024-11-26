@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 import random
 import dspy
@@ -11,7 +11,7 @@ from dspy.teleprompt import Teleprompter
 
 from enum import Enum
 
-random.seed(1, version=2)
+import langProBe.optimizers as langprobe_optimizers
 
 
 class DSPyFeatures(Enum):
@@ -68,7 +68,9 @@ class Benchmark(ABC):
     def trim_dataset(self, dataset, size: int) -> None:
         if size is None or size >= len(dataset):
             return dataset
-        return random.sample(dataset, size)
+        rng = random.Random()
+        rng.seed(1)
+        return rng.sample(dataset, size)
 
     def create_splits(self) -> None:
         """
@@ -118,6 +120,14 @@ class BenchmarkMeta:
     metric: Callable
     dataset_mode: str = "lite"
 
+    optimizers: List[langprobe_optimizers.OptimizerConfig] = field(
+        default_factory=lambda: langprobe_optimizers.DEFAULT_OPTIMIZERS
+    )
+
+    # BenchmarkMeta.num_threads has higher priority than run time argument of num_threads
+    # use this as an upper bound for the number of threads to use
+    num_threads: int = None
+
 
 def setup_lm(dspy_config=None):
     lm: dspy.LM = dspy_config.get("lm", dspy.settings.lm)
@@ -162,11 +172,13 @@ class EvaluateBench(ABC):
             num_threads=self.num_threads,
             display_progress=True,
             # FIXME(shangyin): find a more ergonomic way to set max_errors
-            max_errors=100,
+            max_errors=5000,
             provide_traceback=False,
         )
 
-        self.program_name = self.program.__class__.__name__
+        self.program_name = getattr(
+            self.program, "_name", self.program.__class__.__name__
+        )
         self.benchmark_name = self.benchmark.__class__.__name__
 
         self.results: list[EvaluationResult] = []

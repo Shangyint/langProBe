@@ -3,6 +3,32 @@
 ```bash
 pip install git+https://github.com/stanfordnlp/dspy.git
 ```
+
+## Quick Usage
+```bash
+# example with using gpt-4o, with all non-agent datasets
+mkdir evaluation_gpt4o
+DSPY_CACHEDIR=evaluation_gpt4o/.dspy_cache python -m langProBe.evaluation --benchmark_set=nonagent --file_path=evaluation_gpt4o --lm=openai/gpt-4o
+```
+
+```bash
+# example with using llama (change `lm_api_base` to your API provider)
+mkdir evaluation_llama3170b
+DSPY_CACHEDIR=evaluation_llama3170b/.dspy_cache python -m langProBe.evaluation --benchmark_set=nonagent --file_path=evaluation_llama3170b --lm=openai/meta-llama/Meta-Llama-3.1-70b-Instruct --lm_api_base=http://future-hgx-1:7410/v1
+```
+
+```bash
+# parse the result and generate figures
+python -m langProBe.analysis --file_path=evaluation_llama3170b
+```
+
+## Adding Benchmarks, Programs, Optimizers
+
+Benchmarks and programs are defined by the `BenchmarkMeta` class. You can program definitions to existing `BenchmarkMeta`s or define your own `BenchmarkMeta`s.
+Additionally, each `BenchmarkMeta` object also has an `optimizers` field, containing optimizer definitions. You can inspect `optimizers.py` to checkout how to define an optimizer and default optimizers in `DEFAULT_OPTIMIZERS`.
+
+
+
 ## Proposed Structure
 ### Data
 

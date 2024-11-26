@@ -1,5 +1,6 @@
 from .scone_data import SconeBench
 from .scone_program import (
+    SconePredict,
     SconeCoT,
     SconeGeneratorCriticRanker,
     SconeGeneratorCriticFuser,
@@ -11,7 +12,7 @@ import dspy
 benchmark = [
     BenchmarkMeta(
         SconeBench,
-        [SconeCoT, SconeGeneratorCriticRanker, SconeGeneratorCriticFuser],
+        [SconePredict, SconeCoT, SconeGeneratorCriticRanker, SconeGeneratorCriticFuser],
         dspy.evaluate.answer_exact_match,
     )
 ]

@@ -64,13 +64,13 @@ class AlfWorldServerManager:
             with server.start_server(game_filepath=game_filepath):
                 s = time.time()
                 connected = False
-                while time.time() - s < 10:
+                while time.time() - s < 100:
                     try:
                         result = server.request.reset()
                         connected = True
                         break
                     except (ConnectionError, NewConnectionError) as ce:
-                        time.sleep(0.1)
+                        time.sleep(1)
                     except Exception as e:
                         print(traceback.format_exc())
                         raise e

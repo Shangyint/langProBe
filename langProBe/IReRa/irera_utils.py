@@ -1,7 +1,6 @@
 import pandas as pd
 import dspy
 import random
-import argparse
 from typing import Union
 import re
 import os
@@ -12,9 +11,6 @@ import torch
 import sentence_transformers
 from sentence_transformers import SentenceTransformer
 from functools import lru_cache
-
-random.seed(1, version=2)
-
 
 def normalize(
     label: str,
@@ -239,8 +235,10 @@ def load_data(dataset="esco_tech"):
 
     # shuffle
     # NOTE: pull out this seed to get confidence intervals
-    random.shuffle(validation_examples)
-    random.shuffle(test_examples)
+    rng = random.Random()
+    rng.seed(1)
+    rng.shuffle(validation_examples)
+    rng.shuffle(test_examples)
 
     # log some stats
     print(f"Dataset: {dataset}")
@@ -277,8 +275,8 @@ def load_data(dataset="esco_tech"):
         # validation_examples = house_val + tech_val
         validation_examples = house_val
         # shuffle train and val again
-        random.shuffle(train_examples)
-        random.shuffle(validation_examples)
+        rng.shuffle(train_examples)
+        rng.shuffle(validation_examples)
     elif dataset == "biodex_reactions":
         # train_examples = validation_examples[:100]
         # validation_examples = validation_examples[100:200]

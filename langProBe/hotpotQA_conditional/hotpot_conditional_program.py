@@ -8,11 +8,11 @@ class GenerateAnswerInstruction(dspy.Signature):
     question = dspy.InputField(desc="Question we want an answer to")
     answer = dspy.OutputField(desc="Answer to the question")
 
-
+HotPotQACondPredict = program.Predict("question->answer")
 HotPotQACondSimplifiedBaleen = program.SimplifiedBaleen("question->answer")
 HotPotQACondSimplifiedBaleenHandwritten = program.SimplifiedBaleen(
     GenerateAnswerInstruction
 )
 
 # setting names for HotPotQACondSimplifiedBaleenHandwritten
-HotPotQACondSimplifiedBaleenHandwritten.__class__.__name__ = "SimplifiedBaleenWithHandwrittenInstructions"
+HotPotQACondSimplifiedBaleenHandwritten._name = "SimplifiedBaleenWithHandwrittenInstructions"

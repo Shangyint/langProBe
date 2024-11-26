@@ -10,6 +10,7 @@ class ScoNeSignature(dspy.Signature):
     answer = dspy.OutputField(desc="Yes or No")
 
 
+SconePredict = program.Predict(ScoNeSignature)
 SconeCoT = program.CoT(ScoNeSignature)
 SconeGeneratorCriticRanker = program.GeneratorCriticRanker(ScoNeSignature)
 SconeGeneratorCriticFuser = program.GeneratorCriticFuser(ScoNeSignature)

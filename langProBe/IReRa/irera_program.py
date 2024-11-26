@@ -9,6 +9,7 @@ from .irera_utils import (
     extract_labels_from_strings,
     supported_signatures,
 )
+import langProBe.program as program
 import os
 
 
@@ -18,7 +19,23 @@ state = json.load(open(state_path, "r"))
 global_config = IreraConfig.from_dict(state["config"])
 
 
-class Infer(dspy.Module):
+class IReRaPredict(dspy.Module):
+    def __init__(self, config: IreraConfig = global_config):
+        super().__init__()
+        self.config = config
+        self.predict = program.Predict(supported_signatures[config.infer_signature_name])
+
+    def forward(self, text):
+        parsed_outputs = set()
+        output = self.predict(text=text).completions.output
+        parsed_outputs.update(
+            extract_labels_from_strings(output, do_lower=False, strip_punct=False)
+        )
+
+        return dspy.Prediction(predictions=parsed_outputs)
+
+
+class IReRaCOT(dspy.Module):
     def __init__(self, config: IreraConfig = global_config):
         super().__init__()
         self.config = config
@@ -37,7 +54,7 @@ class Infer(dspy.Module):
         return dspy.Prediction(predictions=parsed_outputs)
 
 
-class InferRetrieve(dspy.Module):
+class IReRaRetrieve(dspy.Module):
     """Infer-Retrieve. Sets the Retriever, initializes the prior."""
 
     def __init__(self, config: IreraConfig = global_config):
@@ -46,7 +63,7 @@ class InferRetrieve(dspy.Module):
         self.config = config
 
         # set LM predictor
-        self.infer = Infer(config)
+        self.infer = IReRaCOT(config)
 
         # set retriever
         self.retriever = Retriever(config)
@@ -88,7 +105,7 @@ class InferRetrieve(dspy.Module):
         return scores
 
 
-class InferRetrieveRank(dspy.Module):
+class IReRaRetrieveRank(dspy.Module):
     """Infer-Retrieve-Rank, as defined in https://arxiv.org/abs/2401.12178."""
 
     def __init__(self, config: IreraConfig = global_config):
@@ -100,7 +117,7 @@ class InferRetrieveRank(dspy.Module):
         self.chunker = Chunker(config)
 
         # Set InferRetrieve
-        self.infer_retrieve = InferRetrieve(config)
+        self.infer_retrieve = IReRaRetrieve(config)
 
         # Set Rank
         self.rank = Rank(config)
@@ -138,9 +155,9 @@ class InferRetrieveRank(dspy.Module):
             predictions=selected_options,
         )
 
-    def dump_state(self):
+    def dump_state(self, verbose):
         """Dump the state. Uses the DSPy dump_state but also adds the config file."""
-        return super().dump_state() | {"config": self.config.to_dict()}
+        return super().dump_state(verbose) | {"config": self.config.to_dict()}
 
     def load_state(self, state: dict):
         super().load_state(state)
@@ -160,7 +177,3 @@ class InferRetrieveRank(dspy.Module):
         state = json.load(open(path, "r"))
         return cls.from_state(state)
 
-    def save(self, path: str):
-        state = self.dump_state()
-        with open(path, "w") as fp:
-            json.dump(state, fp)

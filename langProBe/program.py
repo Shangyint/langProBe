@@ -9,6 +9,9 @@ import logging
 #################################### Common Programs ####################################
 
 
+def Predict(signature):
+    return dspy.Predict(signature)
+
 def CoT(signature):
     return dspy.ChainOfThought(signature)
 

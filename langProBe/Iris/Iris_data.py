@@ -2,7 +2,6 @@ import copy
 from ..benchmark import Benchmark
 import dspy
 from datasets import load_dataset
-import random
 
 
 class IrisBench(Benchmark):

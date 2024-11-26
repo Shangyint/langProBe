@@ -2,10 +2,8 @@ from contextlib import contextmanager
 import os
 from pathlib import Path
 import sys
-import dspy.teleprompt
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
-from langProBe.optimizers import create_optimizer, default_optimizers
-from langProBe.visualization import plot_benchmark_results
+from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks
 import dspy
 
@@ -68,7 +66,6 @@ def evaluate(
     benchmark_meta: BenchmarkMeta,
     lm,
     rm,
-    optimizers,
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
@@ -83,22 +80,36 @@ def evaluate(
     dataset_mode = dataset_mode or benchmark_meta.dataset_mode
     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
-    optimizers = [
-        optimizer
-        if isinstance(optimizer, tuple)
-        else (optimizer, {}, {}, dict(use_valset=False))
-        for optimizer in optimizers
-    ]
-    print(f"Evaluating {benchmark.__class__.__name__}")
+    optimizers = benchmark_meta.optimizers
+    benchmark_name = benchmark.__class__.__name__
+
+    num_threads = benchmark_meta.num_threads or num_threads
+    print(f"Evaluating {benchmark_name}")
     print(f"Train set size: {len(benchmark.train_set)}")
     print(f"Validation set size: {len(benchmark.val_set)}")
     print(f"Test set size: {len(benchmark.test_set)}")
+
+    optimizer_names = [optimizer.optimizer.__name__ for optimizer in optimizers]
+    for i, optimizer in enumerate(optimizers):
+        if "name" not in optimizer.langProBe_configs:
+            optimizer.langProBe_configs["name"] = optimizer_names[i]
+
+    if file_path:
+        stats_file = os.path.join(file_path, f"{benchmark_name}.stat")
+        with open(stats_file, "w") as f:
+            f.write(
+                f"benchmark: {benchmark_name}\n"
+                f"lm: {lm}\n"
+                f"rm: {rm}\n"
+                f"train_set_size: {len(benchmark.train_set)}\n"
+                f"val_set_size: {len(benchmark.val_set)}\n"
+                f"test_set_size: {len(benchmark.test_set)}\n"
+                f"optimizers: {optimizer_names}\n"
+                f"optimizer_configs: {optimizers}\n"
+            )
+
     for program in benchmark_meta.program:
         print(f"Program: {program.__class__.__name__}")
-        optimizer_names = [optimizer[0].__name__ for optimizer in optimizers]
-        for i, (_, _, _, optimizer_config) in enumerate(optimizers):
-            if "name" not in optimizer_config:
-                optimizer_config["name"] = optimizer_names[i]
 
         print(f"Optimizers: {'; '.join(optimizer_names)}")
         with suppress_output(suppress=suppress_dspy_output):
@@ -107,14 +118,10 @@ def evaluate(
                 program=program,
                 metric=benchmark_meta.metric,
                 optimizers=[
-                    (
-                        create_optimizer(
-                            optimizer[0],
-                            benchmark_meta.metric,
-                            optimizer[1],
-                            optimizer[2],
-                        ),
-                        optimizer[3],
+                    create_optimizer(
+                        optimizer,
+                        benchmark_meta.metric,
+                        num_threads=num_threads,
                     )
                     for optimizer in optimizers
                 ],
@@ -153,7 +160,6 @@ def evaluate_all(
     benchmarks,
     lm,
     rm,
-    optimizers,
     num_threads=8,
     suppress_dspy_output=True,
     file_path=None,
@@ -165,7 +171,6 @@ def evaluate_all(
             benchmark_meta,
             lm,
             rm,
-            optimizers,
             num_threads,
             suppress_dspy_output,
             file_path,
@@ -184,9 +189,38 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
     )
+
+    parser.add_argument(
+        "--lm",
+        help="The language model to use for evaluation",
+        type=str,
+        default="openai/gpt-4o-mini",
+    )
+
+    parser.add_argument(
+        "--lm_api_base",
+        help="The language model API base to use for evaluation",
+        type=str,
+        default=None,
+    )
+
+    parser.add_argument(
+        "--lm_api_key",
+        help="The language model API key to use for evaluation",
+        type=str,
+        default="None",
+    )
+
+    parser.add_argument(
+        "--benchmark_set",
+        help="The benchmark set to evaluate. Options are full, nonagent, agent.",
+        type=str,
+        default=None,
+    )
+
     parser.add_argument(
         "--benchmark",
-        help="The benchmark to evaluate. If not provided, all benchmarks will be evaluated.",
+        help="The benchmark to evaluate. If not provided, all benchmarks will be evaluated. Providing this argument will override the benchmark_set argument.",
         type=str,
         default=None,
     )
@@ -206,36 +240,64 @@ if __name__ == "__main__":
         default=None,
     )
 
+    parser.add_argument(
+        "--num_threads",
+        help="The number of threads to use for evaluation",
+        type=int,
+        default=8,
+    )
+
+    parser.add_argument(
+        "--dspy_cache_path",
+        help="The cache path for dspy. THIS IS NOT IMPLEMENTED YET. NEED SUPPORT FROM DSPY.\
+            Now please use DSPY_CACHEDIR=/path/to/cache python -m ...",
+        type=str,
+        default=None,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
     dataset_mode = args.dataset_mode
 
-    optimizers = default_optimizers
-
-    lm = dspy.LM("openai/gpt-4o-mini")
+    lm = dspy.LM(args.lm) if not args.lm_api_base else dspy.LM(args.lm, api_base=args.lm_api_base, api_key=args.lm_api_key)
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
+    agent_benchmarks = [
+        ".AlfWorld",
+        ".AppWorld",
+    ]
+
+    nonagent_benchmarks = [
+        ".hover",
+        ".Iris",
+        ".IReRa",
+        ".hotpotQA",
+        ".MATH",
+        ".gsm8k",
+        ".RAGQAArenaTech",
+        ".MMLU",
+        ".swebenchAnnotation",
+        ".scone",
+        ".hotpotQA_conditional",
+        ".HeartDisease",
+        ".judgebench",
+        ".humaneval",
+    ]
+
     benchmarks = (
-        [
-            ".hover",
-            ".AlfWorld",
-            ".humaneval",
-            ".Iris",
-            ".IReRa",
-            ".hotpotQA",
-            ".MATH",
-            ".gsm8k",
-            ".AppWorld",
-            ".RAGQAArenaTech",
-            ".MMLU",
-            ".swe_bench_verified_annotation_task",
-            ".scone",
-            ".hotpotQA_conditional",
-        ]
-        if not args.benchmark
-        else [f".{args.benchmark}"]
+        agent_benchmarks + nonagent_benchmarks
+        if args.benchmark_set == "full"
+        else agent_benchmarks
+        if args.benchmark_set == "agent"
+        else nonagent_benchmarks
+        if args.benchmark_set == "nonagent"
+        else agent_benchmarks + nonagent_benchmarks
     )
+
+    if args.benchmark:
+        benchmarks = [f".{args.benchmark}"]
+
     # get current time to append to the file name
     import datetime
 
@@ -245,10 +307,8 @@ if __name__ == "__main__":
         benchmarks,
         lm,
         rm,
-        optimizers,
         suppress_dspy_output=suppress_dspy_output,
         file_path=file_path,
         dataset_mode=dataset_mode,
+        num_threads=args.num_threads,
     )
-
-    plot_benchmark_results(file_path)
