@@ -6,6 +6,6 @@ import dspy
 
 benchmark = [
     BenchmarkMeta(
-        RAGQAArenaBench, [RAGQACoT, RAGQAPredict, RAGQARAG, RAGQASimplifiedBaleen], dspy.evaluate.SemanticF1()
+        RAGQAArenaBench, [RAGQASimplifiedBaleen(), RAGQACoT, RAGQAPredict, RAGQARAG], dspy.evaluate.SemanticF1()
     )
 ]
