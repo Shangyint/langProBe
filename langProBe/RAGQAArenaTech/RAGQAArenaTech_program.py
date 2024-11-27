@@ -64,4 +64,3 @@ basic_signature = "question -> response"
 RAGQAPredict = program.Predict(basic_signature)
 RAGQACoT = program.CoT(basic_signature)
 RAGQARAG = RAG()
-RAGQASimplifiedBaleen = program.SimplifiedBaleen(basic_signature)
