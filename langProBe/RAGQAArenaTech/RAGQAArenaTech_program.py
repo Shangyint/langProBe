@@ -10,7 +10,7 @@ from dsp.utils import deduplicate
 from .RAGQAArenaTech_utils import GenerateSearchQuery
 
 
-class RAGQASimplifiedBaleen(dspy.Module):
+class SimplifiedBaleen(dspy.Module):
     def __init__(self, num_docs=5, max_hops=2):
         Path("langProBe/RAGQAArenaTech/data").mkdir(exist_ok=True)
 
@@ -65,7 +65,6 @@ class RAGQASimplifiedBaleen(dspy.Module):
         context = []
         for hop in range(self.max_hops):
             query = self.generate_query[hop](context=context, question=question).query
-            print("query", query)
             passages = self.search(query, k=self.num_docs)
             context = deduplicate(context + passages)
         return self.respond(context=context, question=question)
@@ -126,3 +125,4 @@ basic_signature = "question -> response"
 RAGQAPredict = program.Predict(basic_signature)
 RAGQACoT = program.CoT(basic_signature)
 RAGQARAG = RAG()
+RAGQASimplifiedBaleen = SimplifiedBaleen()
