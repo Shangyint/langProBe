@@ -577,6 +577,85 @@ def compare_programs_with_reference_across_benchmarks(data_df):
 
     return avg_score_diffs
 
+def plot_df_with_programs(df, programs, file_name=None):
+    filtered_df = df[
+        (df["program"].isin(programs)) & (df["optimizer"] == "Baseline")
+    ]
+    
+    # Identify benchmarks containing all specified programs
+    valid_benchmarks = filtered_df.groupby("benchmark")["program"].nunique()
+    valid_benchmarks = valid_benchmarks[valid_benchmarks == len(programs)].index
+    
+    # Filter the DataFrame to include only these benchmarks
+    plot_df = filtered_df[filtered_df["benchmark"].isin(valid_benchmarks)]
+    
+    if plot_df.empty:
+        print("No valid data to plot.")
+        return
+
+    # Set up the plot
+    plt.figure(figsize=(10, 6))
+    sns.set(style="whitegrid")
+
+    # Get unique colors for each program
+    palette = sns.color_palette("husl", len(programs))
+    program_colors = dict(zip(programs, palette))
+
+    # Plot each program
+    for program in programs:
+        program_data = plot_df[plot_df["program"] == program]
+        sns.lineplot(
+            data=program_data,
+            x="benchmark",
+            y="score",
+            label=program,
+            color=program_colors[program],
+            marker="o",
+        )
+
+    # Plot averages for each program
+    averages = (
+        plot_df.groupby("program")["score"]
+        .mean()
+        .reindex(programs)
+    )
+    for program, avg in averages.items():
+        plt.axhline(
+            avg,
+            linestyle="--",
+            color=program_colors[program],
+            alpha=0.7,
+        )
+        # Add the average value as text above the line
+        plt.text(
+            x=0.02,  # Position slightly inside the plot
+            y=avg,
+            s=f"{avg:.2f}",
+            color=program_colors[program],
+            fontsize=10,
+            verticalalignment="bottom",
+            horizontalalignment="left",
+        )
+
+    # Customize plot
+    plt.title("Benchmark Scores by Program (Baseline Only)", fontsize=16)
+    plt.xlabel("Benchmark", fontsize=12)
+    plt.ylabel("Score", fontsize=12)
+    plt.xticks(rotation=45, ha="right")
+    
+    # Add a single dotted line in the legend labeled "Average"
+    plt.plot([], [], linestyle="--", color="black", label="Average")
+
+
+    # Update legend
+    plt.legend(title="Programs", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.tight_layout()
+
+    # Save the plot
+    plt.savefig(file_name, dpi=300)
+    plt.close()
+
+
 
 def find_benchmarks_where_miprov2_performs_worse(data_df):
     # Initialize a list to store benchmarks where MIPROv2 performs worse
@@ -695,6 +774,7 @@ if __name__ == "__main__":
     plot_scores_by_benchmark_model_only(file_path, data_dfs, model_names)
     # plot_percentage_gain_by_benchmark(file_path, data_df)
     for data_df, model_name in zip(data_dfs, model_names):
+        data_df.to_csv(f"evaluation_{model_name}.csv", index=False, header=True)
         results = analyze_experiments(data_df)
         import rich
 
@@ -712,3 +792,7 @@ if __name__ == "__main__":
 
         avg_score_diffs = compare_programs_with_reference_across_benchmarks(data_df)
         rich.print(avg_score_diffs)
+
+        plot_df_with_programs(data_df, ["Predict", "ChainOfThought"], file_name=f"{model_name}_program_performance_baseline.png")
+        plot_df_with_programs(data_df, ["Predict", "ChainOfThought", "GeneratorCriticRanker", "GeneratorCriticFuser"], file_name=f"{model_name}_program_performance.png")
+        plot_df_with_programs(data_df, ["Predict", "ChainOfThought", "RAG", "SimplifiedBaleen"], file_name=f"{model_name}_program_performance_rag.png")
