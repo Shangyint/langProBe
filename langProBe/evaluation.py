@@ -244,7 +244,7 @@ if __name__ == "__main__":
         "--num_threads",
         help="The number of threads to use for evaluation",
         type=int,
-        default=8,
+        default=16,
     )
 
     parser.add_argument(

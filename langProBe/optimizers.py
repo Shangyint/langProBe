@@ -36,7 +36,7 @@ DEFAULT_OPTIMIZERS = [
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-        init_args=dict(max_errors=5000, max_labeled_demos=2, num_threads=8),
+        init_args=dict(max_errors=5000, max_labeled_demos=2, num_threads=16),
         compile_args=dict(),
         langProBe_configs=dict(
             use_valset=True, name="BootstrapFewShotWithRandomSearch"
@@ -44,7 +44,7 @@ DEFAULT_OPTIMIZERS = [
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.MIPROv2,
-        init_args=dict(max_errors=5000, auto="medium", num_threads=8),
+        init_args=dict(max_errors=5000, auto="medium", num_threads=16),
         compile_args=dict(
             requires_permission_to_run=False,
             num_trials=20,
