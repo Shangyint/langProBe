@@ -10,6 +10,7 @@ from dsp.utils import deduplicate
 def Predict(signature):
     return dspy.Predict(signature)
 
+
 def CoT(signature):
     return dspy.ChainOfThought(signature)
 

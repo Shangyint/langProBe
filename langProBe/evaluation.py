@@ -70,6 +70,7 @@ def evaluate(
     suppress_dspy_output=True,
     file_path=None,
     dataset_mode=None,
+    use_devset=False,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -126,6 +127,7 @@ def evaluate(
                     for optimizer in optimizers
                 ],
                 num_threads=num_threads,
+                use_devset=use_devset,
             )
             evaluate_bench.evaluate(dspy_config={"lm": lm, "rm": rm})
         print(f"Results: {evaluate_bench.results}")
@@ -164,6 +166,7 @@ def evaluate_all(
     suppress_dspy_output=True,
     file_path=None,
     dataset_mode=None,
+    use_devset=False,
 ):
     benchmarks = register_all_benchmarks(benchmarks)
     for benchmark_meta in benchmarks:
@@ -175,6 +178,7 @@ def evaluate_all(
             suppress_dspy_output,
             file_path,
             dataset_mode,
+            use_devset,
         )
 
 
@@ -255,12 +259,23 @@ if __name__ == "__main__":
         default=None,
     )
 
+    parser.add_argument(
+        "--use_devset",
+        help="Whether to use the dev set for evaluation",
+        action="store_true",
+        default=False,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
     dataset_mode = args.dataset_mode
 
-    lm = dspy.LM(args.lm) if not args.lm_api_base else dspy.LM(args.lm, api_base=args.lm_api_base, api_key=args.lm_api_key)
+    lm = (
+        dspy.LM(args.lm)
+        if not args.lm_api_base
+        else dspy.LM(args.lm, api_base=args.lm_api_base, api_key=args.lm_api_key)
+    )
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     agent_benchmarks = [
@@ -311,4 +326,5 @@ if __name__ == "__main__":
         file_path=file_path,
         dataset_mode=dataset_mode,
         num_threads=args.num_threads,
+        use_devset=args.use_devset,
     )

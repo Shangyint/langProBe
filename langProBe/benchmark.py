@@ -159,6 +159,7 @@ class EvaluateBench(ABC):
         optimizers: list[(Teleprompter, dict)] = None,
         has_assertions: bool = False,
         num_threads: int = 1,
+        use_devset: bool = False,
     ):
         self.features: list[DSPyFeatures] = [DSPyFeatures.BASELINE]
         self.benchmark = benchmark
@@ -166,8 +167,14 @@ class EvaluateBench(ABC):
         self.metric = metric
         self.optimizers = optimizers
         self.num_threads = num_threads
+        if use_devset:
+            devset = benchmark.get_dev_set()
+            print(f"Using devset[{len(devset)}] for evaluation")
+        else:
+            devset = benchmark.get_test_set()
+            print(f"Using testset[{len(devset)}] for evaluation")
         self.evaluate_prog = Evaluate(
-            devset=self.benchmark.get_test_set(),
+            devset=devset,
             metric=self.metric,
             num_threads=self.num_threads,
             display_progress=True,
