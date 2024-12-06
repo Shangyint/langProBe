@@ -1,5 +1,6 @@
 import dspy
 
+
 class GenerateSearchQuery(dspy.Signature):
     """Write a simple search query that will help answer a complex question based on the information we already have."""
 

@@ -68,7 +68,8 @@ class SimplifiedBaleen(dspy.Module):
             passages = self.search(query, k=self.num_docs)
             context = deduplicate(context + passages)
         return self.respond(context=context, question=question)
-    
+
+
 class RAG(dspy.Module):
     def __init__(self, num_docs=5):
         Path("langProBe/RAGQAArenaTech/data").mkdir(exist_ok=True)
@@ -126,3 +127,5 @@ RAGQAPredict = program.Predict(basic_signature)
 RAGQACoT = program.CoT(basic_signature)
 RAGQARAG = RAG()
 RAGQASimplifiedBaleen = SimplifiedBaleen()
+RAGQAGeneratorCriticFuser = program.GeneratorCriticFuser(basic_signature)
+RAGQAGeneratorCriticRanker = program.GeneratorCriticRanker(basic_signature)
