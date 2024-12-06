@@ -729,6 +729,41 @@ def sort_dataframe(df, program_order=None, optimizer_order=None):
     
     return sorted_df
 
+program_map = {
+    'Predict' : 'Predict',
+    'ChainOfThought' : 'CoT', 
+    'GeneratorCriticRanker': 'GeneratorCriticRanker',
+    'GeneratorCriticFuser': 'GeneratorCriticFuser',  
+    'RAG': 'RAG',
+    'EvaluationValidityPredict': 'Predict', 
+    'EvaluationValidityModule': 'CoT', 
+    'CoT': 'CoT',
+    'Classify': 'CoTBasedVote', 
+    'HeartDiseaseClassify': 'CoTBasedVote',  
+    'RetrieveMultiHop': "RetrieveMultiHop",
+    'SimplifiedBaleen': 'SimplifiedBaleen',
+    'SimplifiedBaleenWithHandwrittenInstructions': "SimplifiedBaleenWithHandwrittenInstructions",
+    'UnderspecifiedAnnotationGenerator': "CoT", 
+    'UnderspecifiedAnnotationPredict': "Predict",
+
+    # Relook at the following programs
+    'IReRaCOT' : 'CoT',
+    'IReRaPredict' : 'Predict', 
+    'Infer': "CoT", 
+    'InferRetrieve': 'IReRaRetrieve', 
+    'IReRaRetrieve': 'IReRaRetrieve', 
+    'IReRaRetrieveRank' : "IReRaRetrieveRank",
+    'InferRetrieveRank': "IReRaRetrieveRank",
+    
+    # 'IReRaCOT' : 'IReRaCOT',
+    # 'IReRaPredict' : 'Predict', 
+    # 'Infer': "Infer", 
+    # 'InferRetrieve': 'InferRetrieve', 
+    # 'IReRaRetrieve': 'IReRaRetrieve', 
+    # 'IReRaRetrieveRank' : "IReRaRetrieveRank",
+    # 'InferRetrieveRank': "InferRetrieveRank",
+}
+
 if __name__ == "__main__":
     import argparse
 
@@ -793,6 +828,9 @@ if __name__ == "__main__":
         avg_score_diffs = compare_programs_with_reference_across_benchmarks(data_df)
         rich.print(avg_score_diffs)
 
-        plot_df_with_programs(data_df, ["Predict", "ChainOfThought"], file_name=f"{model_name}_program_performance_baseline.png")
-        plot_df_with_programs(data_df, ["Predict", "ChainOfThought", "GeneratorCriticRanker", "GeneratorCriticFuser"], file_name=f"{model_name}_program_performance.png")
-        plot_df_with_programs(data_df, ["Predict", "ChainOfThought", "RAG", "SimplifiedBaleen"], file_name=f"{model_name}_program_performance_rag.png")
+        # data_df replace with program_map
+        data_df["program"] = data_df["program"].map(program_map)
+
+        plot_df_with_programs(data_df, ["Predict", "CoT"], file_name=f"{model_name}_program_performance_baseline.png")
+        plot_df_with_programs(data_df, ["Predict", "CoT", "GeneratorCriticRanker", "GeneratorCriticFuser"], file_name=f"{model_name}_program_performance.png")
+        plot_df_with_programs(data_df, ["Predict", "CoT", "RAG", "SimplifiedBaleen"], file_name=f"{model_name}_program_performance_rag.png")
