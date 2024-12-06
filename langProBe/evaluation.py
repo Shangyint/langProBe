@@ -264,7 +264,7 @@ if __name__ == "__main__":
     rm = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")
 
     agent_benchmarks = [
-        ".AlfWorld",
+        # ".AlfWorld",
         ".AppWorld",
     ]
 
