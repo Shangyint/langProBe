@@ -602,16 +602,14 @@ def plot_df_with_programs(df, programs, file_name=None):
     program_colors = dict(zip(programs, palette))
 
     # Plot each program
-    for program in programs:
-        program_data = plot_df[plot_df["program"] == program]
-        sns.lineplot(
-            data=program_data,
-            x="benchmark",
-            y="score",
-            label=program,
-            color=program_colors[program],
-            marker="o",
-        )
+    # Create the barplot with hue for programs
+    sns.barplot(
+        data=plot_df,
+        x="benchmark",
+        y="score",
+        hue="program",
+        palette=sns.color_palette("husl", len(programs))
+    )
 
     # Plot averages for each program
     averages = (
