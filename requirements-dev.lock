@@ -6,6 +6,8 @@
 #   features: []
 #   all-features: false
 #   with-sources: false
+#   generate-hashes: false
+#   universal: false
 
 -e file:.
 aiohappyeyeballs==2.4.4
@@ -27,8 +29,6 @@ anyio==4.7.0
     # via openai
 asttokens==3.0.0
     # via stack-data
-async-timeout==5.0.1
-    # via aiohttp
 asyncer==0.0.8
     # via dspy
 attrs==24.3.0
@@ -72,9 +72,6 @@ distro==1.9.0
     # via openai
 dspy @ git+https://github.com/stanfordnlp/dspy.git@0337e7432ff7372a5a99b72bbabb156cc64e842e
     # via langprobe
-exceptiongroup==1.2.2
-    # via anyio
-    # via ipython
 executing==2.1.0
     # via stack-data
 filelock==3.16.1
@@ -292,8 +289,6 @@ tiktoken==0.8.0
 tokenizers==0.21.0
     # via litellm
     # via transformers
-tomli==2.2.1
-    # via black
 torch==2.2.2
     # via langprobe
     # via sentence-transformers
@@ -317,10 +312,8 @@ transformers==4.47.1
 typing-extensions==4.12.2
     # via alembic
     # via anyio
-    # via black
     # via huggingface-hub
     # via ipython
-    # via multidict
     # via openai
     # via pydantic
     # via pydantic-core
