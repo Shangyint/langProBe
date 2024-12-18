@@ -1,13 +1,11 @@
 {
-
   "typeCheckingMode": "off",
   "include": [
     "langProBe"
   ],
-
   "exclude": [
     "**/.conda",
     "langProBe/AppWorld",
     "langProBe/AlfWorld",
-  ],
+  ]
 }

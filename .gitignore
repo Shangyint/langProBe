@@ -11,6 +11,7 @@ langProBe/AppWorld/.conda/
 *.png
 
 data/
+.env*
 
 # result files
 *.txt

@@ -1,11 +1,16 @@
 from contextlib import contextmanager
-import os
 from pathlib import Path
+import os
 import sys
+
+from dotenv import load_dotenv
+import dspy
+
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks
-import dspy
+
+load_dotenv()
 
 
 class CompareAnswerSignature(dspy.Signature):
@@ -303,11 +308,15 @@ if __name__ == "__main__":
     benchmarks = (
         agent_benchmarks + nonagent_benchmarks
         if args.benchmark_set == "full"
-        else agent_benchmarks
-        if args.benchmark_set == "agent"
-        else nonagent_benchmarks
-        if args.benchmark_set == "nonagent"
-        else agent_benchmarks + nonagent_benchmarks
+        else (
+            agent_benchmarks
+            if args.benchmark_set == "agent"
+            else (
+                nonagent_benchmarks
+                if args.benchmark_set == "nonagent"
+                else agent_benchmarks + nonagent_benchmarks
+            )
+        )
     )
 
     if args.benchmark:

@@ -25,8 +25,6 @@ anyio==4.7.0
     # via dspy
     # via httpx
     # via openai
-appnope==0.1.4
-    # via ipython
 asttokens==3.0.0
     # via stack-data
 async-timeout==5.0.1
@@ -72,7 +70,7 @@ diskcache==5.6.3
     # via dspy
 distro==1.9.0
     # via openai
-dspy @ git+https://github.com/stanfordnlp/dspy.git@6dbc8bc730b8e3cea3718525ed733d2434e68a45
+dspy @ git+https://github.com/stanfordnlp/dspy.git@0337e7432ff7372a5a99b72bbabb156cc64e842e
     # via langprobe
 exceptiongroup==1.2.2
     # via anyio
@@ -115,7 +113,7 @@ idna==3.10
     # via yarl
 importlib-metadata==8.5.0
     # via litellm
-ipython==8.17.2
+ipython==8.30.0
     # via langprobe
 jedi==0.19.2
     # via ipython
@@ -228,6 +226,7 @@ python-dateutil==2.9.0.post0
     # via matplotlib
     # via pandas
 python-dotenv==1.0.1
+    # via langprobe
     # via litellm
 pytz==2024.2
     # via pandas
@@ -320,6 +319,7 @@ typing-extensions==4.12.2
     # via anyio
     # via black
     # via huggingface-hub
+    # via ipython
     # via multidict
     # via openai
     # via pydantic
