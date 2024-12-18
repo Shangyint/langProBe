@@ -1,0 +1,640 @@
+====================
+Module 0
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '65', 'sex': 'male', 'cp': 'asymptomatic', 'trestbps': '120', 'chol': '177', 'fbs': '0', 'restecg': 'normal', 'thalach': '140', 'exang': 'no', 'oldpeak': '0.4', 'slope': 'upsloping', 'ca': '0', 'thal': 'reversible'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, the following factors are indicative of a lower risk for heart disease: \n- Normal resting blood pressure (120 mm Hg)\n- Normal serum cholesterol (177 mg/dl)\n- Normal fasting blood sugar (0)\n- Normal resting electrocardiographic results\n- High maximum heart rate achieved (140)\n- No exercise-induced angina\n- Low ST depression induced by exercise (0.4)\n- Upsloping slope of the peak exercise ST segment\n- No major vessels colored by flourosopy (0)\nHowever, the patient is a male (higher risk for heart disease), 65 years old (increased risk for heart disease), has asymptomatic chest pain, and has reversible thalassemia. Considering these factors, the patient's risk for heart disease is moderate, but the overall indicators suggest a lower risk.",
+    answer=False
+)
+====================
+====================
+Module 1
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '43', 'sex': 'male', 'cp': 'asymptomatic', 'trestbps': '115', 'chol': '303', 'fbs': '0', 'restecg': 'normal', 'thalach': '181', 'exang': 'no', 'oldpeak': '1.2', 'slope': 'flat', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="The patient's profile suggests a moderate risk of heart disease. On the positive side, the patient has a normal resting electrocardiographic result, no exercise-induced angina, and a relatively high maximum heart rate achieved (181). Additionally, the patient has no major vessels colored by flourosopy (0) and normal thalassemia.\n\nHowever, there are also some risk factors present. The patient's serum cholesterol level is high (303 mg/dl), which increases the risk of heart disease. The patient's chest pain type is asymptomatic, which may not necessarily indicate heart disease, but other factors should be considered. The ST depression induced by exercise (1.2) is slightly above normal, and the slope of the peak exercise ST segment is flat, which may indicate some level of ischemia.\n\nConsidering these factors, the model predicts that the patient is likely to have heart disease, but the risk is not extremely high.",
+    answer=True
+)
+====================
+====================
+Module 2
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '57', 'sex': 'male', 'cp': 'non-anginal pain', 'trestbps': '150', 'chol': '168', 'fbs': '0', 'restecg': 'normal', 'thalach': '174', 'exang': 'no', 'oldpeak': '1.6', 'slope': 'upsloping', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, the following factors suggest a moderate risk of heart disease: age (57) is above average, sex (male) is a higher risk group, trestbps (150) is slightly elevated, and chol (168) is slightly above average. However, the following factors suggest a lower risk: cp (non-anginal pain) is not indicative of heart disease, restecg (normal) shows no abnormalities, thalach (174) is high indicating good heart rate, exang (no) shows no signs of angina during exercise, and slope (upsloping) is a good sign. Additionally, ca (0) indicates no major vessels colored by flourosopy and thal (normal) shows no abnormalities. The oldpeak value of 1.6 is slightly elevated but not significantly. Considering these factors, the patient's risk of heart disease is moderate, but the provided information does not strongly suggest heart disease.",
+    answer=False
+)
+====================
+====================
+Module 3
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '69', 'sex': 'female', 'cp': 'typical angina', 'trestbps': '140', 'chol': '239', 'fbs': '0', 'restecg': 'normal', 'thalach': '151', 'exang': 'no', 'oldpeak': '1.8', 'slope': 'upsloping', 'ca': '2', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, several factors indicate a moderate to high risk of heart disease. The patient's age (69) is considered older and increases the risk of heart disease. The patient is female, which is generally considered lower risk than male, but still a risk factor. The patient has typical angina, which is a strong indicator of heart disease. The resting blood pressure (140 mm Hg) is slightly elevated, and the serum cholesterol (239 mg/dl) is above the desirable range. The maximum heart rate achieved (151) is within the normal range, but the ST depression induced by exercise (1.8) is slightly elevated, indicating some level of ischemia. The slope of the peak exercise ST segment is upsloping, which is a good sign, but the number of major vessels colored by flourosopy (2) indicates some level of blockage. Considering these factors, we can conclude that the patient is at moderate to high risk for heart disease.",
+    answer=True
+)
+====================
+====================
+Module 0
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '62', 'sex': 'female', 'cp': 'asymptomatic', 'trestbps': '140', 'chol': '268', 'fbs': '0', 'restecg': 'left ventricular hypertrophy', 'thalach': '160', 'exang': 'no', 'oldpeak': '3.6', 'slope': 'downsloping', 'ca': '2', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="The patient's profile suggests a high risk of heart disease. The patient is 62 years old, which is considered older and increases the risk of heart disease. The patient's resting blood pressure is 140 mm Hg, which is slightly above normal and may indicate hypertension. The serum cholesterol level is 268 mg/dl, which is higher than the desirable range (less than 200 mg/dl) and increases the risk of heart disease. The patient's resting electrocardiographic results show left ventricular hypertrophy, which is a common complication of hypertension and increases the risk of heart disease. The ST depression induced by exercise is 3.6, which is significantly above normal (less than 1.0) and may indicate ischemia. The slope of the peak exercise ST segment is downsloping, which is a strong indicator of ischemia. Additionally, the patient has two major vessels colored by flourosopy, indicating significant blockage. Considering these factors, we can conclude that the patient is at high risk for heart disease.",
+    answer=True
+)
+====================
+====================
+Module 1
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '56', 'sex': 'female', 'cp': 'atypical angina', 'trestbps': '140', 'chol': '294', 'fbs': '0', 'restecg': 'left ventricular hypertrophy', 'thalach': '153', 'exang': 'no', 'oldpeak': '1.3', 'slope': 'flat', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="The patient's age (56) is considered moderate, which may contribute to a higher risk of heart disease. The patient's sex (female) is generally considered lower risk than male. However, the chest pain type (atypical angina) is a significant risk factor, indicating that the patient may have experienced angina-like symptoms. The patient's resting blood pressure (140 mm Hg) is slightly elevated, and the serum cholesterol level (294 mg/dl) is also elevated, which increases the risk of heart disease. The patient's resting electrocardiographic results (left ventricular hypertrophy) indicate a common complication of hypertension, which increases the risk of heart disease. The patient's maximum heart rate achieved (153) is within the normal range, and there is no exercise-induced angina. However, the ST depression induced by exercise (1.3) is slightly elevated, and the slope of the peak exercise ST segment (flat) may indicate ischemia. Considering these factors, we can conclude that the patient is at moderate to high risk for heart disease.",
+    answer=True
+)
+====================
+====================
+Module 2
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '46', 'sex': 'male', 'cp': 'non-anginal pain', 'trestbps': '150', 'chol': '231', 'fbs': '0', 'restecg': 'normal', 'thalach': '147', 'exang': 'no', 'oldpeak': '3.6', 'slope': 'flat', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="The patient has several factors that contribute to a moderate to high risk of heart disease. They are a 46-year-old male, which is considered a risk factor. The chest pain type is non-anginal pain, which is not typical of heart disease but does not rule it out. The resting blood pressure is 150 mm Hg, which is slightly above normal and may indicate hypertension. The serum cholesterol is 231 mg/dl, which is slightly above the normal range (less than 200 mg/dl). However, the fasting blood sugar is 0, indicating no elevated fasting blood sugar levels. The resting electrocardiographic results are normal, which is a positive sign. The maximum heart rate achieved is 147, which is within the normal range. The patient does not have exercise-induced angina. However, the ST depression induced by exercise is 3.6, which is significantly above normal (less than 1.0) and may indicate ischemia. The slope of the peak exercise ST segment is flat, which may also indicate ischemia. The number of major vessels colored by flourosopy is 0, which is a good sign.\n\nConsidering these factors, the patient's risk of heart disease is moderate to high.",
+    answer=True
+)
+====================
+====================
+Module 3
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '48', 'sex': 'female', 'cp': 'non-anginal pain', 'trestbps': '130', 'chol': '275', 'fbs': '0', 'restecg': 'normal', 'thalach': '139', 'exang': 'no', 'oldpeak': '0.2', 'slope': 'upsloping', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, the following factors suggest a moderate risk of heart disease: \n- Age (48) is moderate, not particularly high or low for heart disease.\n- Sex is female, which is generally considered lower risk than male.\n- Chest pain type (non-anginal pain) is not typical of heart disease.\n- Resting blood pressure (130 mm Hg) is slightly above normal.\n- Serum cholesterol (275 mg/dl) is high, which is a significant risk factor for heart disease.\n- Fasting blood sugar (0) is normal.\n- Resting electrocardiographic results (normal) do not indicate any abnormalities.\n- Maximum heart rate achieved (139) is relatively low.\n- Exercise-induced angina (no) is not present.\n- ST depression induced by exercise (0.2) is mild.\n- The slope of the peak exercise ST segment (upsloping) is generally a good sign.\n- Number of major vessels colored by flourosopy (0) indicates no significant blockage.\n- Thalassemia (normal) is not a concern.\n\nConsidering these factors, the patient's risk of heart disease is moderate. However, the predicted answer is False, indicating that the patient is unlikely to have heart disease.",
+    answer=False
+)
+====================
+====================
+Module 0
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '54', 'sex': 'male', 'cp': 'asymptomatic', 'trestbps': '110', 'chol': '206', 'fbs': '0', 'restecg': 'left ventricular hypertrophy', 'thalach': '108', 'exang': 'yes', 'oldpeak': '0.0', 'slope': 'flat', 'ca': '1', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, there are several factors that indicate an elevated risk of heart disease. \n\nThe patient's age (54) is considered moderate, and being male, the patient is at a higher risk of heart disease. \n\nThe patient's chest pain type (asymptomatic) does not necessarily indicate heart disease, but other factors should be considered.\n\nThe patient's resting blood pressure (110 mm Hg) is considered normal. \n\nThe patient's serum cholesterol (206 mg/dl) is slightly above normal, which may increase the risk of heart disease.\n\nThe patient's fasting blood sugar (0) is normal.\n\nHowever, the patient's resting electrocardiographic results (left ventricular hypertrophy) indicate a potential complication of hypertension, which increases the risk of heart disease.\n\nThe patient's maximum heart rate achieved (108) is relatively low.\n\nThe patient has exercise-induced angina (yes), which is a significant indicator of heart disease.\n\nThe patient's ST depression induced by exercise (0.0) is normal.\n\nThe slope of the peak exercise ST segment (flat) may indicate ischemia.\n\nThe patient has one major vessel colored by flourosopy, which indicates some level of blockage.\n\nConsidering these factors, the patient is likely to have heart disease.",
+    answer=True
+)
+====================
+====================
+Module 1
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '59', 'sex': 'male', 'cp': 'typical angina', 'trestbps': '160', 'chol': '273', 'fbs': '0', 'restecg': 'left ventricular hypertrophy', 'thalach': '125', 'exang': 'no', 'oldpeak': '0.0', 'slope': 'upsloping', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning='Based on the provided patient information, several factors indicate a high risk for heart disease: \n- Age: 59 years old, which is considered close to the threshold for increased risk.\n- Sex: Male, which is generally considered a higher risk than female.\n- Chest pain type: Typical angina, which is a strong indicator of heart disease.\n- Resting blood pressure: 160 mm Hg, which is significantly above normal and may indicate hypertension.\n- Serum cholesterol: 273 mg/dl, which is above normal (less than 200 mg/dl) and increases the risk of heart disease.\n- Resting electrocardiographic results: Left ventricular hypertrophy, which is a common complication of hypertension and increases the risk of heart disease.\n- Maximum heart rate achieved: 125, which is slightly below the normal range.\n- Exercise-induced angina: No, indicating no signs of angina during exercise.\n- ST depression induced by exercise: 0.0, which is normal.\n- The slope of the peak exercise ST segment: Upsloping, which is a good sign.\n- Number of major vessels colored by flourosopy: 0, which is a good sign.\n\nConsidering these factors, we can conclude that the patient is at high risk for heart disease.',
+    answer=True
+)
+====================
+====================
+Module 2
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '57', 'sex': 'female', 'cp': 'asymptomatic', 'trestbps': '140', 'chol': '241', 'fbs': '0', 'restecg': 'normal', 'thalach': '123', 'exang': 'yes', 'oldpeak': '0.2', 'slope': 'flat', 'ca': '0', 'thal': 'reversible'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, we can identify a mix of risk factors and normal results. The patient's age (57) is considered moderate, and being female generally reduces the risk of heart disease. The chest pain type is asymptomatic, which doesn't necessarily indicate heart disease. The resting blood pressure (140 mm Hg) is slightly above normal, and the serum cholesterol (241 mg/dl) is moderately elevated. However, the fasting blood sugar is 0, indicating no elevated fasting blood sugar levels.\n\nThe resting electrocardiographic results are normal, which is a good sign. However, the maximum heart rate achieved (123) is relatively low, which may indicate a reduced cardiovascular capacity. The patient does experience exercise-induced angina (yes), which increases the risk of heart disease. The ST depression induced by exercise (0.2) is slightly elevated, and the slope of the peak exercise ST segment (flat) may indicate some level of ischemia. The number of major vessels colored by flourosopy is 0, which is a good sign. The patient's thalassemia is reversible, which may indicate some level of anemia.\n\nConsidering these factors, the patient's risk of heart disease is moderate to high due to the presence of exercise-induced angina, elevated cholesterol, and other risk factors.",
+    answer=True
+)
+====================
+====================
+Module 3
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '57', 'sex': 'male', 'cp': '0', 'trestbps': '130', 'chol': '131', 'fbs': '0', 'restecg': 'ST-T wave abnormality', 'thalach': '115', 'exang': 'yes', 'oldpeak': '1.2', 'slope': 'upsloping', 'ca': '1', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning='Based on the provided patient information, several factors suggest a moderate risk of heart disease. The patient is 57 years old, which is considered middle-aged and increases the risk of heart disease. The patient is male, which is a risk factor. The chest pain type is not specified, but other factors should be considered. The resting blood pressure is 130 mm Hg, which is within the normal range. The serum cholesterol is 131 mg/dl, which is within the normal range (less than 200 mg/dl). The fasting blood sugar is 0, indicating no elevated fasting blood sugar levels.\n\nHowever, several other factors suggest an increased risk. The resting electrocardiographic results show an ST-T wave abnormality, which may indicate ischemia. The maximum heart rate achieved is 115, which is within the normal range but close to the threshold. The patient has exercise-induced angina, indicating signs of angina during exercise. The ST depression induced by exercise is 1.2, which is slightly above normal. The slope of the peak exercise ST segment is upsloping, which may indicate a good heart rate response to exercise, but other factors should be considered. One major vessel is colored by flourosopy, indicating some blockage.\n\nConsidering these factors, we can conclude that the patient is at moderate to high risk for heart disease.',
+    answer=True
+)
+====================
+====================
+Module 0
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '46', 'sex': 'male', 'cp': 'atypical angina', 'trestbps': '101', 'chol': '197', 'fbs': '1', 'restecg': 'normal', 'thalach': '156', 'exang': 'no', 'oldpeak': '0.0', 'slope': 'upsloping', 'ca': '0', 'thal': 'reversible'}
+===
+OUTPUT
+Prediction(
+    reasoning='Based on the provided patient information, we can analyze the following factors to predict the presence of heart disease:\n- Age: 46 years old, which is considered moderate risk.\n- Sex: Male, which is generally considered higher risk than female.\n- Chest pain type: Atypical angina, which is a risk factor for heart disease.\n- Resting blood pressure: 101 mm Hg, which is slightly above normal but not significantly high.\n- Serum cholesterol: 197 mg/dl, which is slightly above normal but not significantly high.\n- Fasting blood sugar: 1, indicating elevated fasting blood sugar levels, which is a risk factor for heart disease.\n- Resting electrocardiographic results: Normal, which is a positive sign.\n- Maximum heart rate achieved: 156, which is within the normal range.\n- Exercise-induced angina: No, indicating no signs of angina during exercise.\n- ST depression induced by exercise: 0.0, indicating no significant ST depression.\n- The slope of the peak exercise ST segment: Upsloping, which is a good sign.\n- Number of major vessels colored by flourosopy: 0, indicating no significant blockage.\n- Thalassemia: Reversible, which indicates some level of anemia.\n\nConsidering these factors, we can conclude that the patient is at moderate risk for heart disease, and the presence of heart disease is likely.',
+    answer=True
+)
+====================
+====================
+Module 1
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '54', 'sex': 'male', 'cp': 'atypical angina', 'trestbps': '192', 'chol': '283', 'fbs': '0', 'restecg': 'left ventricular hypertrophy', 'thalach': '195', 'exang': 'no', 'oldpeak': '0.0', 'slope': 'upsloping', 'ca': '1', 'thal': 'reversible'}
+===
+OUTPUT
+Prediction(
+    reasoning='Based on the provided patient information, several factors indicate a high risk of heart disease:\n- Age: 54 years old, which is considered middle-aged and increases the risk of heart disease.\n- Sex: Male, which is generally considered higher risk than female.\n- Chest pain type: Atypical angina, which indicates a potential heart condition.\n- Resting blood pressure: 192 mm Hg, which is significantly above normal and may indicate hypertension.\n- Serum cholesterol: 283 mg/dl, which is above normal (less than 200 mg/dl) and increases the risk of heart disease.\n- Resting electrocardiographic results: Left ventricular hypertrophy, which is a common complication of hypertension and increases the risk of heart disease.\n- Maximum heart rate achieved: 195, which is high but not necessarily an indicator of heart disease.\n- Exercise-induced angina: No, indicating no signs of angina during exercise.\n- ST depression induced by exercise: 0.0, which is normal.\n- The slope of the peak exercise ST segment: Upsloping, which is a good sign, but other factors dominate the prediction.\n- Number of major vessels colored by flourosopy: 1, which indicates some level of blockage.\n- Thalassemia: Reversible, which indicates some level of anemia.\n\nConsidering these factors, we can conclude that the patient is at high risk for heart disease.',
+    answer=True
+)
+====================
+====================
+Module 2
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '56', 'sex': 'male', 'cp': 'atypical angina', 'trestbps': '120', 'chol': '240', 'fbs': '0', 'restecg': 'normal', 'thalach': '169', 'exang': 'no', 'oldpeak': '0.0', 'slope': 'downsloping', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, the following factors are considered in predicting the presence of heart disease:\n- Age: 56 years old, which is considered middle-aged and may contribute to a higher risk of heart disease.\n- Sex: Male, which is generally considered higher risk than female.\n- Chest pain type: Atypical angina, which may indicate ischemia.\n- Resting blood pressure: 120 mm Hg, which is considered normal.\n- Serum cholesterol: 240 mg/dl, which is slightly above normal and may contribute to a higher risk of heart disease.\n- Fasting blood sugar: 0, indicating no elevated fasting blood sugar levels.\n- Resting electrocardiographic results: Normal, which does not indicate any abnormalities.\n- Maximum heart rate achieved: 169, which is considered high and may contribute to a lower risk of heart disease.\n- Exercise-induced angina: No, indicating no signs of angina during exercise.\n- ST depression induced by exercise: 0.0, which is considered normal.\n- The slope of the peak exercise ST segment: Downsloping, which may indicate ischemia.\n- Number of major vessels colored by flourosopy: 0, which indicates no significant blockage.\n- Thalassemia: Normal, which does not indicate any abnormalities.\n\nConsidering these factors, the patient's risk of heart disease is moderate to high. The presence of atypical angina and downsloping ST segment slope suggest a possible risk of ischemia, despite the normal resting electrocardiographic results and lack of exercise-induced angina.",
+    answer=True
+)
+====================
+====================
+Module 3
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '50', 'sex': 'female', 'cp': 'non-anginal pain', 'trestbps': '120', 'chol': '219', 'fbs': '0', 'restecg': 'normal', 'thalach': '158', 'exang': 'no', 'oldpeak': '1.6', 'slope': 'flat', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the provided patient information, several factors are considered:\n\n1. Age: 50 years old, which is considered middle-aged.\n2. Sex: Female, which is generally considered lower risk than male.\n3. Chest pain type: Non-anginal pain, which may indicate a lower risk of heart disease.\n4. Resting blood pressure: 120 mm Hg, which is within the normal range.\n5. Serum cholesterol: 219 mg/dl, which is slightly above normal (less than 200 mg/dl) but not severely elevated.\n6. Fasting blood sugar: 0, indicating no elevated fasting blood sugar levels.\n7. Resting electrocardiographic results: Normal, which is a good sign.\n8. Maximum heart rate achieved: 158, which is within the normal range.\n9. Exercise-induced angina: No, indicating no signs of angina during exercise.\n10. ST depression induced by exercise: 1.6, which is slightly above normal (less than 1.0) but not severely elevated.\n11. The slope of the peak exercise ST segment: Flat, which may indicate some level of ischemia.\n12. Number of major vessels colored by flourosopy: 0, which is a good sign indicating no significant blockage.\n13. Thalassemia: Normal, indicating no anemia.\n\nConsidering these factors, the patient's risk of heart disease is moderate. However, the flat slope of the peak exercise ST segment and the slightly elevated ST depression induced by exercise suggest some level of ischemia. Nevertheless, the overall profile is not strongly indicative of heart disease.",
+    answer=False
+)
+====================
+====================
+Module 0
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '65', 'sex': 'male', 'cp': 'asymptomatic', 'trestbps': '120', 'chol': '177', 'fbs': '0', 'restecg': 'normal', 'thalach': '140', 'exang': 'no', 'oldpeak': '0.4', 'slope': 'upsloping', 'ca': '0', 'thal': 'reversible'}
+===
+OUTPUT
+Prediction(
+    reasoning="The patient's profile does not strongly indicate the presence of heart disease. The patient's age (65) and asymptomatic chest pain are risk factors, but the patient has normal resting blood pressure (120 mmHg), relatively normal serum cholesterol (177 mg/dl), and normal resting electrocardiographic results. The patient's maximum heart rate achieved (140) and upsloping slope of the peak exercise ST segment are also within normal limits. The patient does not have exercise-induced angina and has a low ST depression induced by exercise relative to rest (0.4). The patient has no major vessels colored by flourosopy, which suggests no blockage. The reversible thalassemia result is not a strong indicator of heart disease in this case.",
+    answer=False
+)
+====================
+====================
+Module 1
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '46', 'sex': 'male', 'cp': 'non-anginal pain', 'trestbps': '150', 'chol': '231', 'fbs': '0', 'restecg': 'normal', 'thalach': '147', 'exang': 'no', 'oldpeak': '3.6', 'slope': 'flat', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the given patient information, several factors suggest a higher risk of heart disease: the patient's age (46), sex (male), elevated resting blood pressure (150 mmHg), and elevated serum cholesterol level (231 mg/dl). Additionally, the patient's ST depression induced by exercise relative to rest (3.6) is high, and the slope of the peak exercise ST segment is flat, both of which are signs of heart disease. However, the patient's resting electrocardiographic results are normal, and the patient does not have exercise-induced angina.\n\nConsidering these factors, the prediction model would likely predict that the patient has heart disease due to the combination of risk factors.",
+    answer=True
+)
+====================
+====================
+Module 2
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '69', 'sex': 'female', 'cp': 'typical angina', 'trestbps': '140', 'chol': '239', 'fbs': '0', 'restecg': 'normal', 'thalach': '151', 'exang': 'no', 'oldpeak': '1.8', 'slope': 'upsloping', 'ca': '2', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="Based on the patient's profile, several factors suggest a higher risk of heart disease. The patient is 69 years old, which is considered high-risk for heart disease. The patient has typical angina, which is a significant indicator of heart disease. The patient's resting blood pressure is 140 mmHg, which is slightly elevated. The patient's maximum heart rate achieved is 151, which is within the normal range. However, the patient's ST depression induced by exercise relative to rest is 1.8, which may indicate some level of heart disease. The slope of the peak exercise ST segment is upsloping, which is generally a good sign. However, the patient has two major vessels colored by flourosopy, which is a sign of heart disease.\n\nConsidering these factors, the prediction model would likely predict that the patient has heart disease due to the presence of typical angina and significant vessel blockage.",
+    answer=True
+)
+====================
+====================
+Module 3
+===
+PREDICTOR
+Predict(StringSignature(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal -> reasoning, answer
+    instructions='Given patient information, predict the presence of heart disease.'
+    age = Field(annotation=str required=True json_schema_extra={'desc': 'Age in years', '__dspy_field_type': 'input', 'prefix': 'Age:'})
+    sex = Field(annotation=str required=True json_schema_extra={'desc': 'Sex (male or female)', '__dspy_field_type': 'input', 'prefix': 'Sex:'})
+    cp = Field(annotation=str required=True json_schema_extra={'desc': 'Chest pain type (typical angina, atypical angina, non-anginal pain, asymptomatic)', '__dspy_field_type': 'input', 'prefix': 'Cp:'})
+    trestbps = Field(annotation=str required=True json_schema_extra={'desc': 'Resting blood pressure (in mm Hg on admission to the hospital)', '__dspy_field_type': 'input', 'prefix': 'Trestbps:'})
+    chol = Field(annotation=str required=True json_schema_extra={'desc': 'Serum cholestoral in mg/dl', '__dspy_field_type': 'input', 'prefix': 'Chol:'})
+    fbs = Field(annotation=str required=True json_schema_extra={'desc': 'Fasting blood sugar > 120 mg/dl (true or false)', '__dspy_field_type': 'input', 'prefix': 'Fbs:'})
+    restecg = Field(annotation=str required=True json_schema_extra={'desc': 'Resting electrocardiographic results (normal, ST-T wave abnormality, left ventricular hypertrophy)', '__dspy_field_type': 'input', 'prefix': 'Restecg:'})
+    thalach = Field(annotation=str required=True json_schema_extra={'desc': 'Maximum heart rate achieved', '__dspy_field_type': 'input', 'prefix': 'Thalach:'})
+    exang = Field(annotation=str required=True json_schema_extra={'desc': 'Exercise induced angina (yes or no)', '__dspy_field_type': 'input', 'prefix': 'Exang:'})
+    oldpeak = Field(annotation=str required=True json_schema_extra={'desc': 'ST depression induced by exercise relative to rest', '__dspy_field_type': 'input', 'prefix': 'Oldpeak:'})
+    slope = Field(annotation=str required=True json_schema_extra={'desc': 'The slope of the peak exercise ST segment (upsloping, flat, downsloping)', '__dspy_field_type': 'input', 'prefix': 'Slope:'})
+    ca = Field(annotation=str required=True json_schema_extra={'desc': 'Number of major vessels (0-3) colored by flourosopy', '__dspy_field_type': 'input', 'prefix': 'Ca:'})
+    thal = Field(annotation=str required=True json_schema_extra={'desc': 'Thalassemia (normal, fixed defect, reversible defect)', '__dspy_field_type': 'input', 'prefix': 'Thal:'})
+    reasoning = Field(annotation=str required=True json_schema_extra={'prefix': "Reasoning: Let's think step by step in order to", 'desc': '${reasoning}', '__dspy_field_type': 'output'})
+    answer = Field(annotation=bool required=True json_schema_extra={'__dspy_field_type': 'output', 'prefix': 'Answer:', 'desc': '${answer}'})
+))
+===
+INPUT
+{'age': '43', 'sex': 'male', 'cp': 'asymptomatic', 'trestbps': '115', 'chol': '303', 'fbs': '0', 'restecg': 'normal', 'thalach': '181', 'exang': 'no', 'oldpeak': '1.2', 'slope': 'flat', 'ca': '0', 'thal': 'normal'}
+===
+OUTPUT
+Prediction(
+    reasoning="The patient's profile suggests a combination of risk factors for heart disease. The patient is male and 43 years old, which is considered a moderate risk for heart disease. The patient has asymptomatic chest pain, which might indicate a lack of typical angina symptoms. The patient's resting blood pressure is 115 mmHg, which is within the normal range. The patient's serum cholesterol level is 303 mg/dl, which is higher than the normal range (less than 200 mg/dl), indicating a risk factor for heart disease. The patient's fasting blood sugar is normal (less than 120 mg/dl). The patient's resting electrocardiographic results are normal, which is a positive sign. The patient's maximum heart rate achieved is 181, which is within the normal range (120-180 beats per minute). The patient does not have exercise-induced angina. However, the patient's ST depression induced by exercise relative to rest is 1.2, and the slope of the peak exercise ST segment is flat, both of which are signs of potential heart disease.\n\nConsidering the mixed results, the prediction is that the patient does not have severe heart disease but may still have some risk factors.",
+    answer=False
+)
+====================

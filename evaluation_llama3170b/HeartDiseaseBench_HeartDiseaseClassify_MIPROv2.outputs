@@ -1,0 +1,615 @@
+    age     sex                cp trestbps chol fbs  \
+0    43    male      asymptomatic      115  303   0   
+1    69  female    typical angina      140  239   0   
+2    57    male                 0      130  131   0   
+3    54    male      asymptomatic      110  206   0   
+4    57  female      asymptomatic      140  241   0   
+5    62  female      asymptomatic      140  268   0   
+6    48  female  non-anginal pain      130  275   0   
+7    56    male   atypical angina      120  240   0   
+8    54    male   atypical angina      192  283   0   
+9    59    male    typical angina      160  273   0   
+10   56  female   atypical angina      140  294   0   
+11   65    male      asymptomatic      120  177   0   
+12   46    male  non-anginal pain      150  231   0   
+13   50  female  non-anginal pain      120  219   0   
+14   57    male  non-anginal pain      150  168   0   
+15   46    male   atypical angina      101  197   1   
+16   66    male      asymptomatic      112  212   0   
+17   62    male      asymptomatic      120  267   0   
+18   57    male      asymptomatic      165  289   1   
+19   44    male  non-anginal pain      140  235   0   
+20   51  female  non-anginal pain      120  295   0   
+21   35  female      asymptomatic      138  183   0   
+22   41  female   atypical angina      130  204   0   
+23   62    male  non-anginal pain      130  231   0   
+24   59    male    typical angina      134  204   0   
+25   41    male   atypical angina      120  157   0   
+26   54  female  non-anginal pain      135  304   1   
+27   60  female    typical angina      150  240   0   
+28   41  female   atypical angina      105  198   0   
+29   40    male      asymptomatic      110  167   0   
+30   61    male      asymptomatic      140  207   0   
+31   43  female  non-anginal pain      122  213   0   
+32   58  female    typical angina      150  283   1   
+33   52    male   atypical angina      128  205   1   
+34   47    male  non-anginal pain      130  253   0   
+35   46  female      asymptomatic      138  243   0   
+36   59    male      asymptomatic      170  326   0   
+37   43    male  non-anginal pain      130  315   0   
+38   54  female   atypical angina      132  288   1   
+39   58    male      asymptomatic      146  218   0   
+40   64  female      asymptomatic      180  325   0   
+41   60    male      asymptomatic      140  293   0   
+42   58  female      asymptomatic      170  225   1   
+43   71  female      asymptomatic      112  149   0   
+44   52    male   atypical angina      120  325   0   
+45   66    male      asymptomatic      120  302   0   
+46   54    male  non-anginal pain      125  273   0   
+47   63    male      asymptomatic      130  330   1   
+48   42    male  non-anginal pain      120  240   1   
+49   45    male    typical angina      110  264   0   
+50   42  female      asymptomatic      102  265   0   
+51   67  female  non-anginal pain      152  277   0   
+52   44    male      asymptomatic      120  169   0   
+53   49    male  non-anginal pain      118  149   0   
+54   40    male    typical angina      140  199   0   
+55   53    male      asymptomatic      140  203   1   
+56   55    male      asymptomatic      132  353   0   
+57   59    male      asymptomatic      135  234   0   
+58   58    male      asymptomatic      100  234   0   
+59   47    male      asymptomatic      112  204   0   
+60   58    male   atypical angina      120  284   0   
+61   54    male      asymptomatic      140  239   0   
+62   62  female      asymptomatic      140  394   0   
+63   62  female  non-anginal pain      130  263   0   
+64   54  female  non-anginal pain      108  267   0   
+65   62  female      asymptomatic      150  244   0   
+66   63    male      asymptomatic      130  254   0   
+67   64    male    typical angina      170  227   0   
+68   44    male  non-anginal pain      120  226   0   
+69   34    male    typical angina      118  182   0   
+70   54    male      asymptomatic      124  266   0   
+71   46  female  non-anginal pain      142  177   0   
+72   62  female      asymptomatic      160  164   0   
+73   50  female      asymptomatic      110  254   0   
+74   44    male      asymptomatic      112  290   0   
+75   60  female  non-anginal pain      102  318   0   
+76   67    male  non-anginal pain      152  212   0   
+77   45    male      asymptomatic      142  309   0   
+78   71  female   atypical angina      160  302   0   
+79   54    male   atypical angina      108  309   0   
+80   65    male    typical angina      138  282   1   
+81   64  female  non-anginal pain      140  313   0   
+82   54    male  non-anginal pain      150  232   0   
+83   50    male      asymptomatic      144  200   0   
+84   51    male    typical angina      125  213   0   
+85   53  female      asymptomatic      130  264   0   
+86   50    male  non-anginal pain      129  196   0   
+87   55  female   atypical angina      132  342   0   
+88   58  female   atypical angina      136  319   1   
+89   70    male      asymptomatic      145  174   0   
+90   62  female      asymptomatic      138  294   1   
+91   41    male      asymptomatic      110  172   0   
+92   74  female   atypical angina      120  269   0   
+93   45  female   atypical angina      130  234   0   
+94   68  female  non-anginal pain      120  211   0   
+95   44    male   atypical angina      120  220   0   
+96   66  female    typical angina      150  226   0   
+97   56    male      asymptomatic      132  184   0   
+98   63    male      asymptomatic      140  187   0   
+99   42    male    typical angina      148  244   0   
+100  57    male   atypical angina      154  232   0   
+101  29    male   atypical angina      130  204   0   
+102  65    male      asymptomatic      135  254   0   
+103  58    male  non-anginal pain      132  224   0   
+104  35    male   atypical angina      122  192   0   
+105  55    male      asymptomatic      140  217   0   
+106  64    male      asymptomatic      145  212   0   
+107  48    male  non-anginal pain      124  255   1   
+108  45    male   atypical angina      128  308   0   
+109  64    male  non-anginal pain      140  335   0   
+110  59    male      asymptomatic      138  271   0   
+111  52    male      asymptomatic      108  233   1   
+112  53    male      asymptomatic      123  282   0   
+113  57  female    typical angina      130  236   0   
+114  63    male    typical angina      145  233   1   
+115  76  female  non-anginal pain      140  197   0   
+116  60    male      asymptomatic      125  258   0   
+117  57  female      asymptomatic      120  354   0   
+118  60    male      asymptomatic      117  230   1   
+119  63  female   atypical angina      140  195   0   
+120  60    male      asymptomatic      130  253   0   
+121  57    male      asymptomatic      110  335   0   
+122  61    male      asymptomatic      120  260   0   
+123  70    male      asymptomatic      130  322   0   
+124  52    male      asymptomatic      112  230   0   
+125  66  female  non-anginal pain      146  278   0   
+126  54  female  non-anginal pain      160  201   0   
+127  45    male      asymptomatic      104  208   0   
+128  59    male      asymptomatic      164  176   1   
+129  39  female  non-anginal pain       94  199   0   
+130  57    male      asymptomatic      150  276   0   
+131  58    male      asymptomatic      150  270   0   
+132  38    male    typical angina      120  231   0   
+133  56  female      asymptomatic      200  288   1   
+134  51  female      asymptomatic      130  305   0   
+135  48    male      asymptomatic      124  274   0   
+136  51  female  non-anginal pain      140  308   0   
+137  49    male  non-anginal pain      120  188   0   
+138  45  female      asymptomatic      138  236   0   
+139  51    male  non-anginal pain      100  222   0   
+140  51    male  non-anginal pain      110  175   0   
+141  54  female  non-anginal pain      110  214   0   
+142  56    male      asymptomatic      130  283   1   
+143  68    male      asymptomatic      144  193   1   
+144  55    male   atypical angina      130  262   0   
+145  44  female  non-anginal pain      118  242   0   
+146  57  female                 0      140  241   0   
+147  53    male  non-anginal pain      130  197   1   
+148  60  female      asymptomatic      158  305   0   
+149  64    male    typical angina      110  211   0   
+150  42    male  non-anginal pain      130  180   0   
+151  57    male      asymptomatic      110  201   0   
+
+                          restecg thalach exang oldpeak        slope ca  \
+0                          normal     181    no     1.2         flat  0   
+1                          normal     151    no     1.8    upsloping  2   
+2           ST-T wave abnormality     115   yes     1.2    upsloping  1   
+3    left ventricular hypertrophy     108   yes     0.0         flat  1   
+4                          normal     123   yes     0.2         flat  0   
+5    left ventricular hypertrophy     160    no     3.6  downsloping  2   
+6                          normal     139    no     0.2    upsloping  0   
+7                          normal     169    no     0.0  downsloping  0   
+8    left ventricular hypertrophy     195    no     0.0    upsloping  1   
+9    left ventricular hypertrophy     125    no     0.0    upsloping  0   
+10   left ventricular hypertrophy     153    no     1.3         flat  0   
+11                         normal     140    no     0.4    upsloping  0   
+12                         normal     147    no     3.6         flat  0   
+13                         normal     158    no     1.6         flat  0   
+14                         normal     174    no     1.6    upsloping  0   
+15                         normal     156    no     0.0    upsloping  0   
+16   left ventricular hypertrophy     132   yes     0.1    upsloping  1   
+17                         normal      99   yes     1.8         flat  2   
+18   left ventricular hypertrophy     124    no     1.0         flat  3   
+19   left ventricular hypertrophy     180    no     0.0    upsloping  0   
+20   left ventricular hypertrophy     157    no     0.6    upsloping  0   
+21                         normal     182    no     1.4    upsloping  0   
+22   left ventricular hypertrophy     172    no     1.4    upsloping  0   
+23                         normal     146    no     1.8         flat  3   
+24                         normal     162    no     0.8    upsloping  2   
+25                         normal     182    no     0.0    upsloping  0   
+26                         normal     170    no     0.0    upsloping  0   
+27                         normal     171    no     0.9    upsloping  0   
+28                         normal     168    no     0.0    upsloping  1   
+29   left ventricular hypertrophy     114   yes     2.0         flat  0   
+30   left ventricular hypertrophy     138   yes     1.9    upsloping  1   
+31                         normal     165    no     0.2         flat  0   
+32   left ventricular hypertrophy     162    no     1.0    upsloping  0   
+33                         normal     184    no     0.0    upsloping  0   
+34                         normal     179    no     0.0    upsloping  0   
+35   left ventricular hypertrophy     152   yes     0.0         flat  0   
+36   left ventricular hypertrophy     140   yes     3.4  downsloping  0   
+37                         normal     162    no     1.9    upsloping  1   
+38   left ventricular hypertrophy     159   yes     0.0    upsloping  1   
+39                         normal     105    no     2.0         flat  1   
+40                         normal     154   yes     0.0    upsloping  0   
+41   left ventricular hypertrophy     170    no     1.2         flat  2   
+42   left ventricular hypertrophy     146   yes     2.8         flat  2   
+43                         normal     125    no     1.6         flat  0   
+44                         normal     172    no     0.2    upsloping  0   
+45   left ventricular hypertrophy     151    no     0.4         flat  0   
+46   left ventricular hypertrophy     152    no     0.5  downsloping  1   
+47   left ventricular hypertrophy     132   yes     1.8    upsloping  3   
+48                         normal     194    no     0.8  downsloping  0   
+49                         normal     132    no     1.2         flat  0   
+50   left ventricular hypertrophy     122    no     0.6         flat  0   
+51                         normal     172    no     0.0    upsloping  1   
+52                         normal     144   yes     2.8  downsloping  0   
+53   left ventricular hypertrophy     126    no     0.8    upsloping  3   
+54                         normal     178   yes     1.4    upsloping  0   
+55   left ventricular hypertrophy     155   yes     3.1  downsloping  0   
+56                         normal     132   yes     1.2         flat  1   
+57                         normal     161    no     0.5         flat  0   
+58                         normal     156    no     0.1    upsloping  1   
+59                         normal     143    no     0.1    upsloping  0   
+60   left ventricular hypertrophy     160    no     1.8         flat  0   
+61                         normal     160    no     1.2    upsloping  0   
+62   left ventricular hypertrophy     157    no     1.2         flat  0   
+63                         normal      97    no     1.2         flat  1   
+64   left ventricular hypertrophy     167    no     0.0    upsloping  0   
+65                         normal     154   yes     1.4         flat  0   
+66   left ventricular hypertrophy     147    no     1.4         flat  1   
+67   left ventricular hypertrophy     155    no     0.6         flat  0   
+68                         normal     169    no     0.0    upsloping  0   
+69   left ventricular hypertrophy     174    no     0.0    upsloping  0   
+70   left ventricular hypertrophy     109   yes     2.2         flat  1   
+71   left ventricular hypertrophy     160   yes     1.4  downsloping  0   
+72   left ventricular hypertrophy     145    no     6.2  downsloping  3   
+73   left ventricular hypertrophy     159    no     0.0    upsloping  0   
+74   left ventricular hypertrophy     153    no     0.0    upsloping  1   
+75                         normal     160    no     0.0    upsloping  1   
+76   left ventricular hypertrophy     150    no     0.8         flat  0   
+77   left ventricular hypertrophy     147   yes     0.0         flat  3   
+78                         normal     162    no     0.4    upsloping  2   
+79                         normal     156    no     0.0    upsloping  0   
+80   left ventricular hypertrophy     174    no     1.4         flat  1   
+81                         normal     133    no     0.2    upsloping  0   
+82   left ventricular hypertrophy     165    no     1.6    upsloping  0   
+83   left ventricular hypertrophy     126   yes     0.9         flat  0   
+84   left ventricular hypertrophy     125   yes     1.4    upsloping  1   
+85   left ventricular hypertrophy     143    no     0.4         flat  0   
+86                         normal     163    no     0.0    upsloping  0   
+87                         normal     166    no     1.2    upsloping  0   
+88   left ventricular hypertrophy     152    no     0.0    upsloping  2   
+89                         normal     125   yes     2.6  downsloping  0   
+90                         normal     106    no     1.9         flat  3   
+91   left ventricular hypertrophy     158    no     0.0    upsloping  0   
+92   left ventricular hypertrophy     121   yes     0.2    upsloping  1   
+93   left ventricular hypertrophy     175    no     0.6         flat  0   
+94   left ventricular hypertrophy     115    no     1.5         flat  0   
+95                         normal     170    no     0.0    upsloping  0   
+96                         normal     114    no     2.6  downsloping  0   
+97   left ventricular hypertrophy     105   yes     2.1         flat  1   
+98   left ventricular hypertrophy     144   yes     4.0    upsloping  2   
+99   left ventricular hypertrophy     178    no     0.8    upsloping  2   
+100  left ventricular hypertrophy     164    no     0.0    upsloping  1   
+101  left ventricular hypertrophy     202    no     0.0    upsloping  0   
+102  left ventricular hypertrophy     127    no     2.8         flat  1   
+103  left ventricular hypertrophy     173    no     3.2    upsloping  2   
+104                        normal     174    no     0.0    upsloping  0   
+105                        normal     111   yes     5.6  downsloping  0   
+106  left ventricular hypertrophy     132    no     2.0         flat  2   
+107                        normal     175    no     0.0    upsloping  2   
+108  left ventricular hypertrophy     170    no     0.0    upsloping  0   
+109                        normal     158    no     0.0    upsloping  0   
+110  left ventricular hypertrophy     182    no     0.0    upsloping  0   
+111                        normal     147    no     0.1    upsloping  3   
+112                        normal      95   yes     2.0         flat  2   
+113                        normal     174    no     0.0    upsloping  1   
+114  left ventricular hypertrophy     150    no     2.3  downsloping  0   
+115         ST-T wave abnormality     116    no     1.1         flat  0   
+116  left ventricular hypertrophy     141   yes     2.8         flat  1   
+117                        normal     163   yes     0.6    upsloping  0   
+118                        normal     160   yes     1.4    upsloping  2   
+119                        normal     179    no     0.0    upsloping  2   
+120                        normal     144   yes     1.4    upsloping  1   
+121                        normal     143   yes     3.0         flat  1   
+122                        normal     140   yes     3.6         flat  1   
+123  left ventricular hypertrophy     109    no     2.4         flat  3   
+124                        normal     160    no     0.0    upsloping  1   
+125  left ventricular hypertrophy     152    no     0.0         flat  1   
+126                        normal     163    no     0.0    upsloping  1   
+127  left ventricular hypertrophy     148   yes     3.0         flat  0   
+128  left ventricular hypertrophy      90    no     1.0         flat  2   
+129                        normal     179    no     0.0    upsloping  0   
+130  left ventricular hypertrophy     112   yes     0.6         flat  1   
+131  left ventricular hypertrophy     111   yes     0.8    upsloping  0   
+132                        normal     182   yes     3.8         flat  0   
+133  left ventricular hypertrophy     133   yes     4.0  downsloping  2   
+134                        normal     142   yes     1.2         flat  0   
+135  left ventricular hypertrophy     166    no     0.5         flat  0   
+136  left ventricular hypertrophy     142    no     1.5    upsloping  1   
+137                        normal     139    no     2.0         flat  3   
+138  left ventricular hypertrophy     152   yes     0.2         flat  0   
+139                        normal     143   yes     1.2         flat  0   
+140                        normal     123    no     0.6    upsloping  0   
+141                        normal     158    no     1.6         flat  0   
+142  left ventricular hypertrophy     103   yes     1.6  downsloping  0   
+143                        normal     141    no     3.4         flat  2   
+144                        normal     155    no     0.0    upsloping  0   
+145                        normal     149    no     0.3         flat  1   
+146         ST-T wave abnormality     123   yes     0.2    upsloping  0   
+147  left ventricular hypertrophy     152    no     1.2  downsloping  0   
+148  left ventricular hypertrophy     161    no     0.0    upsloping  0   
+149  left ventricular hypertrophy     144   yes     1.8         flat  0   
+150                        normal     150    no     0.0    upsloping  0   
+151                        normal     126   yes     1.5         flat  0   
+
+           thal  example_answer  \
+0        normal           False   
+1        normal           False   
+2        normal           False   
+3        normal            True   
+4    reversible           False   
+5        normal            True   
+6        normal           False   
+7        normal           False   
+8    reversible           False   
+9        normal           False   
+10       normal           False   
+11   reversible           False   
+12       normal           False   
+13       normal           False   
+14       normal           False   
+15   reversible           False   
+16       normal            True   
+17   reversible           False   
+18   reversible            True   
+19       normal           False   
+20       normal           False   
+21       normal           False   
+22       normal           False   
+23   reversible           False   
+24       normal           False   
+25       normal           False   
+26       normal           False   
+27       normal           False   
+28       normal           False   
+29   reversible            True   
+30   reversible           False   
+31       normal           False   
+32       normal           False   
+33       normal           False   
+34       normal           False   
+35       normal           False   
+36   reversible            True   
+37       normal           False   
+38       normal           False   
+39   reversible           False   
+40       normal           False   
+41   reversible            True   
+42        fixed            True   
+43       normal           False   
+44       normal           False   
+45       normal           False   
+46       normal           False   
+47   reversible            True   
+48   reversible           False   
+49   reversible           False   
+50       normal           False   
+51       normal           False   
+52        fixed            True   
+53       normal           False   
+54   reversible           False   
+55   reversible           False   
+56   reversible            True   
+57   reversible           False   
+58   reversible            True   
+59       normal           False   
+60       normal           False   
+61       normal           False   
+62       normal           False   
+63   reversible            True   
+64       normal           False   
+65       normal           False   
+66   reversible            True   
+67   reversible           False   
+68       normal           False   
+69       normal           False   
+70   reversible           False   
+71       normal           False   
+72   reversible            True   
+73       normal           False   
+74       normal            True   
+75       normal           False   
+76   reversible           False   
+77   reversible            True   
+78       normal           False   
+79   reversible           False   
+80       normal           False   
+81   reversible           False   
+82   reversible           False   
+83   reversible            True   
+84       normal           False   
+85       normal           False   
+86       normal           False   
+87       normal           False   
+88       normal            True   
+89   reversible            True   
+90       normal            True   
+91   reversible           False   
+92       normal           False   
+93       normal           False   
+94       normal           False   
+95       normal           False   
+96       normal           False   
+97        fixed           False   
+98   reversible            True   
+99       normal           False   
+100      normal           False   
+101      normal           False   
+102  reversible            True   
+103  reversible            True   
+104      normal           False   
+105  reversible            True   
+106       fixed            True   
+107      normal           False   
+108      normal           False   
+109      normal           False   
+110      normal           False   
+111  reversible           False   
+112  reversible            True   
+113           2           False   
+114       fixed           False   
+115      normal           False   
+116  reversible           False   
+117      normal           False   
+118  reversible            True   
+119      normal           False   
+120  reversible           False   
+121  reversible            True   
+122  reversible            True   
+123      normal           False   
+124      normal           False   
+125      normal           False   
+126      normal           False   
+127      normal           False   
+128       fixed            True   
+129      normal           False   
+130       fixed           False   
+131  reversible            True   
+132  reversible            True   
+133  reversible            True   
+134  reversible            True   
+135  reversible            True   
+136      normal           False   
+137  reversible            True   
+138      normal           False   
+139      normal           False   
+140      normal           False   
+141      normal           False   
+142  reversible            True   
+143  reversible            True   
+144      normal           False   
+145      normal           False   
+146      normal           False   
+147      normal           False   
+148      normal           False   
+149      normal           False   
+150      normal           False   
+151       fixed           False   
+
+                                             reasoning  pred_answer   <lambda>  
+0    The patient has a few risk factors for heart d...        False  ✔️ [True]  
+1    Based on the patient's age (69), typical angin...         True             
+2    The patient has several risk factors for heart...         True             
+3    The patient's age (54) and sex (male) are risk...         True  ✔️ [True]  
+4    Although the patient has a few risk factors su...        False  ✔️ [True]  
+5    Based on the patient's high cholesterol level ...         True  ✔️ [True]  
+6    The patient's profile suggests a relatively lo...        False  ✔️ [True]  
+7    The patient's atypical angina and downsloping ...         True             
+8    The patient has several risk factors for heart...         True             
+9    The patient's profile suggests a moderate to h...         True             
+10   Based on the patient's high cholesterol level ...         True             
+11   The patient's age (65) is a risk factor for he...         True             
+12   The patient's high ST depression induced by ex...         True             
+13   The patient's profile suggests a relatively mo...        False  ✔️ [True]  
+14   The patient's profile presents mixed indicator...        False  ✔️ [True]  
+15   The patient's atypical angina, high fasting bl...        False  ✔️ [True]  
+16   The patient's age (66), presence of left ventr...         True  ✔️ [True]  
+17   The patient's age (62), high cholesterol level...         True             
+18   The patient's high risk profile for heart dise...         True  ✔️ [True]  
+19   The patient's profile presents mixed indicator...        False  ✔️ [True]  
+20   The patient's profile presents a mix of risk f...        False  ✔️ [True]  
+21   The patient's relatively young age (35), norma...        False  ✔️ [True]  
+22   The patient's profile presents a mix of risk f...         True             
+23   Based on the patient's advanced age (62), high...         True             
+24   The patient's profile indicates a moderate to ...         True             
+25   The patient's relatively low cholesterol level...        False  ✔️ [True]  
+26   The patient has several risk factors for heart...        False  ✔️ [True]  
+27   The patient has several risk factors for heart...        False  ✔️ [True]  
+28   The patient's profile presents mixed factors f...         True             
+29   The patient's profile shows a combination of r...         True  ✔️ [True]  
+30   The patient's advanced age (61), high blood pr...         True             
+31   Based on the patient's relatively normal test ...        False  ✔️ [True]  
+32   The patient's symptoms and test results, inclu...         True             
+33   The patient has some risk factors for heart di...        False  ✔️ [True]  
+34   The patient's profile does not indicate any si...        False  ✔️ [True]  
+35   The patient has several risk factors for heart...         True             
+36   The patient's high cholesterol level (326), hi...         True  ✔️ [True]  
+37   The patient's high cholesterol level (315 mg/d...         True             
+38   The patient presents with several risk factors...         True             
+39   The patient's age (58), high resting blood pre...         True             
+40   The patient's high resting blood pressure (180...         True             
+41   Based on the patient's age (60), high blood pr...         True  ✔️ [True]  
+42   The patient's high resting blood pressure (170...         True  ✔️ [True]  
+43   The patient's age (71) and some ST depression ...         True             
+44   Although the patient's high cholesterol level ...        False  ✔️ [True]  
+45   The patient's advanced age (66), high serum ch...         True             
+46   The patient's profile presents several risk fa...         True             
+47   The patient has several risk factors for heart...         True  ✔️ [True]  
+48   The patient has several risk factors for heart...         True             
+49   The patient's age (45), sex (male), and typica...         True             
+50   The patient's profile presents a mix of risk f...         True             
+51   The patient has several risk factors for heart...         True             
+52   The patient's profile presents a mix of risk f...         True  ✔️ [True]  
+53   The patient has a mix of risk factors and posi...         True             
+54   The patient's typical angina, high resting blo...        False  ✔️ [True]  
+55   The patient has several risk factors for heart...         True             
+56   The patient's high serum cholesterol level (35...         True  ✔️ [True]  
+57   The patient's profile presents mixed factors f...         True             
+58   The patient's profile presents a mix of risk f...         True  ✔️ [True]  
+59   The patient's asymptomatic chest pain, normal ...        False  ✔️ [True]  
+60   The patient has several risk factors for heart...         True             
+61   The patient's normal resting electrocardiograp...        False  ✔️ [True]  
+62   The patient's high cholesterol level (394), hi...         True             
+63   The patient's age (62), high cholesterol level...         True  ✔️ [True]  
+64   The patient has a few risk factors for heart d...        False  ✔️ [True]  
+65   The patient's age, high resting blood pressure...         True             
+66   Based on the patient's advanced age (63), high...         True  ✔️ [True]  
+67   The patient has several risk factors for heart...         True             
+68   The patient's normal resting electrocardiograp...        False  ✔️ [True]  
+69   The patient's young age (34) and the absence o...        False  ✔️ [True]  
+70   Based on the patient's profile, the presence o...         True             
+71   The patient's left ventricular hypertrophy, do...         True             
+72   The patient's high-risk profile for heart dise...         True  ✔️ [True]  
+73   The patient's profile presents mixed indicator...        False  ✔️ [True]  
+74   The patient's profile presents a mix of risk f...         True  ✔️ [True]  
+75   The patient's high cholesterol level (318) and...         True             
+76   The patient has several risk factors for heart...         True             
+77   Based on the patient's high cholesterol level ...         True  ✔️ [True]  
+78   The patient has several risk factors for heart...         True             
+79   The patient's age (54) and high cholesterol le...        False  ✔️ [True]  
+80   Based on the patient's age (65), sex, chest pa...         True             
+81   The patient's age (64) and high cholesterol le...        False  ✔️ [True]  
+82   The patient's age, high resting blood pressure...         True             
+83   The patient's left ventricular hypertrophy, ex...         True  ✔️ [True]  
+84   Based on the patient's symptoms, including typ...         True             
+85   The patient has several risk factors for heart...        False  ✔️ [True]  
+86   The patient's relatively normal blood pressure...        False  ✔️ [True]  
+87   The patient's age, sex, and high cholesterol l...        False  ✔️ [True]  
+88   The patient's high cholesterol level (319), le...         True  ✔️ [True]  
+89   Based on the patient's advanced age (70), high...         True  ✔️ [True]  
+90   The patient has several risk factors for heart...         True  ✔️ [True]  
+91   Although the patient has left ventricular hype...        False  ✔️ [True]  
+92   The patient's advanced age (74), presence of a...         True             
+93   The patient's profile presents mixed indicator...         True             
+94   Considering the patient's age (68) and left ve...         True             
+95   The patient's profile indicates a low risk of ...        False  ✔️ [True]  
+96   The patient's profile suggests a moderate to h...         True             
+97   The patient has several risk factors for heart...         True             
+98   The patient's profile presents a mix of risk f...         True  ✔️ [True]  
+99   The patient's symptoms and test results sugges...         True             
+100  The patient's profile presents a mix of risk f...         True             
+101  The patient's relatively young age (29) and th...        False  ✔️ [True]  
+102  Based on the patient's high age (65), left ven...         True  ✔️ [True]  
+103  Based on the patient's profile, with factors s...         True  ✔️ [True]  
+104  The patient's relatively young age (35), norma...        False  ✔️ [True]  
+105  The patient has several risk factors for heart...         True  ✔️ [True]  
+106  The patient's age (64), high blood pressure (1...         True  ✔️ [True]  
+107  The patient's high cholesterol level (255 mg/d...         True             
+108  Although the patient has high cholesterol (308...         True             
+109  The patient's age (64) and high serum choleste...        False  ✔️ [True]  
+110  The patient's asymptomatic chest pain, left ve...        False  ✔️ [True]  
+111  The patient has several risk factors for heart...         True             
+112  The patient has several risk factors for heart...         True  ✔️ [True]  
+113  The patient's typical angina, elevated cholest...         True             
+114  The patient has several risk factors for heart...         True             
+115  The patient's advanced age (76), high blood pr...         True             
+116  The patient's age (60), high cholesterol level...         True             
+117  The patient's high cholesterol level (354) and...        False  ✔️ [True]  
+118  The patient has several risk factors for heart...         True  ✔️ [True]  
+119  The patient's profile presents a mix of risk f...         True             
+120  The patient has several risk factors for heart...         True             
+121  Based on the patient's high cholesterol level ...         True  ✔️ [True]  
+122  The patient's significant ST depression induce...         True  ✔️ [True]  
+123  The patient's advanced age (70), high serum ch...         True             
+124  The patient's profile presents a mix of risk a...         True             
+125  The patient's advanced age (66), high choleste...         True             
+126  The patient's high resting blood pressure (160...        False  ✔️ [True]  
+127  The patient's presence of exercise-induced ang...         True             
+128  Based on the patient's high resting blood pres...         True  ✔️ [True]  
+129  This patient's age is relatively young (39), a...        False  ✔️ [True]  
+130  The patient's high cholesterol level (276), hi...         True             
+131  The patient's high blood pressure (150), high ...         True  ✔️ [True]  
+132  The patient has several risk factors for heart...         True  ✔️ [True]  
+133  The patient has several risk factors for heart...         True  ✔️ [True]  
+134  The patient has several risk factors for heart...         True  ✔️ [True]  
+135  The patient's profile presents a mix of risk f...        False             
+136  The patient's high cholesterol level (308), el...         True             
+137  The patient presents a mix of risk factors and...         True  ✔️ [True]  
+138  The patient has several risk factors for heart...         True             
+139  The patient's profile presents mixed indicator...         True             
+140  The patient's relatively normal values for cho...        False  ✔️ [True]  
+141  The patient's age (54) and sex (female) do not...        False  ✔️ [True]  
+142  The patient's profile suggests a number of ris...         True  ✔️ [True]  
+143  Based on the patient's advanced age (68), high...         True  ✔️ [True]  
+144  The patient's age (55) and cholesterol level (...        False  ✔️ [True]  
+145  The patient's profile suggests a moderate risk...         True             
+146  The patient's profile presents a mix of risk f...         True             
+147  The patient's profile presents a mix of risk f...         True             
+148  The patient's high serum cholesterol (305 mg/d...        False  ✔️ [True]  
+149  The patient's profile suggests a high risk of ...         True             
+150  The patient's relatively low cholesterol level...        False  ✔️ [True]  
+151  The patient's profile presents a mix of risk f...         True             
