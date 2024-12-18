@@ -154,7 +154,7 @@ def evaluate(
                     )
                 if evaluation_result.optimizer:
                     evaluation_result.optimized_program.save(
-                        os.path.join(file_path, f"{file_name}.model")
+                        os.path.join(file_path, f"{file_name}.json")
                     )
 
 
