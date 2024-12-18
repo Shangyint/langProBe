@@ -324,6 +324,7 @@ tzdata==2024.2
 ujson==5.10.0
     # via dspy
 urllib3==2.2.3
+    # via langprobe
     # via requests
 wcwidth==0.2.13
     # via prompt-toolkit

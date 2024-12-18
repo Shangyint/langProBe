@@ -4,15 +4,49 @@ import os
 from pathlib import Path
 
 
+USE_UVX = os.getenv("LANGPROBE_UVX", False)
+
+
+def get_appworld_root():
+    return Path.cwd() / "langProBe" / "AppWorld"
+
+
 def ensure_appworld_setup():
-    appworld_root = Path.cwd() / "langProBe" / "AppWorld"
+    appworld_root = get_appworld_root()
 
     os.environ["APPWORLD_ROOT"] = str(appworld_root)
 
-    conda_root = appworld_root.joinpath(".conda")
     data_root = appworld_root.joinpath("data")
 
     # Check if the environment is already set up
+    if data_root.exists():
+        return
+
+    if USE_UVX:
+        uvx_appworld_setup(appworld_root)
+    else:
+        conda_appworld_setup(appworld_root)
+
+
+def uvx_appworld_setup(appworld_root):
+    data_root = appworld_root.joinpath("data")
+    if data_root.exists():
+        return
+
+    subprocess.check_call(
+        "uvx appworld install",
+        shell=True,
+    )
+    subprocess.check_call(
+        f"uvx appworld download data --root {appworld_root}",
+        shell=True,
+    )
+
+
+def conda_appworld_setup(appworld_root):
+    conda_root = appworld_root.joinpath(".conda")
+    data_root = appworld_root.joinpath("data")
+
     if conda_root.exists() and data_root.exists():
         return
 

@@ -102,6 +102,8 @@ def evaluate(
 
     if file_path:
         stats_file = os.path.join(file_path, f"{benchmark_name}.stat")
+        Path(stats_file).parent.mkdir(parents=True, exist_ok=True)
+
         with open(stats_file, "w") as f:
             f.write(
                 f"benchmark: {benchmark_name}\n"

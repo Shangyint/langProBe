@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "DSPy benchmarking suite"
 authors = []
 dependencies = [
-    "requests",
+    "requests>=2.32.3",
     "shortuuid",
     "seaborn",
     "black==23.11.0",
@@ -13,9 +13,10 @@ dependencies = [
     "huggingface-hub==0.25.0",
     "numpy==1.24.3",
     "torch>=2.2.2",
-    "dspy @ git+https://github.com/stanfordnlp/dspy.git@miprov2-knn",
     "python-dotenv>=1.0.1",
     "ipython>=8.30.0",
+    "dspy @ git+https://github.com/stanfordnlp/dspy.git@miprov2-knn",
+    "urllib3>=2.2.3",
 ]
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
@@ -33,3 +34,6 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["langProBe"]
+
+[tool.ruff]
+line-length = 120
