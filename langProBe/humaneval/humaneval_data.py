@@ -1,6 +1,7 @@
-from ..benchmark import Benchmark
 from datasets import load_dataset
 import dspy
+
+from ..benchmark import Benchmark
 
 
 class HumanEvalBench(Benchmark):

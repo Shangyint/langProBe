@@ -17,6 +17,7 @@ dependencies = [
     "ipython>=8.30.0",
     "dspy @ git+https://github.com/stanfordnlp/dspy.git@miprov2-knn",
     "urllib3>=2.2.3",
+    "alfworld>=0.4.1",
 ]
 readme = "README.md"
 requires-python = ">=3.11,<3.12"

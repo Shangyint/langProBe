@@ -1,7 +1,5 @@
 import dspy
 
-from itertools import chain
-from .humaneval_utils import post_process_tests, post_process_code
 import langProBe.program as program
 
 NUM_SAMPLES = 20

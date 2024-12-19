@@ -6,9 +6,9 @@ import sys
 from dotenv import load_dotenv
 import dspy
 
-from langProBe.benchmark import BenchmarkMeta, EvaluateBench
-from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
-from langProBe.register_benchmark import register_all_benchmarks
+from .benchmark import BenchmarkMeta, EvaluateBench
+from .optimizers import create_optimizer
+from .register_benchmark import register_all_benchmarks
 
 load_dotenv()
 

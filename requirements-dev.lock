@@ -20,6 +20,8 @@ aiosignal==1.3.2
     # via aiohttp
 alembic==1.14.0
     # via optuna
+alfworld==0.4.1
+    # via langprobe
 annotated-types==0.7.0
     # via pydantic
 anyio==4.7.0
@@ -39,26 +41,44 @@ backoff==2.2.1
     # via dspy
 black==23.11.0
     # via langprobe
+blis==1.1.0
+    # via thinc
 cachetools==5.5.0
     # via dspy
+catalogue==2.0.10
+    # via spacy
+    # via srsly
+    # via thinc
 certifi==2024.12.14
     # via httpcore
     # via httpx
     # via requests
+cffi==1.17.1
+    # via textworld
 charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via black
     # via litellm
     # via nltk
+    # via typer
+cloudpathlib==0.20.0
+    # via weasel
 cloudpickle==3.1.0
     # via dspy
 colorlog==6.9.0
     # via optuna
+confection==0.1.5
+    # via thinc
+    # via weasel
 contourpy==1.3.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
+cymem==2.0.10
+    # via preshed
+    # via spacy
+    # via thinc
 datasets==2.21.0
     # via dspy
 decorator==5.1.1
@@ -74,6 +94,8 @@ dspy @ git+https://github.com/stanfordnlp/dspy.git@0337e7432ff7372a5a99b72bbabb1
     # via langprobe
 executing==2.1.0
     # via stack-data
+fast-downward-textworld==20.6.2
+    # via textworld
 filelock==3.16.1
     # via datasets
     # via huggingface-hub
@@ -92,6 +114,8 @@ greenlet==3.1.1
     # via sqlalchemy
 h11==0.14.0
     # via httpcore
+hashids==1.3.1
+    # via textworld
 httpcore==1.0.7
     # via httpx
 httpx==0.27.2
@@ -114,9 +138,12 @@ ipython==8.30.0
     # via langprobe
 jedi==0.19.2
     # via ipython
+jericho==3.3.0
+    # via textworld
 jinja2==3.1.4
     # via dspy
     # via litellm
+    # via spacy
     # via torch
 jiter==0.8.2
     # via openai
@@ -132,12 +159,20 @@ jsonschema-specifications==2024.10.1
     # via jsonschema
 kiwisolver==1.4.7
     # via matplotlib
+langcodes==3.5.0
+    # via spacy
+language-data==1.3.0
+    # via langcodes
 litellm==1.55.3
     # via dspy
 magicattr==0.1.6
     # via dspy
 mako==1.3.8
     # via alembic
+marisa-trie==1.2.1
+    # via language-data
+markdown-it-py==3.0.0
+    # via rich
 markupsafe==3.0.2
     # via jinja2
     # via mako
@@ -145,6 +180,12 @@ matplotlib==3.10.0
     # via seaborn
 matplotlib-inline==0.1.7
     # via ipython
+mdurl==0.1.2
+    # via markdown-it-py
+mementos==1.3.1
+    # via textworld
+more-itertools==10.5.0
+    # via textworld
 mpmath==1.3.0
     # via sympy
 multidict==6.1.0
@@ -152,15 +193,22 @@ multidict==6.1.0
     # via yarl
 multiprocess==0.70.16
     # via datasets
+murmurhash==1.0.11
+    # via preshed
+    # via spacy
+    # via thinc
 mypy-extensions==1.0.0
     # via black
 networkx==3.4.2
+    # via textworld
     # via torch
 nltk==3.9.1
     # via sentence-transformers
 numpy==1.24.3
+    # via blis
     # via contourpy
     # via datasets
+    # via jericho
     # via langprobe
     # via matplotlib
     # via optuna
@@ -169,6 +217,9 @@ numpy==1.24.3
     # via scipy
     # via seaborn
     # via sentence-transformers
+    # via spacy
+    # via textworld
+    # via thinc
     # via torchvision
     # via transformers
 openai==1.58.1
@@ -182,7 +233,10 @@ packaging==24.2
     # via huggingface-hub
     # via matplotlib
     # via optuna
+    # via spacy
+    # via thinc
     # via transformers
+    # via weasel
 pandas==2.2.3
     # via datasets
     # via dspy
@@ -198,8 +252,12 @@ pillow==11.0.0
     # via torchvision
 platformdirs==4.3.6
     # via black
+preshed==3.0.9
+    # via spacy
+    # via thinc
 prompt-toolkit==3.0.48
     # via ipython
+    # via textworld
 propcache==0.2.1
     # via aiohttp
     # via yarl
@@ -209,14 +267,21 @@ pure-eval==0.2.3
     # via stack-data
 pyarrow==18.1.0
     # via datasets
+pycparser==2.22
+    # via cffi
 pydantic==2.10.4
+    # via confection
     # via dspy
     # via litellm
     # via openai
+    # via spacy
+    # via thinc
+    # via weasel
 pydantic-core==2.27.2
     # via pydantic
 pygments==2.18.0
     # via ipython
+    # via rich
 pyparsing==3.2.0
     # via matplotlib
 python-dateutil==2.9.0.post0
@@ -246,8 +311,12 @@ requests==2.32.3
     # via huggingface-hub
     # via langprobe
     # via litellm
+    # via spacy
     # via tiktoken
     # via transformers
+    # via weasel
+rich==13.9.4
+    # via typer
 rpds-py==0.22.3
     # via jsonschema
     # via referencing
@@ -265,23 +334,51 @@ sentence-transformers==2.2.2
 sentencepiece==0.1.99
     # via langprobe
     # via sentence-transformers
+setuptools==75.6.0
+    # via marisa-trie
+    # via spacy
+    # via thinc
+shellingham==1.5.4
+    # via typer
 shortuuid==1.0.13
     # via langprobe
 six==1.17.0
     # via python-dateutil
+smart-open==7.1.0
+    # via weasel
 sniffio==1.3.1
     # via anyio
     # via httpx
     # via openai
+spacy==3.8.3
+    # via jericho
+spacy-legacy==3.0.12
+    # via spacy
+spacy-loggers==1.0.5
+    # via spacy
 sqlalchemy==2.0.36
     # via alembic
     # via optuna
+srsly==2.5.0
+    # via confection
+    # via spacy
+    # via thinc
+    # via weasel
 stack-data==0.6.3
     # via ipython
 sympy==1.13.3
     # via torch
+tatsu==5.12.2
+    # via textworld
 tenacity==9.0.0
     # via dspy
+termcolor==2.5.0
+    # via jericho
+    # via textworld
+textworld==1.6.1
+    # via alfworld
+thinc==8.3.3
+    # via spacy
 threadpoolctl==3.5.0
     # via scikit-learn
 tiktoken==0.8.0
@@ -303,12 +400,17 @@ tqdm==4.67.1
     # via openai
     # via optuna
     # via sentence-transformers
+    # via spacy
+    # via textworld
     # via transformers
 traitlets==5.14.3
     # via ipython
     # via matplotlib-inline
 transformers==4.47.1
     # via sentence-transformers
+typer==0.15.1
+    # via spacy
+    # via weasel
 typing-extensions==4.12.2
     # via alembic
     # via anyio
@@ -319,6 +421,7 @@ typing-extensions==4.12.2
     # via pydantic-core
     # via sqlalchemy
     # via torch
+    # via typer
 tzdata==2024.2
     # via pandas
 ujson==5.10.0
@@ -326,8 +429,16 @@ ujson==5.10.0
 urllib3==2.2.3
     # via langprobe
     # via requests
+wasabi==1.1.3
+    # via spacy
+    # via thinc
+    # via weasel
 wcwidth==0.2.13
     # via prompt-toolkit
+weasel==0.4.1
+    # via spacy
+wrapt==1.17.0
+    # via smart-open
 xxhash==3.5.0
     # via datasets
 yarl==1.18.3

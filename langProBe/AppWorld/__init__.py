@@ -64,5 +64,3 @@ benchmark = [
         optimizers=APPWORLD_OPTIMIZERS,
     )
 ]
-
-os.environ["APPWORLD_ROOT"] = os.path.join(os.getcwd(), "langProBe", "AppWorld")

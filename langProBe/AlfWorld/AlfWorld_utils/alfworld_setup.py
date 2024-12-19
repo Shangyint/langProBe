@@ -1,17 +1,14 @@
-from contextlib import contextmanager
-import shutil
+from pathlib import Path
 import subprocess
 import os
 
-def ensure_alfworld_setup():
-    os.environ["ALFWORLD_DATA"] = os.path.join(os.getcwd(), "langProBe", "AlfWorld", "data")
 
-    try:
-        import alfworld
-    except ImportError:
-        subprocess.check_call("pip install alfworld[full]==0.3.5", shell=True)
-    
-    if os.path.exists(os.path.join(os.getcwd(), "langProBe", "AlfWorld", "data")):
+def ensure_alfworld_setup() -> Path:
+    alfworld_root = Path(__file__).parent.parent
+    os.environ["ALFWORLD_DATA"] = str(alfworld_root / "data")
+
+    if (alfworld_root / "data").exists():
         return
 
-    subprocess.check_call(f"alfworld-download", shell=True)
+    subprocess.check_call("alfworld-download", shell=True)
+    return alfworld_root / "data"

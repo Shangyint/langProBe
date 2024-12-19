@@ -8,6 +8,7 @@ import time
 from requests.exceptions import ConnectionError
 
 from .app_world_client import AppWorldClient
+from .appworld_setup import ensure_appworld_setup
 
 
 class AppWorldServer:
@@ -20,9 +21,11 @@ class AppWorldServer:
 
     @contextmanager
     def start_server(self):
-        # # Start the appworld serve command in a separate process
+        cmd, appworld_root = ensure_appworld_setup()
+
+        # Start the appworld serve command in a separate process
         process = subprocess.Popen(
-            f"uvx appworld serve environment --root {os.environ['APPWORLD_ROOT']} --port {self.port}",
+            f"{cmd} appworld serve environment --root {appworld_root} --port {self.port}",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
