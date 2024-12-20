@@ -44,10 +44,10 @@ DEFAULT_OPTIMIZERS = [
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.MIPROv2,
-        init_args=dict(max_errors=5000, auto="medium", num_threads=16),
+        init_args=dict(max_errors=5000, num_threads=16),
         compile_args=dict(
             requires_permission_to_run=False,
-            num_trials=20,
+            num_trials=25,
             max_bootstrapped_demos=4,
             max_labeled_demos=2,
         ),
