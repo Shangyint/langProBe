@@ -1,7 +1,6 @@
 ## Installation
 
 ```bash
-pip install git+https://github.com/stanfordnlp/dspy.git
 pip install -r requirements.txt
 ```
 
