@@ -1,7 +1,7 @@
 import re
 import dspy
 from copy import deepcopy
-from dsp.utils import deduplicate
+from dspy.dsp.utils import deduplicate
 
 
 #################################### Common Programs ####################################

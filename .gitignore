@@ -16,5 +16,6 @@ data/
 *.txt
 *.model
 *.stat
+*.json
 
 .dspy_cache/
