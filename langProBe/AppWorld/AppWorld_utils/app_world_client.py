@@ -15,7 +15,7 @@ class AppWorldInitializeArgs:
     # raise_on_unsafe_syntax: bool = True
     # null_patch_unsafe_execution: bool = True
     # load_ground_truth: bool = True
-    # ground_truth_mode: Literal["fullminimal"] = "minimal"
+    # ground_truth_mode: Literal['fullminimal'] = 'minimal'
     # raise_on_failure: bool = True
     # random_seed: int = 100
     # timeout_seconds: int = 100
@@ -76,72 +76,72 @@ class TaskCompletedArgs:
 
 class AppWorldClient:
     def __init__(self, base_url):
-        self.base_url = base_url.rstrip("/")
+        self.base_url = base_url.rstrip('/')
 
     def _make_request(self, method, endpoint, data=None):
-        url = f"{self.base_url}{endpoint}"
-        headers = {"Content-Type": "application/json"}
+        url = f'{self.base_url}{endpoint}'
+        headers = {'Content-Type': 'application/json'}
 
-        if method == "GET":
+        if method == 'GET':
             response = requests.get(url, headers=headers)
-        elif method in ["POST", "PUT", "DELETE"]:
+        elif method in ['POST', 'PUT', 'DELETE']:
             response = requests.request(method, url, headers=headers, json=data)
         else:
-            raise ValueError(f"Unsupported HTTP method: {method}")
+            raise ValueError(f'Unsupported HTTP method: {method}')
 
         response.raise_for_status()
-        return response.json()["output"]
+        return response.json()['output']
 
     def index(self):
-        return self._make_request("GET", "/")
+        return self._make_request('GET', '/')
 
     def initialize(self, experiment_name: str, task_id: str):
         args = AppWorldInitializeArgs(
             experiment_name=experiment_name, task_id=task_id
         ).__dict__
-        return self._make_request("POST", "/initialize", data=args)
+        return self._make_request('POST', '/initialize', data=args)
 
     def execute(self, task_id, code):
-        data = {"task_id": task_id, "code": code}
-        return self._make_request("POST", "/execute", data=data)
+        data = {'task_id': task_id, 'code': code}
+        return self._make_request('POST', '/execute', data=data)
 
     def close(self, task_id):
-        data = {"task_id": task_id}
-        return self._make_request("POST", "/close", data=data)
+        data = {'task_id': task_id}
+        return self._make_request('POST', '/close', data=data)
 
     def close_all(self, task_id):
-        data = {"task_id": task_id}
-        return self._make_request("POST", "/close_all", data=data)
+        data = {'task_id': task_id}
+        return self._make_request('POST', '/close_all', data=data)
 
     def evaluate(self, task_id, suppress_errors=False, report=False):
         data = {
-            "task_id": task_id,
-            "suppress_errors": suppress_errors,
-            "report": report,
+            'task_id': task_id,
+            'suppress_errors': suppress_errors,
+            'report': report,
         }
-        return self._make_request("POST", "/evaluate", data=data)
+        return self._make_request('POST', '/evaluate', data=data)
 
     def save_logs(self, task_id):
-        data = {"task_id": task_id}
-        return self._make_request("POST", "/save_logs", data=data)
+        data = {'task_id': task_id}
+        return self._make_request('POST', '/save_logs', data=data)
 
     def save_state(self, task_id, state_id):
-        data = {"task_id": task_id, "state_id": state_id}
-        return self._make_request("POST", "/save_state", data=data)
+        data = {'task_id': task_id, 'state_id': state_id}
+        return self._make_request('POST', '/save_state', data=data)
 
     def load_state(self, task_id, state_id):
-        data = {"task_id": task_id, "state_id": state_id}
-        return self._make_request("POST", "/load_state", data=data)
+        data = {'task_id': task_id, 'state_id': state_id}
+        return self._make_request('POST', '/load_state', data=data)
 
     def task_completed(self, task_id):
-        data = {"task_id": task_id}
-        return self._make_request("POST", "/task_completed", data=data)
+        data = {'task_id': task_id}
+        return self._make_request('POST', '/task_completed', data=data)
 
     def show_task(self, task_id):
-        return self._make_request("GET", f"/tasks/{task_id}")
+        return self._make_request('GET', f'/tasks/{task_id}')
 
     def api_docs(self):
-        return self._make_request("GET", "/api_docs")
+        return self._make_request('GET', '/api_docs')
 
     def launch_playground(self):
-        return self._make_request("GET", "/playground")
+        return self._make_request('GET', '/playground')
