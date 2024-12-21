@@ -310,15 +310,11 @@ if __name__ == "__main__":
     benchmarks = (
         agent_benchmarks + nonagent_benchmarks
         if args.benchmark_set == "full"
-        else (
-            agent_benchmarks
-            if args.benchmark_set == "agent"
-            else (
-                nonagent_benchmarks
-                if args.benchmark_set == "nonagent"
-                else agent_benchmarks + nonagent_benchmarks
-            )
-        )
+        else agent_benchmarks
+        if args.benchmark_set == "agent"
+        else nonagent_benchmarks
+        if args.benchmark_set == "nonagent"
+        else agent_benchmarks + nonagent_benchmarks
     )
 
     if args.benchmark:
