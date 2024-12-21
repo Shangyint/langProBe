@@ -65,9 +65,7 @@ class AppWorldServerManager:
                 connected = False
                 while time.time() - s < 10:
                     try:
-                        server.request.initialize(
-                            experiment_name=experiment_name, task_id=task_id
-                        )
+                        server.request.initialize(experiment_name=experiment_name, task_id=task_id)
                         connected = True
                         break
                     except ConnectionError:
