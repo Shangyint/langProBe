@@ -15,7 +15,7 @@ class AppWorldInitializeArgs:
     # raise_on_unsafe_syntax: bool = True
     # null_patch_unsafe_execution: bool = True
     # load_ground_truth: bool = True
-    # ground_truth_mode: Literal['fullminimal'] = 'minimal'
+    # ground_truth_mode: Literal["fullminimal"] = "minimal"
     # raise_on_failure: bool = True
     # random_seed: int = 100
     # timeout_seconds: int = 100
@@ -28,22 +28,18 @@ class AppWorldInitializeArgs:
     # add_login_shortcut: bool = False
     # munchify_response: bool = False
 
-
 @dataclass
 class ExecuteArgs:
     task_id: str
     code: str
 
-
 @dataclass
 class CloseArgs:
     task_id: str
 
-
 # @dataclass
 # class CloseAllArgs:
 #     task_id: str
-
 
 @dataclass
 class EvaluateArgs:
@@ -51,28 +47,23 @@ class EvaluateArgs:
     suppress_errors: bool = False
     report: bool = False
 
-
 @dataclass
 class SaveLogsArgs:
     task_id: str
-
 
 @dataclass
 class SaveStateArgs:
     task_id: str
     state_id: str
 
-
 @dataclass
 class LoadStateArgs:
     task_id: str
     state_id: str
 
-
 @dataclass
 class TaskCompletedArgs:
     task_id: str
-
 
 class AppWorldClient:
     def __init__(self, base_url):

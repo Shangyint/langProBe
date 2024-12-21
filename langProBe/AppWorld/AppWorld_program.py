@@ -97,7 +97,7 @@ class AppWorldReact(dspy.Module):
         output_experiment_name = shortuuid.uuid()
         with appworld_manager.acquire_server(output_experiment_name, task_id) as server:
             task = server.request.show_task(task_id)
-            supervisor_name = task['supervisor']['first_name'] + ' ' + task['supervisor']['last_name']
+            supervisor_name = task['supervisor']['first_name'] + " " + task['supervisor']['last_name']
             supervisor_email = task['supervisor']['email']
             supervisor_phone = task['supervisor']['phone_number']
 
