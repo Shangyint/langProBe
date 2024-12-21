@@ -66,11 +66,7 @@ def load_task_ids(
     if not dataset_file_path.exists():
         raise Exception(f"The dataset file ({dataset_file_path}) doesn't exist.")
 
-    task_ids = [
-        line.strip()
-        for line in read_file(dataset_file_path).splitlines()
-        if line.strip()
-    ]
+    task_ids = [line.strip() for line in read_file(dataset_file_path).splitlines() if line.strip()]
     if only_tagged is not None:
         task_ids = [task_id for task_id in task_ids if task_id_to_tag(task_id) in only_tagged]
     task_ids = [remove_tag(task_id) for task_id in task_ids]
@@ -83,6 +79,8 @@ def load_task_ids(
 
         task_ids = [task_id for task_id in task_ids if get_task_difficulty(task_id) == difficulty]
     if num_tasks_per_scenario is not None:
-        task_ids = [task_id for task_id in task_ids if task_id_to_number(task_id) <= num_tasks_per_scenario]
+        task_ids = [
+            task_id for task_id in task_ids if task_id_to_number(task_id) <= num_tasks_per_scenario
+        ]
     _maybe_assure_num_tasks_per_scenario(task_ids, num_tasks_per_scenario)
     return task_ids
