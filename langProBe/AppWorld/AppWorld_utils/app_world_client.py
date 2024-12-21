@@ -79,7 +79,7 @@ class AppWorldClient:
         self.base_url = base_url.rstrip('/')
 
     def _make_request(self, method, endpoint, data=None):
-        url = f'{self.base_url}{endpoint}'
+        url = f"{self.base_url}{endpoint}"
         headers = {'Content-Type': 'application/json'}
 
         if method == 'GET':
@@ -87,7 +87,7 @@ class AppWorldClient:
         elif method in ['POST', 'PUT', 'DELETE']:
             response = requests.request(method, url, headers=headers, json=data)
         else:
-            raise ValueError(f'Unsupported HTTP method: {method}')
+            raise ValueError(f"Unsupported HTTP method: {method}")
 
         response.raise_for_status()
         return response.json()['output']

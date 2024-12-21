@@ -45,9 +45,7 @@ class AppWorldServerManager:
         self.servers = [AppWorldServer(self.BASE_PORT + i) for i in range(num_servers)]
 
     @contextmanager
-    def acquire_server(
-        self, experiment_name: str, task_id: str
-    ) -> Generator[AppWorldServer, None, None]:
+    def acquire_server(self, experiment_name: str, task_id: str) -> Generator[AppWorldServer, None, None]:
         acquired_idx = None
         while True:
             for i, server in enumerate(self.servers):
