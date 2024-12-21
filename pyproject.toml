@@ -17,6 +17,7 @@ dependencies = [
     "ipython>=8.30.0",
     "dspy @ git+https://github.com/stanfordnlp/dspy.git",
     "alfworld>=0.4.1",
+    "flask>=3.1.0",
 ]
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
