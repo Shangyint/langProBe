@@ -97,9 +97,9 @@ class AppWorldReact(dspy.Module):
         output_experiment_name = shortuuid.uuid()
         with appworld_manager.acquire_server(output_experiment_name, task_id) as server:
             task = server.request.show_task(task_id)
-            supervisor_name = task["supervisor"]["first_name"] + " " + task["supervisor"]["last_name"]
-            supervisor_email = task["supervisor"]["email"]
-            supervisor_phone = task["supervisor"]["phone_number"]
+            supervisor_name = task['supervisor']['first_name'] + ' ' + task['supervisor']['last_name']
+            supervisor_email = task['supervisor']['email']
+            supervisor_phone = task['supervisor']['phone_number']
 
             trace = []
             for _ in range(self.max_steps):
@@ -144,9 +144,7 @@ class AppWorldReact(dspy.Module):
                             self.known_apis[extract_api] = server.request.execute(task_id=task_id, code=extract_api_code)
                         if "Execution failed" not in self.known_apis[extract_api]:
                             trace.append((extract_api_code, self.known_apis[extract_api]))
-                    elif re.search(
-                        r"Usage of the following .* is not allowed", gen_code_output
-                    ):
+                    elif re.search(r"Usage of the following .* is not allowed", gen_code_output):
                         trace[-1] = (gen_code, gen_code_output + " You must use the file system app to access the file system.")
 
                 if server.request.task_completed(task_id=task_id):
