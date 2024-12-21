@@ -39,4 +39,4 @@ class AlfredTWEnvOneGame(AlfredTWEnv):
 
         self.num_games = len(self.game_files)
 
-        assert self.train_eval == 'eval', 'Only eval mode supported'
+        assert self.train_eval == "eval", "Only eval mode supported"
