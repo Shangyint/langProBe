@@ -9,7 +9,7 @@ from .AlfWorld_utils.alfworld_setup import ensure_alfworld_setup
 class AlfWorldBench(Benchmark):
     def _find_files(self, path):
         # Recursively find all .tw-pddl files in the given path
-        for root, _dirs, files in os.walk(str(path)):
+        for root, dirs, files in os.walk(str(path)):
             for file in files:
                 if file.endswith(".tw-pddl"):
                     filepath = os.path.join(root, file)
@@ -26,9 +26,9 @@ class AlfWorldBench(Benchmark):
         valid_unseen_filepaths = list(self._find_files(data_dir / "json_2.1.1/valid_unseen"))
         valid_train_filepaths = list(self._find_files(data_dir / "json_2.1.1/valid_train"))
 
-        assert len(train_filepaths) == 3553, f"Expected 3553 train filepaths, got {len(train_filepaths)}"
-        assert len(valid_seen_filepaths) == 140, f"Expected 140 valid_seen filepaths, got {len(valid_seen_filepaths)}"
-        assert len(valid_unseen_filepaths) == 134, f"Expected 134 valid_unseen filepaths, got {len(valid_unseen_filepaths)}"
+        assert len(train_filepaths) == 3553, f"Expected 3553 train files, got {len(train_filepaths)}"
+        assert len(valid_seen_filepaths) == 140, f"Expected 140 valid seen files, got {len(valid_seen_filepaths)}"
+        assert len(valid_unseen_filepaths) == 134, f"Expected 134 valid unseen files, got {len(valid_unseen_filepaths)}"
 
         self.train_set = [dspy.Example(game_file=filepath).with_inputs("game_file") for filepath in train_filepaths] # Use for training
         self.val_set = [dspy.Example(game_file=filepath).with_inputs("game_file") for filepath in valid_train_filepaths] # Use for validation during bootstrapping
