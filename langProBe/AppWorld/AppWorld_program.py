@@ -8,14 +8,12 @@ import dspy
 
 import ast
 
-
 def strip_comments(code_str):
     try:
         parsed_code = ast.parse(code_str)
         return ast.unparse(parsed_code)
     except:
         return code_str
-
 
 class AppWorldReactSignature(dspy.Signature):
     """Your job is to achieve my day-to-day tasks completely autonomously.
@@ -51,14 +49,12 @@ Each code execution will produce an output that you can use in subsequent calls.
 (7) Once you have completed the task, make sure to call apis.supervisor.complete_task(). If the task asked for some information, return it as the answer argument, i.e. call apis.supervisor.complete_task(answer=<answer>). Many tasks do not require an answer, so in those cases, just call apis.supervisor.complete_task() i.e. do not pass any argument.
 
 Using these APIs, now generate the next code step to solve the actual task."""
-
     instruction = dspy.InputField(description="Task to be completed", format=str)
     supervisor_name = dspy.InputField()
     supervisor_phone_number = dspy.InputField()
     supervisor_email = dspy.InputField()
     past_steps = dspy.InputField(description="Past code executions and their outputs", format=str)
     code = dspy.OutputField(description="Python code to be executed", format=str)
-
 
 class AppWorldReact(dspy.Module):
     def __init__(self, max_steps=40, module=None, add_few_shot=True):
