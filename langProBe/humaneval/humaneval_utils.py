@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 import contextlib
 import faulthandler
 import io
@@ -61,8 +61,8 @@ def unsafe_execute(problem, completion, result, timeout):
 
 
 def check_correctness(
-    problem: dict, completion: str, timeout: float, completion_id: Optional[int] = None
-) -> dict:
+    problem: Dict, completion: str, timeout: float, completion_id: Optional[int] = None
+) -> Dict:
     """
     Evaluates the functional correctness of a completion by running the test
     suite provided in the problem.
