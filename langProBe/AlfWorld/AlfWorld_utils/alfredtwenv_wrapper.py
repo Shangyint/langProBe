@@ -20,19 +20,19 @@ class AlfredTWEnvOneGame(AlfredTWEnv):
 
         root = os.path.dirname(self.gamefile_path)
         assert os.path.exists(os.path.join(root, 'traj_data.json'))
-        assert os.path.exists(os.path.join(root, 'game.tw-pddl'))
+        assert os.path.exists(os.path.join(root, "game.tw-pddl"))
 
         # Filenames
-        # json_path = os.path.join(root, 'traj_data.json')
-        game_file_path = os.path.join(root, 'game.tw-pddl')
+        # json_path = os.path.join(root, "traj_data.json")
+        game_file_path = os.path.join(root, "game.tw-pddl")
 
         assert 'movable' not in root and 'Sliced' not in root, f'Movable & slice trajs not supported {root}'
 
         with open(game_file_path, 'r') as f:
             gamedata = json.load(f)
 
-        assert 'solvable' in gamedata, f'Missing solvable key! {game_file_path}'
-        assert gamedata['solvable'], f'Unsolvable game! {game_file_path}'
+        assert 'solvable' in gamedata, f"Missing solvable key! {game_file_path}"
+        assert gamedata['solvable'], f"Unsolvable game! {game_file_path}"
 
         # Add to game file list
         self.game_files.append(game_file_path)
