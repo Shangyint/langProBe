@@ -91,20 +91,13 @@ class AppWorldReact(dspy.Module):
         # return "\n\n".join([f"Code:\n{code}\nOutput:\n{output}" for code, output in trace])
         if len(trace) == 0:
             return ""
-        return "\n\n".join(
-            [
-                f"Step {idx+1}\nCode:\n{code}\n\nOutput:\n{output}"
-                for idx, (code, output) in enumerate(trace)
-            ]
-        )
+        return "\n\n".join([f"Step {idx+1}\nCode:\n{code}\n\nOutput:\n{output}" for idx, (code, output) in enumerate(trace)])
 
     def forward(self, task_id):
         output_experiment_name = shortuuid.uuid()
         with appworld_manager.acquire_server(output_experiment_name, task_id) as server:
             task = server.request.show_task(task_id)
-            supervisor_name = (
-                task["supervisor"]["first_name"] + " " + task["supervisor"]["last_name"]
-            )
+            supervisor_name = task["supervisor"]["first_name"] + " " + task["supervisor"]["last_name"]
             supervisor_email = task["supervisor"]["email"]
             supervisor_phone = task["supervisor"]["phone_number"]
 
@@ -113,7 +106,7 @@ class AppWorldReact(dspy.Module):
                 while True:
                     try:
                         module_gen = self.module(
-                            instruction=task["instruction"],
+                            instruction=task['instruction'],
                             supervisor_name=supervisor_name,
                             supervisor_phone_number=supervisor_phone,
                             supervisor_email=supervisor_email,
@@ -122,10 +115,7 @@ class AppWorldReact(dspy.Module):
                         break
                     except ValueError as ve:
                         # TODO: This is a hack to deal with the fact that the model runs out of context window. Need better ways to resolve this
-                        if (
-                            ve.args[0]
-                            == "Expected dict_keys(['code']) but got dict_keys([])"
-                        ):
+                        if ve.args[0] == "Expected dict_keys(['code']) but got dict_keys([])":
                             if len(trace) >= 1:
                                 trace = trace[1:]
                             else:
@@ -134,63 +124,33 @@ class AppWorldReact(dspy.Module):
                             raise ve
                 gen_code = module_gen.code
                 if "os.path.expanduser" in strip_comments(gen_code):
-                    gen_code_output = (
-                        "Usage of the following os.path.expanduser is not allowed."
-                    )
+                    gen_code_output = "Usage of the following os.path.expanduser is not allowed."
                 else:
-                    gen_code_output = server.request.execute(
-                        task_id=task_id, code=gen_code
-                    )
+                    gen_code_output = server.request.execute(task_id=task_id, code=gen_code)
                 trace.append((gen_code, gen_code_output))
 
                 if "Execution failed" in gen_code_output:
-                    if re.search(
-                        r"No API named '(.*)' found in the (.*) app.", gen_code_output
-                    ):
-                        app_name = re.search(
-                            r"No API named '(.*)' found in the (.*) app.",
-                            gen_code_output,
-                        ).groups()[1]
+                    if re.search(r"No API named '(.*)' found in the (.*) app.", gen_code_output):
+                        app_name = re.search(r"No API named '(.*)' found in the (.*) app.", gen_code_output).groups()[1]
                         extract_api_code = f"# Let me check the available APIs in the {app_name} app.\nprint(apis.api_docs.show_api_descriptions(app_name='{app_name}'))"
                         if app_name not in self.app_docs:
-                            self.app_docs[app_name] = server.request.execute(
-                                task_id=task_id, code=extract_api_code
-                            )
+                            self.app_docs[app_name] = server.request.execute(task_id=task_id, code=extract_api_code)
                         if "Execution failed" not in self.app_docs[app_name]:
                             trace.append((extract_api_code, self.app_docs[app_name]))
-                    elif (
-                        "apis" in gen_code_output
-                        and "KeyError" not in gen_code_output
-                        and "TypeError" not in gen_code_output
-                        and "NameError" not in gen_code_output
-                    ):
+                    elif "apis" in gen_code_output and "KeyError" not in gen_code_output and "TypeError" not in gen_code_output and "NameError" not in gen_code_output:
                         extract_api = gen_code_output.split("apis.")[1].split("(")[0]
                         extract_api_code = f"# There was an issue with the way I invoked the API. Let me check the documentations to fix the issue.\nprint(apis.api_docs.show_api_doc(app_name='{extract_api.split('.')[0]}', api_name='{extract_api.split('.')[1]}'))"
                         if extract_api not in self.known_apis:
-                            self.known_apis[extract_api] = server.request.execute(
-                                task_id=task_id, code=extract_api_code
-                            )
+                            self.known_apis[extract_api] = server.request.execute(task_id=task_id, code=extract_api_code)
                         if "Execution failed" not in self.known_apis[extract_api]:
-                            trace.append(
-                                (extract_api_code, self.known_apis[extract_api])
-                            )
+                            trace.append((extract_api_code, self.known_apis[extract_api]))
                     elif re.search(
                         r"Usage of the following .* is not allowed", gen_code_output
                     ):
-                        trace[-1] = (
-                            gen_code,
-                            gen_code_output
-                            + " You must use the file system app to access the file system.",
-                        )
+                        trace[-1] = (gen_code, gen_code_output + " You must use the file system app to access the file system.")
 
                 if server.request.task_completed(task_id=task_id):
                     break
 
-            eval_report = server.request.evaluate(
-                task_id=task_id, suppress_errors=True, report=False
-            )
-            return dspy.Prediction(
-                trace=trace,
-                experiment_name_to_eval=output_experiment_name,
-                eval_report=eval_report,
-            )
+            eval_report = server.request.evaluate(task_id=task_id, suppress_errors=True, report=False)
+            return dspy.Prediction(trace=trace, experiment_name_to_eval=output_experiment_name, eval_report=eval_report)
