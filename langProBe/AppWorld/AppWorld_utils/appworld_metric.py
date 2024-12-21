@@ -10,4 +10,4 @@ def appworld_metric(example: dspy.Example, pred: dspy.Prediction, target: str = 
     #     eval_report = server.request.evaluate(task_id=task_id, suppress_errors=True, report=False)
     #     print(eval_report)
     #     return eval_report['success']
-    return pred.eval_report["success"]
+    return pred.eval_report['success']
