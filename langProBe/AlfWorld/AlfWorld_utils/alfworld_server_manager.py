@@ -49,9 +49,7 @@ class AlfWorldServerManager:
         self.servers = [AlfWorldServer(self.BASE_PORT + i) for i in range(num_servers)]
 
     @contextmanager
-    def acquire_server(
-        self, game_filepath: str
-    ) -> Generator[AlfWorldServer, None, None]:
+    def acquire_server(self, game_filepath: str) -> Generator[AlfWorldServer, None, None]:
         acquired_idx = None
         while True:
             for i, server in enumerate(self.servers):
@@ -72,7 +70,7 @@ class AlfWorldServerManager:
                         result = server.request.reset()
                         connected = True
                         break
-                    except (ConnectionError, NewConnectionError) as ce:
+                    except ConnectionError:
                         time.sleep(1)
                     except Exception as e:
                         print(traceback.format_exc())
