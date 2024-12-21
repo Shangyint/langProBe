@@ -20,37 +20,37 @@ def strip_comments(code_str):
 class AppWorldReactSignature(dspy.Signature):
     """Your job is to achieve my day-to-day tasks completely autonomously.
 
-    To do this, you will need to interact with app/s (e.g., spotify, venmo etc) using their associated APIs on my behalf. For this you will undertake a *multi-step interaction* using a python REPL environment. That is, you will write the python code and the environment will execute it and show you the result, based on which, you will write python code for the next step and so on, until you've achieved the goal. This environment will let you interact with app/s using their associated APIs on my behalf.
+To do this, you will need to interact with app/s (e.g., spotify, venmo etc) using their associated APIs on my behalf. For this you will undertake a *multi-step interaction* using a python REPL environment. That is, you will write the python code and the environment will execute it and show you the result, based on which, you will write python code for the next step and so on, until you've achieved the goal. This environment will let you interact with app/s using their associated APIs on my behalf.
 
-    Here are three key APIs that you need to know to get more information:
+Here are three key APIs that you need to know to get more information:
 
-    # To get a list of apps that are available to you.
-    print(apis.api_docs.show_app_descriptions())
+# To get a list of apps that are available to you.
+print(apis.api_docs.show_app_descriptions())
 
-    # To get the list of apis under any app listed above, e.g. spotify
-    print(apis.api_docs.show_api_descriptions(app_name='spotify'))
+# To get the list of apis under any app listed above, e.g. spotify
+print(apis.api_docs.show_api_descriptions(app_name='spotify'))
 
-    # To get the specification of a particular api, e.g. spotify app's login api
-    print(apis.api_docs.show_api_doc(app_name='spotify', api_name='login'))
+# To get the specification of a particular api, e.g. spotify app's login api
+print(apis.api_docs.show_api_doc(app_name='spotify', api_name='login'))
 
-    Each code execution will produce an output that you can use in subsequent calls. Using these APIs, you can now generate code, that I will execute, to solve the task.
+Each code execution will produce an output that you can use in subsequent calls. Using these APIs, you can now generate code, that I will execute, to solve the task.
 
-    **Key instructions**:
-    (1) Remember you can use the variables in your code in subsequent code blocks.
+**Key instructions**:
+(1) Remember you can use the variables in your code in subsequent code blocks.
 
-    (2) Remember that the email addresses, access tokens and variables (e.g. spotify_password) in the example above are not valid anymore.
+(2) Remember that the email addresses, access tokens and variables (e.g. spotify_password) in the example above are not valid anymore.
 
-    (3) You can use the "supervisor" app to get information about my accounts and use the "phone" app to get information about friends and family.
+(3) You can use the "supervisor" app to get information about my accounts and use the "phone" app to get information about friends and family.
 
-    (4) Always look at API specifications (using apis.api_docs.show_api_doc) before calling an API.
+(4) Always look at API specifications (using apis.api_docs.show_api_doc) before calling an API.
 
-    (5) Write small chunks of code and only one chunk of code in every step. Make sure everything is working correctly before making any irreversible change.
+(5) Write small chunks of code and only one chunk of code in every step. Make sure everything is working correctly before making any irreversible change.
 
-    (6) Many APIs return items in "pages". Make sure to run through all the pages by looping over `page_index`.
+(6) Many APIs return items in "pages". Make sure to run through all the pages by looping over `page_index`.
 
-    (7) Once you have completed the task, make sure to call apis.supervisor.complete_task(). If the task asked for some information, return it as the answer argument, i.e. call apis.supervisor.complete_task(answer=<answer>). Many tasks do not require an answer, so in those cases, just call apis.supervisor.complete_task() i.e. do not pass any argument.
+(7) Once you have completed the task, make sure to call apis.supervisor.complete_task(). If the task asked for some information, return it as the answer argument, i.e. call apis.supervisor.complete_task(answer=<answer>). Many tasks do not require an answer, so in those cases, just call apis.supervisor.complete_task() i.e. do not pass any argument.
 
-    Using these APIs, now generate the next code step to solve the actual task."""
+Using these APIs, now generate the next code step to solve the actual task."""
 
     instruction = dspy.InputField(description="Task to be completed", format=str)
     supervisor_name = dspy.InputField()

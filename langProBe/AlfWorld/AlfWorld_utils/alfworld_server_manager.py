@@ -1,14 +1,14 @@
 from contextlib import contextmanager
-import os
+from requests import ConnectionError
+from typing import Generator
 import subprocess
 import sys
 import threading
 import time
 import traceback
-from typing import Generator
+
 from .alfworld_client import AlfWorldClient
-from requests.exceptions import ConnectionError
-from urllib3.exceptions import NewConnectionError
+
 
 class AlfWorldServer:
     def __init__(self, port: int):
@@ -20,7 +20,7 @@ class AlfWorldServer:
         self.process = None
         self.stdout = None
         self.stderr = None
-    
+
     @contextmanager
     def start_server(self, game_filepath: str):
         # # Start the appworld serve command in a separate process
@@ -29,12 +29,12 @@ class AlfWorldServer:
             f"{sys.executable} -m langProBe.AlfWorld.AlfWorld_utils.alfworld_server {game_filepath} {self.port}",
             shell=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
 
         self.stdout = self.process.stdout
         self.stderr = self.process.stderr
-        
+
         try:
             yield
         finally:
@@ -42,13 +42,16 @@ class AlfWorldServer:
             self.process.terminate()
             self.process.wait()
 
+
 class AlfWorldServerManager:
     def __init__(self, num_servers: int):
         self.BASE_PORT = 9123
         self.servers = [AlfWorldServer(self.BASE_PORT + i) for i in range(num_servers)]
-    
+
     @contextmanager
-    def acquire_server(self, game_filepath: str) -> Generator[AlfWorldServer, None, None]:
+    def acquire_server(
+        self, game_filepath: str
+    ) -> Generator[AlfWorldServer, None, None]:
         acquired_idx = None
         while True:
             for i, server in enumerate(self.servers):
@@ -58,7 +61,7 @@ class AlfWorldServerManager:
             if acquired_idx is not None:
                 break
             time.sleep(0.1)
-        
+
         try:
             server = self.servers[acquired_idx]
             with server.start_server(game_filepath=game_filepath):
@@ -79,6 +82,7 @@ class AlfWorldServerManager:
                 yield server, result[0], result[1]
         finally:
             server.lock.release()
+
 
 # This is a singleton
 # TODO: Ensure that this is the same number of servers as the number of threads in Evaluate
