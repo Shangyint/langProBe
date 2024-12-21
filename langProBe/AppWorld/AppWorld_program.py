@@ -56,9 +56,7 @@ Using these APIs, now generate the next code step to solve the actual task."""
     supervisor_name = dspy.InputField()
     supervisor_phone_number = dspy.InputField()
     supervisor_email = dspy.InputField()
-    past_steps = dspy.InputField(
-        description="Past code executions and their outputs", format=str
-    )
+    past_steps = dspy.InputField(description="Past code executions and their outputs", format=str)
     code = dspy.OutputField(description="Python code to be executed", format=str)
 
 
@@ -76,19 +74,13 @@ class AppWorldReact(dspy.Module):
                 past_steps_trace = json.load(f)
 
             fewshotexample = dspy.Example(
-                instruction="How many playlists do I have in Spotify?",
-                supervisor_name="John Doe",
-                supervisor_phone_number="0123456789",
-                supervisor_email="johndoe@example.com",
-                past_steps=self.format_trace(past_steps_trace[:-1]),
-                code=past_steps_trace[-1][0],
-            ).with_inputs(
-                "instruction",
-                "supervisor_name",
-                "supervisor_phone_number",
-                "supervisor_email",
-                "past_steps",
-            )
+                instruction = "How many playlists do I have in Spotify?",
+                supervisor_name = "John Doe",
+                supervisor_phone_number = "0123456789",
+                supervisor_email = "johndoe@example.com",
+                past_steps = self.format_trace(past_steps_trace[:-1]),
+                code = past_steps_trace[-1][0],
+            ).with_inputs("instruction", "supervisor_name", "supervisor_phone_number", "supervisor_email", "past_steps")
 
             self.module.demos.append(fewshotexample)
 
