@@ -1,5 +1,9 @@
 from langProBe.AlfWorld.AlfWorld_data import AlfWorldBench
-from langProBe.AlfWorld.AlfWorld_program import AlfWorldReAct, AlfWorldPredict, AlfWorldCoT
+from langProBe.AlfWorld.AlfWorld_program import (
+    AlfWorldReAct,
+    AlfWorldPredict,
+    AlfWorldCoT,
+)
 from langProBe.AlfWorld.AlfWorld_utils.alfworld_metric import alfworld_metric
 from langProBe.benchmark import BenchmarkMeta
 from langProBe.optimizers import OptimizerConfig
@@ -15,7 +19,13 @@ ALFWORLD_OPTIMIZERS = [
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-        init_args=dict(max_errors=1000, max_labeled_demos=0, max_bootstrapped_demos=2, num_threads=8, num_candidate_programs=8),
+        init_args=dict(
+            max_errors=1000,
+            max_labeled_demos=0,
+            max_bootstrapped_demos=2,
+            num_threads=8,
+            num_candidate_programs=8,
+        ),
         compile_args=dict(),
         langProBe_configs=dict(
             use_valset=True, name="BootstrapFewShotWithRandomSearch"
@@ -35,8 +45,15 @@ ALFWORLD_OPTIMIZERS = [
 ]
 
 
-benchmark = [BenchmarkMeta(AlfWorldBench, [
-    # AlfWorldReAct(),
-    # AlfWorldPredict(),
-    AlfWorldCoT()
-], alfworld_metric, optimizers=ALFWORLD_OPTIMIZERS), ]
+benchmark = [
+    BenchmarkMeta(
+        AlfWorldBench,
+        [
+            # AlfWorldReAct(),
+            # AlfWorldPredict(),
+            AlfWorldCoT()
+        ],
+        alfworld_metric,
+        optimizers=ALFWORLD_OPTIMIZERS,
+    ),
+]
