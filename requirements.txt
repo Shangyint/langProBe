@@ -1,4 +1,4 @@
-dspy>=2.5.18
+dspy>=2.5.40
 requests
 shortuuid
 seaborn

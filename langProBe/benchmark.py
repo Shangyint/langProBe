@@ -112,6 +112,8 @@ class EvaluationResult:
     optimizer_output_tokens: int = None
     optimizer_cost: float = None
 
+    optimizer_program_scores: list[float] = None
+
 
 @dataclass
 class BenchmarkMeta:
@@ -159,6 +161,7 @@ class EvaluateBench(ABC):
         optimizers: list[(Teleprompter, dict)] = None,
         has_assertions: bool = False,
         num_threads: int = 1,
+        use_devset: bool = False,
     ):
         self.features: list[DSPyFeatures] = [DSPyFeatures.BASELINE]
         self.benchmark = benchmark
@@ -166,8 +169,14 @@ class EvaluateBench(ABC):
         self.metric = metric
         self.optimizers = optimizers
         self.num_threads = num_threads
+        if use_devset:
+            devset = benchmark.get_dev_set()
+            print(f"Using devset[{len(devset)}] for evaluation")
+        else:
+            devset = benchmark.get_test_set()
+            print(f"Using testset[{len(devset)}] for evaluation")
         self.evaluate_prog = Evaluate(
-            devset=self.benchmark.get_test_set(),
+            devset=devset,
             metric=self.metric,
             num_threads=self.num_threads,
             display_progress=True,
@@ -226,6 +235,7 @@ class EvaluateBench(ABC):
         result = self.get_empty_results()
         optimizer_lm = lm.copy()
         dspy_config["lm"] = optimizer_lm
+        save_candidate_score = optimizer_config.get("save_candidate_score", False)
         with dspy.context(**dspy_config):
             if optimizer_config.get("use_valset", False):
                 optimized_program = optimizer(
@@ -242,6 +252,10 @@ class EvaluateBench(ABC):
             result.optimizer_input_tokens,
             result.optimizer_output_tokens,
         ) = calculate_stats(optimizer_lm)
+        if save_candidate_score:
+            score_data = optimized_program.score_data
+            candidate_scores = [candidate["score"] for candidate in score_data]
+            result.optimizer_program_scores = candidate_scores
 
         result.optimizer = optimizer_config.get("name", optimizer.__class__.__name__)
         result.optimized_program = optimized_program

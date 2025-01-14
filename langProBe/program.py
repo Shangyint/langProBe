@@ -1,14 +1,20 @@
 import re
 import dspy
 from copy import deepcopy
-from dsp.utils import deduplicate
-
 
 #################################### Common Programs ####################################
 
+def deduplicate(seq: list[str]) -> list[str]:
+    """
+    Source: https://stackoverflow.com/a/480227/1493011
+    """
+
+    seen = set()
+    return [x for x in seq if not (x in seen or seen.add(x))]
 
 def Predict(signature):
     return dspy.Predict(signature)
+
 
 def CoT(signature):
     return dspy.ChainOfThought(signature)

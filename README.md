@@ -1,7 +1,7 @@
 ## Installation
 
 ```bash
-pip install git+https://github.com/stanfordnlp/dspy.git
+pip install -r requirements.txt
 ```
 
 ## Quick Usage
@@ -63,13 +63,7 @@ This file defines DSPy programs for this benchmark. Each program should be a sub
 This file defines utility functions for this benchmark.
 
 ## TODO architecture-level
-- [x] Top-level config to enable/disable benchmarks and programs
-- [x] have summary/visualization/report after running all the experiments
-- [x] Seperate between easier evaluations and harder evaluations. Easier ones require zero installation - runs on the go. For each benchmarks, have an easier way to output their size, easiness, time to evaluate etc.
-- [x] top-level experiment scripts that involve vanilla DSPy programs and optimizers (we need training data here).
-- [x] Specify the equivalent classes for each dataset (`full` (not advised), `lite`==500, `tiny`==200).
-- [ ] Better config system for specifying optimizer initialization/parameters
-- [ ] Tracking how much LLM call each dataset+program is taking, so that a better estimate (lower bound) for classes.
+- [ ] easier way to specify what program/dataset/optimzier to run. Let's use a config system!
 
 ### Contributing
 #### Formatting

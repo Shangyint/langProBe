@@ -138,7 +138,6 @@ def plot_scores_by_benchmark(directory_path: str, data_df):
 
 
 def plot_percentage_gain_by_benchmark(directory_path, data_df):
-
     # Calculate the baseline score for each benchmark and program
     baseline_df = data_df[data_df["optimizer"] == "Baseline"].rename(
         columns={"score": "baseline_score"}
@@ -315,25 +314,26 @@ def get_programs(data_df):
 
 def display_benchmark_performance(data_df, selected_benchmarks):
     # Filter data for the selected benchmarks
-    filtered_data = data_df[data_df['benchmark'].isin(selected_benchmarks)]
-    
+    filtered_data = data_df[data_df["benchmark"].isin(selected_benchmarks)]
+
     # Sort the data for better readability
-    filtered_data = filtered_data.sort_values(by=['benchmark', 'program', 'optimizer'])
+    filtered_data = filtered_data.sort_values(by=["benchmark", "program", "optimizer"])
 
     # for the same benchmark and program, None should always come first
 
-    
     # Create a human-readable table
     performance_table = filtered_data.pivot_table(
-        index=['benchmark', 'program'],
-        columns='optimizer',
-        values='score',
-        aggfunc='mean'
+        index=["benchmark", "program"],
+        columns="optimizer",
+        values="score",
+        aggfunc="mean",
     )
-    
+
     # Reorder columns to ensure "None (Baseline)" is always first
     if "Baseline" in performance_table.columns:
-        cols = ["Baseline"] + [col for col in performance_table.columns if col != "Baseline"]
+        cols = ["Baseline"] + [
+            col for col in performance_table.columns if col != "Baseline"
+        ]
         performance_table = performance_table[cols]
 
     # Return the performance table
@@ -486,7 +486,9 @@ if __name__ == "__main__":
     avg_score_diffs = compare_programs_with_reference_across_benchmarks(data_df)
     rich.print(avg_score_diffs)
 
-    table = display_benchmark_performance(data_df, ["HotpotQABench", "IrisBench", "GSM8KBench"])
+    table = display_benchmark_performance(
+        data_df, ["HotpotQABench", "IrisBench", "GSM8KBench"]
+    )
     print()
     rich.print(f"[bold red]Results for {file_path.split('_')[1]}[/bold red]")
     rich.print(table)
