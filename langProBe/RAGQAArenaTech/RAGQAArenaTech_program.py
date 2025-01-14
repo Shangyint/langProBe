@@ -6,7 +6,7 @@ import ujson
 import os
 import requests
 import langProBe.program as program
-from dspy.dsp.utils import deduplicate
+from langProBe.program import deduplicate
 from .RAGQAArenaTech_utils import GenerateSearchQuery
 
 
