@@ -10,6 +10,7 @@ class GenerateAnswerBasic(dspy.Signature):
     question = dspy.InputField()
     answer = dspy.OutputField(desc="The answer to the problem")
 
+
 GSM8KPredict = program.Predict(GenerateAnswerBasic)
 GSM8KCoT = program.CoT(GenerateAnswerBasic)
 GSM8KGeneratorCriticFuser = program.GeneratorCriticFuser(GenerateAnswerBasic)

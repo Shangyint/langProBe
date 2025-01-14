@@ -1,5 +1,6 @@
 import dspy
 
+
 def underspecified_annotation_evaluate(
     example: dspy.Example, pred: dspy.Prediction, target: str = None
 ):
@@ -8,6 +9,7 @@ def underspecified_annotation_evaluate(
         score += 1
 
     return score
+
 
 def evaluation_validity_evaluate(
     example: dspy.Example, pred: dspy.Prediction, target: str = None
