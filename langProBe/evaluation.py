@@ -156,7 +156,9 @@ def evaluate(
                     evaluation_result.optimized_program.save(
                         os.path.join(file_path, f"{file_name}.json")
                     )
-
+                if evaluation_result.optimizer_program_scores:
+                    with open(os.path.join(file_path, f"{file_name}_optimizer_score.txt"), "w") as f:
+                        f.write(",".join(evaluation_result.optimizer_program_scores))
 
 def evaluate_all(
     benchmarks,
