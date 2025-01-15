@@ -252,10 +252,10 @@ class EvaluateBench(ABC):
             result.optimizer_input_tokens,
             result.optimizer_output_tokens,
         ) = calculate_stats(optimizer_lm)
-        if save_candidate_score:
-            score_data = optimized_program.score_data
-            candidate_scores = [candidate["score"] for candidate in score_data]
-            result.optimizer_program_scores = candidate_scores
+        # if save_candidate_score:
+        #     score_data = optimized_program.score_data
+        #     candidate_scores = [candidate["score"] for candidate in score_data]
+        #     result.optimizer_program_scores = candidate_scores
 
         result.optimizer = optimizer_config.get("name", optimizer.__class__.__name__)
         result.optimized_program = optimized_program
