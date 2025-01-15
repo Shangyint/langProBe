@@ -288,6 +288,7 @@ if __name__ == "__main__":
     nonagent_benchmarks = [
         ".hover",
         ".Iris",
+        ".Iris_typo"
         ".IReRa",
         ".hotpotQA",
         ".MATH",
