@@ -64,6 +64,8 @@ This file defines utility functions for this benchmark.
 
 ## TODO architecture-level
 - [ ] easier way to specify what program/dataset/optimzier to run. Let's use a config system!
+- [ ] add a missing mode for running experiments
+- [ ] make names mandatory for optimizers
 
 ### Contributing
 #### Formatting
