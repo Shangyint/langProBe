@@ -9,6 +9,5 @@ import dspy
 
 programs = [HeartDiseasePredict, HeartDiseaseCoT, HeartDiseaseClassify()]
 
-benchmark = [
-    BenchmarkMeta(HeartDiseaseBench, programs, dspy.evaluate.answer_exact_match)
-]
+benchmark = [BenchmarkMeta(HeartDiseaseBench, programs, lambda g,p,t=None: g.answer == p.answer)]
+

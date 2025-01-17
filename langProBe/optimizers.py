@@ -31,14 +31,14 @@ class OptimizerConfig:
 DEFAULT_OPTIMIZERS = [
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShot,
-        init_args=dict(max_errors=5000, max_labeled_demos=2),
+        init_args=dict(max_errors=5000, max_labeled_demos=0, max_bootstrapped_demos=8),
         compile_args=dict(),
         langProBe_configs=dict(use_valset=False, save_candidate_score=False),
         name="BootstrapFewShot",
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-        init_args=dict(max_errors=5000, max_labeled_demos=2, num_threads=16),
+        init_args=dict(max_errors=5000, max_labeled_demos=0, num_threads=16, max_bootstrapped_demos=8),
         compile_args=dict(),
         langProBe_configs=dict(
             use_valset=True, save_candidate_score=True

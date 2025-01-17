@@ -21,7 +21,7 @@ class HeartDiseaseBench(Benchmark):
         "exang": {0: "no", 1: "yes"},
         "slope": {1: "upsloping", 2: "flat", 3: "downsloping"},
         "thal": {"3": "normal", "6": "fixed defect", "7": "reversible defect"},
-        "target": {0: "no", 1: "yes"},  # presence of heart disease
+        "target": {0: False, 1: True},  # presence of heart disease
     }
 
     def init_dataset(self):
@@ -32,7 +32,7 @@ class HeartDiseaseBench(Benchmark):
             for key, value in x.items():
                 if key in self.mappings:
                     x[key] = self.mappings[key].get(value, value)
-                x[key] = str(x[key])
+                x[key] = str(x[key]) if not key == "target" else bool(x[key])
 
             inputs = [k for k in x.keys() if k != "target"]
             x["answer"] = x["target"]

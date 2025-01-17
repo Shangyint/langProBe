@@ -1,5 +1,6 @@
 import dspy
 import langProBe.program as program
+from typing import List
 
 
 class HeartDiseaseInput(dspy.Signature):
@@ -29,22 +30,18 @@ class HeartDiseaseInput(dspy.Signature):
 class HeartDiseaseSignature(HeartDiseaseInput):
     """Given patient information, predict the presence of heart disease."""
 
-    answer = dspy.OutputField(
-        desc="Does this patient have heart disease? Just yes or no."
-    )
+    answer:bool = dspy.OutputField()
 
 
 class HeartDiseaseVote(HeartDiseaseInput):
     """Given patient information, predict the presence of heart disease. I can critically assess the provided trainee opinions."""
 
-    context = dspy.InputField(desc="A list of opinions from trainee doctors.")
-    answer = dspy.OutputField(
-        desc="Does this patient have heart disease? Just yes or no."
-    )
-
+    context:List[str] = dspy.InputField(desc="A list of opinions from trainee doctors.")
+    answer:bool = dspy.OutputField()
 
 class HeartDiseaseClassify(dspy.Module):
     def __init__(self):
+
         self.classify = [
             dspy.ChainOfThought(HeartDiseaseSignature, temperature=0.7 + i * 0.01)
             for i in range(3)
@@ -84,13 +81,14 @@ class HeartDiseaseClassify(dspy.Module):
         )
 
         opinions = [c(**kwargs) for c in self.classify]
+        
         opinions = [
-            (opinion.rationale.replace("\n", " ").strip("."), opinion.answer.strip("."))
+            (opinion.reasoning.replace("\n", " ").strip("."), opinion.answer)
             for opinion in opinions
         ]
 
         opinions = [
-            f"I'm a trainee doctor, trying to {reason}. Hence, my answer is {answer}."
+            f"I'm a trainee doctor.  Here are my observations: {reason}. Hence, my answer is {answer}."
             for reason, answer in opinions
         ]
 
