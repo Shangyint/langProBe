@@ -203,16 +203,7 @@ def evaluate(
         print(f"Results: {evaluate_bench.results}")
 
         if missing_mode:
-            records = []
-            for evaluation_result in evaluate_bench.results:
-                records.append(
-                    (
-                        evaluation_result.benchmark,
-                        evaluation_result.program,
-                        evaluation_result.optimizer,
-                    )
-                )
-            add_to_evaluation_records(file_path, records)
+            add_to_evaluation_records(file_path, evaluate_bench.results)
 
         # logging all results
         for evaluation_result in evaluate_bench.results:
