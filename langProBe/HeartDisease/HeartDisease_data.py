@@ -47,4 +47,3 @@ class HeartDiseaseBench(Benchmark):
         self.train_set = self.dataset[:15]
         self.val_set = self.dataset[15:]
         self.dev_set = self.dataset
-

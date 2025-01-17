@@ -11,11 +11,12 @@ class OptimizerConfig:
     init_args: dict
     compile_args: dict
     langProBe_configs: dict
+    name: str
 
     def __str__(self):
         return f"""
 [[
-    Optimizer: {self.optimizer}
+    Optimizer: {self.name} ({self.optimizer})
     init_args: {self.init_args}
     compile_args: {self.compile_args}
     langProBe_configs: {self.langProBe_configs}
@@ -32,16 +33,19 @@ DEFAULT_OPTIMIZERS = [
         optimizer=dspy.teleprompt.BootstrapFewShot,
         init_args=dict(max_errors=5000, max_labeled_demos=2),
         compile_args=dict(),
-        langProBe_configs=dict(use_valset=False, name="BootstrapFewShot", save_candidate_score=False),
+        langProBe_configs=dict(use_valset=False, save_candidate_score=False),
+        name="BootstrapFewShot",
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
         init_args=dict(max_errors=5000, max_labeled_demos=2, num_threads=16),
         compile_args=dict(),
         langProBe_configs=dict(
-            use_valset=True, name="BootstrapFewShotWithRandomSearch", save_candidate_score=True
+            use_valset=True, save_candidate_score=True
         ),
+        name="BootstrapFewShotWithRandomSearch",
     ),
+
     OptimizerConfig(
         optimizer=dspy.teleprompt.MIPROv2,
         init_args=dict(max_errors=5000, num_threads=16, num_candidates=12),
@@ -50,8 +54,13 @@ DEFAULT_OPTIMIZERS = [
             num_trials=50,
             max_bootstrapped_demos=4,
             max_labeled_demos=2,
+            minibatch_size=35,
+            minibatch_full_eval_steps=5,
         ),
-        langProBe_configs=dict(use_valset=True, name="MIPROv2", save_candidate_score=True),
+        langProBe_configs=dict(
+            use_valset=True, save_candidate_score=True,
+        ),
+        name="MIPROv2",
     ),
 ]
 
@@ -71,11 +80,12 @@ def update_optimizer_from_list(
 def create_optimizer(
     optimizer_config: OptimizerConfig, metric, num_threads=None
 ) -> tuple[Callable, dict]:
+    name = optimizer_config.name
     optimizer = optimizer_config.optimizer
     init_args = optimizer_config.init_args
     if num_threads and "num_threads" in init_args:
         init_args["num_threads"] = num_threads
     compile_args = optimizer_config.compile_args
-    langProBe_configs = optimizer_config.langProBe_configs
+    langProBe_configs = optimizer_config.langProBe_configs | {"name": name}
     optimizer = optimizer(metric=metric, **init_args)
     return partial(optimizer.compile, **compile_args), langProBe_configs

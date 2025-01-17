@@ -1,5 +1,6 @@
 import dspy
 
+
 class HoverMultiHopPredict(dspy.Module):
     def __init__(self):
         super().__init__()
@@ -31,6 +32,7 @@ class HoverMultiHopPredict(dspy.Module):
         hop3_docs = self.retrieve_k(hop3_query).passages
 
         return dspy.Prediction(retrieved_docs=hop1_docs + hop2_docs + hop3_docs)
+
 
 class HoverMultiHop(dspy.Module):
     def __init__(self):

@@ -23,7 +23,9 @@ class IReRaPredict(dspy.Module):
     def __init__(self, config: IreraConfig = global_config):
         super().__init__()
         self.config = config
-        self.predict = program.Predict(supported_signatures[config.infer_signature_name])
+        self.predict = program.Predict(
+            supported_signatures[config.infer_signature_name]
+        )
 
     def forward(self, text):
         parsed_outputs = set()
@@ -155,9 +157,9 @@ class IReRaRetrieveRank(dspy.Module):
             predictions=selected_options,
         )
 
-    def dump_state(self, verbose):
+    def dump_state(self):
         """Dump the state. Uses the DSPy dump_state but also adds the config file."""
-        return super().dump_state(verbose) | {"config": self.config.to_dict()}
+        return super().dump_state() | {"config": self.config.to_dict()}
 
     def load_state(self, state: dict):
         super().load_state(state)
@@ -176,4 +178,3 @@ class IReRaRetrieveRank(dspy.Module):
     def load(cls, path: str):
         state = json.load(open(path, "r"))
         return cls.from_state(state)
-

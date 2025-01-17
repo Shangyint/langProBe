@@ -4,6 +4,7 @@ from copy import deepcopy
 
 #################################### Common Programs ####################################
 
+
 def deduplicate(seq: list[str]) -> list[str]:
     """
     Source: https://stackoverflow.com/a/480227/1493011
@@ -11,6 +12,7 @@ def deduplicate(seq: list[str]) -> list[str]:
 
     seen = set()
     return [x for x in seq if not (x in seen or seen.add(x))]
+
 
 def Predict(signature):
     return dspy.Predict(signature)
