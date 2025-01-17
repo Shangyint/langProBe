@@ -12,6 +12,7 @@ import sentence_transformers
 from sentence_transformers import SentenceTransformer
 from functools import lru_cache
 
+
 def normalize(
     label: str,
     do_lower: bool = True,

@@ -11,7 +11,11 @@ from langProBe.benchmark import BenchmarkMeta
 benchmark = [
     BenchmarkMeta(
         HotpotQAConditionalBench,
-        [HotPotQACondPredict, HotPotQACondSimplifiedBaleen, HotPotQACondSimplifiedBaleenHandwritten],
+        [
+            HotPotQACondPredict,
+            HotPotQACondSimplifiedBaleen,
+            HotPotQACondSimplifiedBaleenHandwritten,
+        ],
         check_conditions,
     )
 ]

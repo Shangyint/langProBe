@@ -1,7 +1,9 @@
 import dspy
 
+
 def count_unique_docs(example):
     return len(set([fact["key"] for fact in example["supporting_facts"]]))
+
 
 def discrete_retrieval_eval(example, pred, trace=None):
     gold_titles = set(

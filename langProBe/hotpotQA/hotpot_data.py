@@ -10,5 +10,6 @@ class HotpotQABench(Benchmark):
             dspy.Example(**x).with_inputs("question") for x in raw_datasets["train"]
         ]
         self.test_set = [
-            dspy.Example(**x).with_inputs("question") for x in raw_datasets["validation"]
+            dspy.Example(**x).with_inputs("question")
+            for x in raw_datasets["validation"]
         ]

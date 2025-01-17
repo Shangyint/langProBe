@@ -24,7 +24,13 @@ APPWORLD_OPTIMIZERS = [
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
-        init_args=dict(max_errors=1000, max_labeled_demos=0, max_bootstrapped_demos=2, num_threads=8, num_candidate_programs=8),
+        init_args=dict(
+            max_errors=1000,
+            max_labeled_demos=0,
+            max_bootstrapped_demos=2,
+            num_threads=8,
+            num_candidate_programs=8,
+        ),
         compile_args=dict(teacher=appworld_teacher),
         langProBe_configs=dict(
             use_valset=True, name="BootstrapFewShotWithRandomSearch"
@@ -45,6 +51,14 @@ APPWORLD_OPTIMIZERS = [
 ]
 
 
-benchmark = [BenchmarkMeta(AppWorldBench, [appworld_student, appworld_teacher], appworld_metric, dataset_mode="full", optimizers=APPWORLD_OPTIMIZERS)]
+benchmark = [
+    BenchmarkMeta(
+        AppWorldBench,
+        [appworld_student, appworld_teacher],
+        appworld_metric,
+        dataset_mode="full",
+        optimizers=APPWORLD_OPTIMIZERS,
+    )
+]
 
 os.environ["APPWORLD_ROOT"] = os.path.join(os.getcwd(), "langProBe", "AppWorld")
