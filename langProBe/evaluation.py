@@ -1,4 +1,4 @@
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stdout
 import os
 from pathlib import Path
 import sys
@@ -6,6 +6,7 @@ from langProBe.benchmark import BenchmarkMeta, EvaluateBench
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks
 import dspy
+from dspy.evaluate import Evaluate
 
 
 class CompareAnswerSignature(dspy.Signature):
@@ -71,6 +72,7 @@ def evaluate(
     file_path=None,
     dataset_mode=None,
     use_devset=False,
+    suppress_output_samples=False,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -156,9 +158,38 @@ def evaluate(
                     evaluation_result.optimized_program.save(
                         os.path.join(file_path, f"{file_name}.json")
                     )
+
                 if evaluation_result.optimizer_program_scores:
                     with open(os.path.join(file_path, f"{file_name}_optimizer_score.txt"), "w") as f:
                         f.write(",".join(evaluation_result.optimizer_program_scores))
+
+                if evaluation_result.traces:
+                    with open(os.path.join(file_path, f"{file_name}.traces"), "w") as f:
+                        for trace in evaluation_result.traces:
+                            f.write(f"{trace}\n")
+
+                if not suppress_output_samples and (program or evaluation_result.optimized_program):
+                    evaluate_printer = Evaluate(
+                        devset=evaluate_bench.evalset,
+                        metric=evaluate_bench.metric,
+                        num_threads=evaluate_bench.num_threads,
+                        display_progress=False,
+                        display_table=True,
+                        # FIXME(shangyin): find a more ergonomic way to set max_errors
+                        max_errors=5000,
+                        provide_traceback=False,
+                    )
+
+                    with open(os.path.join(file_path, f"{file_name}.outputs"), "w") as f:
+                        with redirect_stdout(f):
+                            p = program
+                            score = 0
+                            if evaluation_result.optimized_program:
+                                p = evaluation_result.optimized_program
+                            with dspy.context(**{"lm": lm, "rm": rm}):
+                                evaluate_printer(p)
+                            print()
+                            print("Score: ", score, "(" + round(score * len(evaluate_bench.evalset), 2) + "/" + len(evaluate_bench.evalset) + ")")
 
 def evaluate_all(
     benchmarks,
@@ -169,6 +200,7 @@ def evaluate_all(
     file_path=None,
     dataset_mode=None,
     use_devset=False,
+    suppress_output_samples=False,
 ):
     benchmarks = register_all_benchmarks(benchmarks)
     for benchmark_meta in benchmarks:
@@ -181,6 +213,7 @@ def evaluate_all(
             file_path,
             dataset_mode,
             use_devset,
+            suppress_output_samples,
         )
 
 
@@ -268,6 +301,13 @@ if __name__ == "__main__":
         default=False,
     )
 
+    parser.add_argument(
+        "--suppress_output_samples",
+        help="Whether to suppress output samples from being saved to a file",
+        action="store_true",
+        default=False,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
@@ -329,4 +369,5 @@ if __name__ == "__main__":
         dataset_mode=dataset_mode,
         num_threads=args.num_threads,
         use_devset=args.use_devset,
+        suppress_output_samples=args.suppress_output_samples,
     )

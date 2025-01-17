@@ -111,6 +111,8 @@ class EvaluationResult:
     optimizer_input_tokens: int = None
     optimizer_output_tokens: int = None
     optimizer_cost: float = None
+    
+    traces: List[str] = None
 
     optimizer_program_scores: list[float] = None
 
@@ -175,8 +177,9 @@ class EvaluateBench(ABC):
         else:
             devset = benchmark.get_test_set()
             print(f"Using testset[{len(devset)}] for evaluation")
+        self.evalset = devset
         self.evaluate_prog = Evaluate(
-            devset=devset,
+            devset=self.evalset,
             metric=self.metric,
             num_threads=self.num_threads,
             display_progress=True,
@@ -214,11 +217,15 @@ class EvaluateBench(ABC):
         lm = setup_lm(dspy_config)
         dspy_config["lm"] = lm
 
+        self.clear_traces()
+
         with dspy.context(**dspy_config):
             score = self.evaluate_prog(self.program)
         result = self.get_empty_results()
         result.score = score
         result.cost, result.input_tokens, result.output_tokens = calculate_stats(lm)
+        with dspy.context(**dspy_config):
+            result.traces = self.extract_traces(self.program)
         return [result]
 
     def evaluate_optimizers(self, dspy_config=None) -> list[EvaluationResult]:
@@ -260,6 +267,8 @@ class EvaluateBench(ABC):
         result.optimizer = optimizer_config.get("name", optimizer.__class__.__name__)
         result.optimized_program = optimized_program
 
+        self.clear_traces()
+
         eval_lm = lm.copy()
         dspy_config["lm"] = eval_lm
         with dspy.context(**dspy_config):
@@ -268,12 +277,21 @@ class EvaluateBench(ABC):
         result.cost, result.input_tokens, result.output_tokens = calculate_stats(
             eval_lm
         )
+        with dspy.context(**dspy_config):
+            result.traces = self.extract_traces(result.optimized_program)
         return result
 
     def evaluate_assertion(self, dspy_config=None) -> list[EvaluationResult]:
         self.program.activate_assertions()
+
+        self.clear_traces()
+
         # TODO (shangyin): Implement assertion evaluation with cost metric
-        return self.evaluate_prog(self.program)
+        result = self.evaluate_prog(self.program)
+
+        with dspy.context(**dspy_config):
+            result.traces = self.extract_traces(self.program)
+        return result
 
     def evaluate(self, dspy_config=None) -> list[EvaluationResult]:
         """
@@ -295,3 +313,28 @@ class EvaluateBench(ABC):
                     result.extend(self.evaluate_assertion(dspy_config))
         self.results = result
         return result
+
+    def clear_traces(self):
+        dspy.settings.trace = []
+
+    def extract_traces(self, program, n=20):
+        num_modules = len(program.predictors())
+
+        traces = []
+
+        for i in range(0, min(n*num_modules, len(dspy.settings.trace)), num_modules):
+            for offset in range(num_modules):
+                if i+offset >= len(dspy.settings.trace):
+                    break
+                trace_str = ["="*20]
+                trace_str.append(f"Module {offset}")
+                trace_str.append("===\nPREDICTOR")
+                trace_str.append(str(dspy.settings.trace[i+offset][0]))
+                trace_str.append("===\nINPUT")
+                trace_str.append(str(dspy.settings.trace[i+offset][1]))
+                trace_str.append("===\nOUTPUT")
+                trace_str.append(str(dspy.settings.trace[i+offset][2]))
+                trace_str.append("="*20)
+                traces.append("\n".join(trace_str))
+
+        return traces
