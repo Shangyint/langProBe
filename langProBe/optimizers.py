@@ -40,12 +40,24 @@ DEFAULT_OPTIMIZERS = [
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
         init_args=dict(max_errors=5000, max_labeled_demos=2, num_threads=16),
         compile_args=dict(),
-        langProBe_configs=dict(
-            use_valset=True, save_candidate_score=True
-        ),
+        langProBe_configs=dict(use_valset=True, save_candidate_score=True),
         name="BootstrapFewShotWithRandomSearch",
     ),
-
+    OptimizerConfig(
+        optimizer=dspy.teleprompt.MIPROv2,
+        init_args=dict(max_errors=5000, auto="medium", num_threads=16),
+        compile_args=dict(
+            requires_permission_to_run=False,
+            num_trials=20,
+            max_bootstrapped_demos=4,
+            max_labeled_demos=2,
+        ),
+        langProBe_configs=dict(
+            use_valset=True,
+            save_candidate_score=True,
+        ),
+        name="MIPROv2",
+    ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.MIPROv2,
         init_args=dict(max_errors=5000, num_threads=16, num_candidates=12),
@@ -58,9 +70,10 @@ DEFAULT_OPTIMIZERS = [
             minibatch_full_eval_steps=5,
         ),
         langProBe_configs=dict(
-            use_valset=True, save_candidate_score=True,
+            use_valset=True,
+            save_candidate_score=True,
         ),
-        name="MIPROv2",
+        name="MIPROv2+",
     ),
 ]
 

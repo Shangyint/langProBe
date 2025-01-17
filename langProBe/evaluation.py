@@ -1,8 +1,10 @@
 from contextlib import contextmanager
+import copy
 import os
 from pathlib import Path
+import pathlib
 import sys
-from langProBe.benchmark import BenchmarkMeta, EvaluateBench
+from langProBe.benchmark import BenchmarkMeta, EvaluateBench, EvaluationResult
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks
 import dspy
@@ -62,21 +64,75 @@ def suppress_output(suppress=True):
             sys.stdout = original_stdout
 
 
+def generate_evaluation_records(file_path):
+    file_path = pathlib.Path(file_path)
+
+    # if the records file already exists, do not overwrite it
+    if (file_path / "evaluation_records.csv").exists():
+        return
+
+    # List all .txt files in the directory
+    all_result_files = list(file_path.rglob("*.txt"))
+
+    records = []
+
+    # Process each file
+    for file in all_result_files:
+        # Split the filename to get benchmark, program, and optimizer
+        file_name_parts = file.stem.split("_")
+        if len(file_name_parts) >= 3:
+            benchmark = file_name_parts[0]
+            program = file_name_parts[1]
+            optimizer = file_name_parts[2]
+            records.append((benchmark, program, optimizer))
+        else:
+            raise ValueError(f"Invalid file name: {file.name}")
+
+    with open(f"{file_path}/evaluation_records.csv", "w") as f:
+        f.write("benchmark,program,optimizer\n")
+        for record in records:
+            f.write(",".join(record) + "\n")
+
+
+def add_to_evaluation_records(file_path, evaluation_results: list[EvaluationResult]):
+    file_path = pathlib.Path(file_path)
+
+    with open(f"{file_path}/evaluation_records.csv", "a") as f:
+        for evaluation_result in evaluation_results:
+            f.write(
+                f"{evaluation_result.benchmark},{evaluation_result.program},{evaluation_result.optimizer}\n"
+            )
+
+
+def read_evaluation_records(file_path):
+    file_path = pathlib.Path(file_path)
+    records = []
+
+    with open(f"{file_path}/evaluation_records.csv", "r") as f:
+        lines = f.readlines()
+        for line in lines[1:]:
+            records.append(tuple(line.strip().split(",")))
+
+    return records
+
+
 def evaluate(
     benchmark_meta: BenchmarkMeta,
     lm,
     rm,
+    file_path,
     num_threads=8,
     suppress_dspy_output=True,
-    file_path=None,
     dataset_mode=None,
     use_devset=False,
+    missing_mode=False,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
     lm: Language model to use, should be an instance of dspy.LM
     rm: Retrieval model to use
     optimizers: List[type(Teleprompter) | (type(Teleprompter), kwargs_for_compile)]
+    missing_mode: only evaluate experiments without a result file
     """
     dataset_mode = dataset_mode or benchmark_meta.dataset_mode
     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
@@ -90,29 +146,42 @@ def evaluate(
     print(f"Validation set size: {len(benchmark.val_set)}")
     print(f"Test set size: {len(benchmark.test_set)}")
 
-    optimizer_names = [optimizer.optimizer.__name__ for optimizer in optimizers]
-    for i, optimizer in enumerate(optimizers):
-        if "name" not in optimizer.langProBe_configs:
-            optimizer.langProBe_configs["name"] = optimizer_names[i]
+    optimizer_names = [optimizer.name for optimizer in optimizers]
 
-    if file_path:
-        stats_file = os.path.join(file_path, f"{benchmark_name}.stat")
-        with open(stats_file, "w") as f:
-            f.write(
-                f"benchmark: {benchmark_name}\n"
-                f"lm: {lm}\n"
-                f"rm: {rm}\n"
-                f"train_set_size: {len(benchmark.train_set)}\n"
-                f"val_set_size: {len(benchmark.val_set)}\n"
-                f"test_set_size: {len(benchmark.test_set)}\n"
-                f"optimizers: {optimizer_names}\n"
-                f"optimizer_configs: {optimizers}\n"
-            )
+    Path(file_path).mkdir(parents=True, exist_ok=True)
+
+    evaluation_records = read_evaluation_records(file_path)
+
+    # create a stats file for each experiment
+    stats_file = os.path.join(file_path, f"{benchmark_name}.stat")
+    with open(stats_file, "w") as f:
+        f.write(
+            f"benchmark: {benchmark_name}\n"
+            f"lm: {lm}\n"
+            f"rm: {rm}\n"
+            f"train_set_size: {len(benchmark.train_set)}\n"
+            f"val_set_size: {len(benchmark.val_set)}\n"
+            f"test_set_size: {len(benchmark.test_set)}\n"
+            f"optimizers: {optimizer_names}\n"
+            f"optimizer_configs: {optimizers}\n"
+        )
 
     for program in benchmark_meta.program:
-        print(f"Program: {program.__class__.__name__}")
+        program_name = getattr(program, "_name", program.__class__.__name__)
 
-        print(f"Optimizers: {'; '.join(optimizer_names)}")
+        evaluate_baseline_flag = True
+        optimizers = copy.deepcopy(benchmark_meta.optimizers)
+        if missing_mode:
+            # Only run missing experiments
+            for optimizer in benchmark_meta.optimizers:
+                if (benchmark_name, program_name, optimizer.name) in evaluation_records:
+                    optimizers.remove(optimizer)
+            if (benchmark_name, program_name, "None") in evaluation_records:
+                evaluate_baseline_flag = False
+
+        print(f"Program: {program_name}, running baseline: {evaluate_baseline_flag}")
+        print(f"Optimizers: {'; '.join(map(lambda x: x.name, optimizers))}")
+
         with suppress_output(suppress=suppress_dspy_output):
             evaluate_bench = EvaluateBench(
                 benchmark=benchmark,
@@ -126,61 +195,82 @@ def evaluate(
                     )
                     for optimizer in optimizers
                 ],
+                evaluate_baseline_flag=evaluate_baseline_flag,
                 num_threads=num_threads,
                 use_devset=use_devset,
             )
             evaluate_bench.evaluate(dspy_config={"lm": lm, "rm": rm})
         print(f"Results: {evaluate_bench.results}")
-        if file_path:
-            Path(file_path).mkdir(parents=True, exist_ok=True)
+
+        if missing_mode:
+            records = []
             for evaluation_result in evaluate_bench.results:
-                file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}_{evaluation_result.optimizer}"
-                if evaluation_result.optimizer:
-                    optimizer_header = "optimizer,optimizer_cost,optimizer_input_tokens,optimizer_output_tokens"
-                    optimizer_values = (
-                        f"{evaluation_result.optimizer},{evaluation_result.optimizer_cost},"
-                        f"{evaluation_result.optimizer_input_tokens},{evaluation_result.optimizer_output_tokens},"
+                records.append(
+                    (
+                        evaluation_result.benchmark,
+                        evaluation_result.program,
+                        evaluation_result.optimizer,
                     )
-                else:
-                    optimizer_header = ""
-                    optimizer_values = ""
-                with open(os.path.join(file_path, f"{file_name}.txt"), "w") as f:
-                    f.write(
-                        f"score,cost,input_tokens,output_tokens,{optimizer_header}\n"
-                    )
-                    f.write(
-                        f"{evaluation_result.score},{evaluation_result.cost},{evaluation_result.input_tokens},"
-                        f"{evaluation_result.output_tokens},{optimizer_values}\n"
-                    )
-                if evaluation_result.optimizer:
-                    evaluation_result.optimized_program.save(
-                        os.path.join(file_path, f"{file_name}.json")
-                    )
-                if evaluation_result.optimizer_program_scores:
-                    with open(os.path.join(file_path, f"{file_name}_optimizer_score.txt"), "w") as f:
-                        f.write(",".join(evaluation_result.optimizer_program_scores))
+                )
+            add_to_evaluation_records(file_path, records)
+
+        # logging all results
+        for evaluation_result in evaluate_bench.results:
+            file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}_{evaluation_result.optimizer}"
+            if evaluation_result.optimizer:
+                optimizer_header = "optimizer,optimizer_cost,optimizer_input_tokens,optimizer_output_tokens"
+                optimizer_values = (
+                    f"{evaluation_result.optimizer},{evaluation_result.optimizer_cost},"
+                    f"{evaluation_result.optimizer_input_tokens},{evaluation_result.optimizer_output_tokens},"
+                )
+            else:
+                optimizer_header = ""
+                optimizer_values = ""
+            with open(os.path.join(file_path, f"{file_name}.txt"), "w") as f:
+                f.write(f"score,cost,input_tokens,output_tokens,{optimizer_header}\n")
+                f.write(
+                    f"{evaluation_result.score},{evaluation_result.cost},{evaluation_result.input_tokens},"
+                    f"{evaluation_result.output_tokens},{optimizer_values}\n"
+                )
+            if evaluation_result.optimizer:
+                evaluation_result.optimized_program.save(
+                    os.path.join(file_path, f"{file_name}.json")
+                )
+            if evaluation_result.optimizer_program_scores:
+                with open(
+                    os.path.join(file_path, f"{file_name}_optimizer_score.txt"), "w"
+                ) as f:
+                    f.write(",".join(evaluation_result.optimizer_program_scores))
+
+    # generate evaluation records
+    generate_evaluation_records(file_path)
+
 
 def evaluate_all(
     benchmarks,
     lm,
     rm,
+    file_path,
     num_threads=8,
     suppress_dspy_output=True,
-    file_path=None,
     dataset_mode=None,
     use_devset=False,
+    missing_mode=False,
 ):
     benchmarks = register_all_benchmarks(benchmarks)
+    if missing_mode:
+        generate_evaluation_records(file_path)
     for benchmark_meta in benchmarks:
         evaluate(
             benchmark_meta,
             lm,
             rm,
+            file_path,
             num_threads,
             suppress_dspy_output,
-            file_path,
             dataset_mode,
             use_devset,
+            missing_mode,
         )
 
 
@@ -268,6 +358,13 @@ if __name__ == "__main__":
         default=False,
     )
 
+    parser.add_argument(
+        "--missing_mode",
+        help="Whether to only evaluate experiments without a result file",
+        action="store_true",
+        default=False,
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
@@ -324,9 +421,10 @@ if __name__ == "__main__":
         benchmarks,
         lm,
         rm,
-        suppress_dspy_output=suppress_dspy_output,
         file_path=file_path,
+        suppress_dspy_output=suppress_dspy_output,
         dataset_mode=dataset_mode,
         num_threads=args.num_threads,
         use_devset=args.use_devset,
+        missing_mode=args.missing_mode,
     )

@@ -162,8 +162,12 @@ class EvaluateBench(ABC):
         has_assertions: bool = False,
         num_threads: int = 1,
         use_devset: bool = False,
+        evaluate_baseline_flag=True,
     ):
-        self.features: list[DSPyFeatures] = [DSPyFeatures.BASELINE]
+        self.evaluate_baseline_flag = evaluate_baseline_flag
+        self.features: list[DSPyFeatures] = (
+            [DSPyFeatures.BASELINE] if self.evaluate_baseline_flag else []
+        )
         self.benchmark = benchmark
         self.program = program
         self.metric = metric
