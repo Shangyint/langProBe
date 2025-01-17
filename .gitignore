@@ -17,7 +17,5 @@ data/
 *.model
 *.stat
 *.json
-*.outputs
-*.traces
 
 .dspy_cache/
