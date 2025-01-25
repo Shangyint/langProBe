@@ -71,3 +71,47 @@ class UnderspecifiedAnnotationCoT(dspy.Module):
             output["underspecification_" + k] = v
         
         return dspy.Prediction(**output)
+
+class UnderspecifiedAnnotationGeneratorCriticFuser(dspy.Module):
+    def __init__(self):
+        self.underspcification_predictor = program.GeneratorCriticFuser(UnderspecifiedSignature)
+
+    def forward(self, patch, test_patch, problem_statement, FAIL_TO_PASS, repo):
+        underspecification_output = self.underspcification_predictor(
+            repo=repo,
+            issue_description=problem_statement,
+            gold_patch=patch,
+            test_patch=test_patch,
+            test_names=FAIL_TO_PASS,
+        )
+        
+        underspecification_output['score'] = str(int(re.split(r'[^0-9]+', underspecification_output['score'])[0]))
+
+        output = {}
+        
+        for k, v in underspecification_output.items():
+            output["underspecification_" + k] = v
+        
+        return dspy.Prediction(**output)
+
+class UnderspecifiedAnnotationGeneratorCriticRanker(dspy.Module):
+    def __init__(self):
+        self.underspcification_predictor = program.GeneratorCriticRanker(UnderspecifiedSignature)
+
+    def forward(self, patch, test_patch, problem_statement, FAIL_TO_PASS, repo):
+        underspecification_output = self.underspcification_predictor(
+            repo=repo,
+            issue_description=problem_statement,
+            gold_patch=patch,
+            test_patch=test_patch,
+            test_names=FAIL_TO_PASS,
+        )
+        
+        underspecification_output['score'] = str(int(re.split(r'[^0-9]+', underspecification_output['score'])[0]))
+
+        output = {}
+        
+        for k, v in underspecification_output.items():
+            output["underspecification_" + k] = v
+        
+        return dspy.Prediction(**output)

@@ -72,3 +72,47 @@ class EvaluationValidityCoT(dspy.Module):
             output["evaluation_validity_" + k] = v
         
         return dspy.Prediction(**output)
+
+class EvaluationValidityGeneratorCriticRanker(dspy.Module):
+    def __init__(self):
+        self.evaluation_validity_predictor = program.GeneratorCriticRanker(EvaluationValiditySignature)
+
+    def forward(self, patch, test_patch, problem_statement, FAIL_TO_PASS, repo):        
+        evaluation_validity_output = self.evaluation_validity_predictor(
+            repo=repo,
+            issue_description=problem_statement,
+            gold_patch=patch,
+            test_patch=test_patch,
+            test_names=FAIL_TO_PASS,
+        )
+        
+        evaluation_validity_output['score'] = str(int(re.split(r'[^0-9]+', evaluation_validity_output['score'])[0]))
+
+        output = {}
+        
+        for k, v in evaluation_validity_output.items():
+            output["evaluation_validity_" + k] = v
+        
+        return dspy.Prediction(**output)
+
+class EvaluationValidityGeneratorCriticFuser(dspy.Module):
+    def __init__(self):
+        self.evaluation_validity_predictor = program.GeneratorCriticFuser(EvaluationValiditySignature)
+
+    def forward(self, patch, test_patch, problem_statement, FAIL_TO_PASS, repo):        
+        evaluation_validity_output = self.evaluation_validity_predictor(
+            repo=repo,
+            issue_description=problem_statement,
+            gold_patch=patch,
+            test_patch=test_patch,
+            test_names=FAIL_TO_PASS,
+        )
+        
+        evaluation_validity_output['score'] = str(int(re.split(r'[^0-9]+', evaluation_validity_output['score'])[0]))
+
+        output = {}
+        
+        for k, v in evaluation_validity_output.items():
+            output["evaluation_validity_" + k] = v
+        
+        return dspy.Prediction(**output)

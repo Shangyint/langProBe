@@ -3,10 +3,14 @@ from .swebench_verified_annotation_task_data import SWEBenchVerifiedAnnotationTa
 from .swebench_verified_underspecified_annotation_program import (
     UnderspecifiedAnnotationCoT,
     UnderspecifiedAnnotationPredict,
+    UnderspecifiedAnnotationGeneratorCriticRanker,
+    UnderspecifiedAnnotationGeneratorCriticFuser
 )
 from .swebench_verifier_eval_validity_annotation_program import (
     EvaluationValidityCoT,
     EvaluationValidityPredict,
+    EvaluationValidityGeneratorCriticFuser,
+    EvaluationValidityGeneratorCriticRanker
 )
 from .swebench_utils import (
     evaluation_validity_evaluate,
@@ -17,12 +21,22 @@ from .swebench_utils import (
 benchmark = [
     BenchmarkMeta(
         SWEBenchVerifiedAnnotationTaskBench,
-        [UnderspecifiedAnnotationPredict(), UnderspecifiedAnnotationCoT()],
+        [
+            UnderspecifiedAnnotationPredict(),
+            UnderspecifiedAnnotationCoT(),
+            UnderspecifiedAnnotationGeneratorCriticRanker(),
+            UnderspecifiedAnnotationGeneratorCriticFuser()
+        ],
         underspecified_annotation_evaluate,
     ),
     BenchmarkMeta(
         SWEBenchVerifiedAnnotationTaskBench,
-        [EvaluationValidityPredict(), EvaluationValidityCoT()],
+        [
+            EvaluationValidityPredict(),
+            EvaluationValidityCoT(),
+            EvaluationValidityGeneratorCriticRanker(),
+            EvaluationValidityGeneratorCriticFuser()
+        ],
         evaluation_validity_evaluate,
     ),
 ]
