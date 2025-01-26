@@ -30,15 +30,52 @@ def default_input_to_query(**kwargs):
             "Cannot convert multiple inputs to a query, please specify input_to_query."
         )
 
+import bm25s
+import Stemmer
+import ujson
+import pickle
+import os
+
+corpus = []
+with open("wiki.abstracts.2017.jsonl") as f:
+    for line in f:
+        line = ujson.loads(line)
+        corpus.append(f"{line['title']} | {' '.join(line['text'])}")
+
+stemmer = Stemmer.Stemmer("english")
+
+tokenized_corpus_file = "corpus_tokens.pkl"
+retriever_file = "bm25_index.pkl"
+
+if os.path.exists(tokenized_corpus_file) and os.path.exists(retriever_file):
+    print('entered here')
+    with open(tokenized_corpus_file, "rb") as f:
+        corpus_tokens = pickle.load(f)
+    with open(retriever_file, "rb") as f:
+        retriever = pickle.load(f)
+else:
+    print('entered here for indexing')
+    corpus_tokens = bm25s.tokenize(corpus, stopwords="en", stemmer=stemmer)
+    retriever = bm25s.BM25(k1=0.9, b=0.4)
+    retriever.index(corpus_tokens)
+
+    with open(tokenized_corpus_file, "wb") as f:
+        pickle.dump(corpus_tokens, f)
+    with open(retriever_file, "wb") as f:
+        pickle.dump(retriever, f)
+
+def search(query: str, k: int) -> list[str]:
+    tokens = bm25s.tokenize(query, stopwords="en", stemmer=stemmer, show_progress=False)
+    results, scores = retriever.retrieve(tokens, k=k, n_threads=1, show_progress=False)
+    run = {corpus[doc]: float(score) for doc, score in zip(results[0], scores[0])}
+    return run
+
 
 class RAG(dspy.Module):
-    def __init__(
-        self,
-        signature,
-        retriever=dspy.Retrieve(k=3),
-        input_to_query=default_input_to_query,
-    ):
-        self.retriver = retriever
+
+    
+    def __init__(self, signature, input_to_query=default_input_to_query, num_docs=3):
+        self.num_docs = num_docs
         verified_signature = dspy.ensure_signature(signature)
         verified_signature = verified_signature.prepend(
             "context", dspy.InputField(desc="may contain relevant facts")
@@ -47,26 +84,26 @@ class RAG(dspy.Module):
         self.input_to_query = input_to_query
 
     def forward(self, **kwargs):
-        context = self.retriver(self.input_to_query(**kwargs)).passages
+        query = self.input_to_query(**kwargs)
+        context = search(query, k=self.num_docs)
+        context = list(context.keys())
         pred = self.prog(context=context, **kwargs)
         return pred
 
 
 class SimplifiedBaleen(dspy.Module):
-    def __init__(
-        self, signature, query_gen_input=None, retriever=dspy.Retrieve(k=2), max_hops=2
-    ):
+    def __init__(self, signature, query_gen_input=None, max_hops=2, num_docs=2):
         """
         args:
             signature: The signature to the final generate module
             query_gen_input: a list of keywords to be used as input to the query generation module
-            retriever: a retriever module to be used to retrieve relevant facts
             max_hops: the number of hops to be used in the simplified
+            num_docs: the number of documents to retrieve per hop
             FIXME (shangyin) correctly handle query_gen_input
         """
 
         self.max_hops = max_hops
-        self.retriever = retriever
+        self.num_docs = num_docs
         verified_signature = dspy.ensure_signature(signature)
         verified_signature = verified_signature.prepend(
             "context", dspy.InputField(desc="may contain relevant facts")
@@ -85,18 +122,19 @@ class SimplifiedBaleen(dspy.Module):
             dspy.ChainOfThought(generate_query_signature) for _ in range(self.max_hops)
         ]
         self.generate_answer = dspy.ChainOfThought(verified_signature)
-
+        
     def forward(self, **kwargs):
         context = []
 
         for hop in range(self.max_hops):
             query = self.generate_query[hop](context=context, **kwargs).search_query
-            passages = self.retriever(query).passages
+            passages = search(query, k=self.num_docs)
+            passages = list(passages.keys())
+
             context = deduplicate(context + passages)
 
         pred = self.generate_answer(context=context, **kwargs)
         return pred
-
 
 #################################### Archon Programs ####################################
 
