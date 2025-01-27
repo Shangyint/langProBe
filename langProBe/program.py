@@ -335,6 +335,9 @@ class GeneratorCriticRanker(dspy.Module):
         self.critic = ArchonCritic(self.signature, n)
         self.ranker = ArchonRanker(self.signature, n, use_critic=True)
 
+        if n != 5: # override default name
+            self._name = f"GeneratorCriticRanker{n}"
+
     def forward(self, **kwargs):
         responses = self.generator.get_responses(**kwargs)
         formatted_responses = responses_formatter(responses)
@@ -353,6 +356,9 @@ class GeneratorCriticFuser(dspy.Module):
         self.generator = ArchonGenerator(self.signature, n)
         self.critic = ArchonCritic(self.signature, n)
         self.fuser = ArchonFuser(self.signature, use_critic=True)
+
+        if n != 5: # override default name
+            self._name = f"GeneratorCriticFuser{n}"
 
     def forward(self, **kwargs):
         formatted_responses = self.generator.get_formatted_responses(**kwargs)

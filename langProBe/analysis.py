@@ -1,8 +1,6 @@
-import math
-from matplotlib.patches import Patch
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 import pathlib
@@ -75,385 +73,1124 @@ def extract_information_from_files(directory_path):
     # Convert the list of dictionaries to a pandas DataFrame
     df = pd.DataFrame(extracted_data)
     df["optimizer"] = df["optimizer"].replace("None", "Baseline")
+    print(df["benchmark"].unique())
     return df
 
 
-def plot_scores_by_benchmark(directory_path: str, data_df):
-    # Get a list of unique benchmarks
-    benchmarks = data_df["benchmark"].unique()
-    num_benchmarks = len(benchmarks)
+program_mapping = {
+    "AppWorldReact": "ReActBaseline",
+    "AppWorldReactAugumented": "ReActAugumented",
+    "Predict": "Predict",
+    "ChainOfThought": "CoT",
+    "GeneratorCriticRanker": "GeneratorCriticRanker",
+    "GeneratorCriticFuser": "GeneratorCriticFuser",
+    "RAG": "RAG",
+    "EvaluationValidityPredict": "Predict",
+    "EvaluationValidityModule": "CoT",
+    "CoT": "CoT",
+    "Classify": "CoTBasedVote",
+    "HeartDiseaseClassify": "CoTBasedVote",
+    "RetrieveMultiHop": "RetrieveMultiHop",
+    "SimplifiedBaleen": "SimplifiedBaleen",
+    "SimplifiedBaleenWithHandwrittenInstructions": "SimplifiedBaleenWithInst",
+    "UnderspecifiedAnnotationCoT": "CoT",
+    "UnderspecifiedAnnotationPredict": "Predict",
+    "EvaluationValidityCoT": "CoT",
+    "EvaluationValidityPredict": "Predict",
+    # Relook at the following programs
+    "IReRaCOT": "CoT",
+    "IReRaPredict": "Predict",
+    "Infer": "CoT",
+    "InferRetrieve": "RAG",
+    "IReRaRetrieve": "RAG",
+    "IReRaRetrieveRank": "RAGBasedRank",
+    "InferRetrieveRank": "RAGBasedRank",
+    "HoverMultiHopPredict": "Predict",
+    "HoverMultiHop": "MultiHopSummarize",
+}
 
-    # Determine the number of rows and columns based on the square root of the number of benchmarks
-    cols = math.ceil(math.sqrt(num_benchmarks))
-    rows = math.ceil(num_benchmarks / cols)
 
-    # Set up the figure with subplots arranged in a grid
-    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows), sharey=True)
-    fig.suptitle("Scores by Program and Optimizer for Each Benchmark", fontsize=16)
+def canonicalize_program(data_df):
+    # Update the benchmark names based on the program
+    data_df.loc[
+        data_df["program"].isin(["UnderspecifiedAnnotationCoT", "UnderspecifiedAnnotationPredict"]),
+        "benchmark"
+    ] = "SWEBenchUnderspecified"
 
-    # Flatten axes array for easy iteration
-    axes = axes.flatten()
+    data_df.loc[
+        data_df["program"].isin(["EvaluationValidityCoT", "EvaluationValidityPredict"]),
+        "benchmark"
+    ] = "SWEBenchValidity"
+    data_df["program"] = data_df["program"].replace(program_mapping)
+    data_df["benchmark"] = data_df["benchmark"].apply(lambda x: x.replace("Bench", ""))
+    print("HEREHERE")
+    print(data_df["benchmark"].unique())
+    return data_df
 
-    # Create subplots for each benchmark
-    for i, benchmark in enumerate(benchmarks):
-        ax = axes[i]
-        benchmark_data = data_df[data_df["benchmark"] == benchmark]
 
-        # Create a bar plot for each benchmark
-        sns.barplot(
-            data=benchmark_data,
-            x="program",
-            y="score",
-            hue="optimizer",
-            ax=ax,
-            palette="viridis",
-        )
+## Plotting functions
+# Global variable to store consistent program colors
+PROGRAM_COLORS = {}
 
-        # Set labels and title for each subplot
-        ax.set_title(f"Benchmark: {benchmark}")
-        ax.set_xlabel("Program")
-        ax.set_ylabel("Score")
+CUD_COLORS = [
+    "#56B4E9",  # Sky Blue
+    "#E69F00",  # Orange
+    "#009E73",  # Bluish Green
+    "#F0E442",  # Yellow
+    "#0072B2",  # Blue
+    "#CC79A7",  # Reddish Purple
+    "#999999",  # Gray
+    "#882255",  # Dark Red (new)
+    "#44AA99",  # Teal (new)
+    "#332288",  # Dark Blue (new)
+    "#AA4499",  # Purple (new)
+    "#117733",  # Dark Green (new)
+    "#DDCC77",  # Sand Yellow (new)
+]
 
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
-        ax.get_legend().remove()  # Remove individual legends
 
-    # Hide any unused subplots
-    for j in range(i + 1, rows * cols):
-        fig.delaxes(axes[j])
+def plot_program_specific(data_df, programs, model, benchmark_to_categories=None):
+    """
+    Plot program-specific benchmark scores for Baseline optimizer.
 
-    # create a handle for unique optimizers
-    unique_optimizers = data_df["optimizer"].unique()
-    legend_handles = [
-        Patch(
-            color=sns.color_palette("viridis", len(unique_optimizers))[i],
-            label=optimizer,
-        )
-        for i, optimizer in enumerate(unique_optimizers)
+    Args:
+        data_df (pd.DataFrame): The input DataFrame containing benchmark data.
+        programs (list): List of programs to include in the plot.
+        model (str): Name of the model used in the experiment.
+        benchmark_to_categories (dict, optional): A mapping from benchmarks to categories for highlighting.
+    """
+    # Filter benchmarks that have all specified programs
+    benchmarks_with_all_programs = data_df[data_df["optimizer"] == "Baseline"]
+    valid_benchmarks = (
+        benchmarks_with_all_programs.groupby("benchmark")
+        .filter(
+            lambda x: set(programs).issubset(
+                set(x["program"])
+            )  # Ensure all programs exist for the benchmark
+        )["benchmark"]
+        .unique()
+    )
+
+    # Filter the DataFrame to include only valid benchmarks and specified programs
+    filtered_df = data_df[
+        (data_df["benchmark"].isin(valid_benchmarks))
+        & (data_df["program"].isin(programs))
+        & (data_df["optimizer"] == "Baseline")
     ]
-    fig.legend(title="Optimizer", handles=legend_handles, loc="upper left")
-    # Adjust layout and add legend
-    plt.tight_layout(rect=[0, 0, 1, 0.96])  # To leave space for the suptitle
 
-    plt.savefig(f"{directory_path}_scores_by_benchmark.png", dpi=300)
+    # Sort programs to ensure Predict comes first and CoT second
+    sorted_programs = sorted(programs, key=lambda x: (x != "Predict", x != "CoT", x))
 
+    # Group by benchmark and program to calculate mean scores
+    grouped = filtered_df.groupby(["benchmark", "program"])["score"].mean().unstack()
 
-def plot_percentage_gain_by_benchmark(directory_path, data_df):
-    # Calculate the baseline score for each benchmark and program
-    baseline_df = data_df[data_df["optimizer"] == "Baseline"].rename(
-        columns={"score": "baseline_score"}
-    )
-    baseline_df = baseline_df[["benchmark", "program", "baseline_score"]]
+    # Ensure all programs are represented in the DataFrame
+    for program in sorted_programs:
+        if program not in grouped.columns:
+            grouped[program] = float("nan")  # Add missing programs as NaN
 
-    # Merge the baseline score back into the original dataframe
-    data_with_baseline = pd.merge(
-        data_df, baseline_df, on=["benchmark", "program"], how="left"
-    )
+    # Reorder columns
+    grouped = grouped[sorted_programs]
 
-    # Calculate the percentage gain for each optimizer compared to the baseline
-    data_with_baseline["percentage_gain"] = (
-        (data_with_baseline["score"] - data_with_baseline["baseline_score"])
-        / data_with_baseline["baseline_score"]
-    ) * 100
-
-    # Filter out baseline entries from the plotting data
-    data_to_plot = data_with_baseline[data_with_baseline["optimizer"] != "Baseline"]
-
-    # Get a list of unique benchmarks
-    benchmarks = data_to_plot["benchmark"].unique()
-    num_benchmarks = len(benchmarks)
-
-    # Determine the number of rows and columns based on the square root of the number of benchmarks
-    cols = math.ceil(math.sqrt(num_benchmarks))
-    rows = math.ceil(num_benchmarks / cols)
-
-    # Set up the figure with subplots arranged in a grid
-    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows), sharey=False)
-    fig.suptitle(
-        "Percentage Gain by Program and Optimizer for Each Benchmark", fontsize=16
-    )
-
-    # Define a color palette, skipping the first color for "Baseline"
-    unique_optimizers = data_to_plot["optimizer"].unique()
-    palette = sns.color_palette("viridis", len(unique_optimizers) + 1)[1:]
-
-    # Flatten axes array for easy iteration
-    axes = axes.flatten()
-
-    # Create subplots for each benchmark
-    for i, benchmark in enumerate(benchmarks):
-        ax = axes[i]
-        benchmark_data = data_to_plot[data_to_plot["benchmark"] == benchmark]
-
-        # Calculate individual y-axis limits to fit the data within each subplot
-        y_min, y_max = (
-            benchmark_data["percentage_gain"].min(),
-            benchmark_data["percentage_gain"].max(),
-        )
-        ax.set_ylim(
-            y_min - abs(y_min) * 0.1, y_max + abs(y_max) * 0.1
-        )  # Add some padding for visibility
-
-        # Create a bar plot for each benchmark
-        sns.barplot(
-            data=benchmark_data,
-            x="program",
-            y="percentage_gain",
-            hue="optimizer",
-            ax=ax,
-            palette=palette,
+    # Sort benchmarks by category if benchmark_to_categories is provided
+    if benchmark_to_categories:
+        grouped = grouped.reindex(
+            sorted(grouped.index, key=lambda x: benchmark_to_categories.get(x, "zzz"))
         )
 
-        # Set title and labels
-        ax.set_title(f"Benchmark: {benchmark}")
-        ax.set_xlabel("Program")
-        ax.set_ylabel("Percentage Gain (%)")
+    # Assign consistent colors to programs
+    global PROGRAM_COLORS
+    cmap = plt.get_cmap("tab10")  # Default color palette
+    new_colors = {}
+    for idx, program in enumerate(sorted_programs):
+        if program not in PROGRAM_COLORS:
+            new_colors[program] = cmap(
+                len(PROGRAM_COLORS) + len(new_colors)
+            )  # Assign unique color
+        else:
+            new_colors[program] = PROGRAM_COLORS[program]  # Preserve existing color
+    PROGRAM_COLORS.update(new_colors)  # Update global program colors
 
-        # Rotate x-axis labels to prevent overlapping
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+    # Define category colors if provided
+    category_colors = {}
+    if benchmark_to_categories:
+        unique_categories = set(benchmark_to_categories.values())
+        cmap_category = plt.get_cmap("Set2")  # Use Set2 colormap for categories
+        for idx, category in enumerate(unique_categories):
+            category_colors[category] = cmap_category(idx)
 
-        # Remove individual legends
-        ax.get_legend().remove()
+    # Plot bar chart
+    fig, ax = plt.subplots(figsize=(12, 9))
+    grouped.plot(
+        kind="bar",
+        ax=ax,
+        alpha=0.8,
+        edgecolor="black",
+        color=[PROGRAM_COLORS[program] for program in sorted_programs],
+    )
 
-    # Hide any unused subplots
-    for j in range(i + 1, rows * cols):
-        fig.delaxes(axes[j])
+    # Add dotted average line for each program with matching colors
+    avg_scores = grouped.mean()
+    for program, avg in avg_scores.items():
+        ax.axhline(
+            y=avg,
+            color=PROGRAM_COLORS[program],
+            linestyle="dotted",
+            linewidth=1.5,
+            label=f"{program} Avg",
+        )
 
-    # Create custom legend handles and labels
-    legend_handles = [
-        Patch(color=palette[i], label=optimizer)
-        for i, optimizer in enumerate(unique_optimizers)
+    # Highlight benchmarks according to categories if mapping is provided
+    if benchmark_to_categories:
+        from matplotlib.patches import Patch
+
+        category_patches = []
+        for idx, benchmark in enumerate(grouped.index):
+            if benchmark in benchmark_to_categories:
+                category = benchmark_to_categories[benchmark]
+                ax.get_xticklabels()[idx].set_backgroundcolor(category_colors[category])
+
+        # Add category legend at the bottom
+        category_patches = [
+            Patch(facecolor=color, label=category)
+            for category, color in category_colors.items()
+        ]
+        fig.legend(
+            handles=category_patches,
+            title="Benchmark Categories",
+            loc="lower left",
+            bbox_to_anchor=(0, -0.05),
+            ncol=len(category_patches),
+            fontsize=10,
+            title_fontsize=12,
+        )
+
+    # Set plot title, labels, and legend
+    ax.set_title(f"Program-Specific Benchmark Scores ({model})", fontsize=14)
+    ax.set_xlabel("Benchmark", fontsize=12)
+    ax.set_ylabel("Score", fontsize=12)
+    ax.legend(title="Programs", fontsize=10, title_fontsize=12, loc="upper left")
+
+    # Adjust layout to accommodate legend
+    # plt.subplots_adjust(bottom=0.25)
+    plt.tight_layout()
+
+    # Save the figure
+    programs_str = "_".join(sorted_programs)
+    filename = f"{model}_program_{programs_str}.png"
+    plt.savefig(filename, bbox_inches="tight")
+    plt.show()
+
+    print(f"Plot saved as {filename}")
+
+
+
+def plot_best_program(data_df, model, optimizers=False):
+    """
+    Plot program-specific benchmark scores for Baseline optimizer.
+
+    Args:
+        data_df (pd.DataFrame): The input DataFrame containing benchmark data.
+        programs (list): List of programs to include in the plot.
+        model (str): Name of the model used in the experiment.
+        benchmark_to_categories (dict, optional): A mapping from benchmarks to categories for highlighting.
+    """
+    # Filter benchmarks that have all specified programs
+    benchmarks_with_all_programs = data_df[data_df["optimizer"] == "Baseline"] if not optimizers else data_df
+
+    ## Group by benchmarks and select the best-performing program other than "Predict"
+    best_programs = (
+        benchmarks_with_all_programs[benchmarks_with_all_programs["program"] != "Predict"]
+        .groupby("benchmark", as_index=False)
+        .apply(lambda group: group.loc[group["score"].idxmax()])
+    )
+
+    # Extract scores for "Predict" program and merge with the best programs
+    predict_scores = benchmarks_with_all_programs[
+        (("ReActBaseline" == benchmarks_with_all_programs["program"]) | (benchmarks_with_all_programs["program"] == "Predict")) & (benchmarks_with_all_programs["optimizer"] == "Baseline")
+    ][["benchmark", "score"]].rename(columns={"score": "predict_score"})
+    
+    best_programs = best_programs.rename(columns={"score": "best_score", "program": "best_program"})
+    merged_data = pd.merge(best_programs, predict_scores, on="benchmark")
+
+    # Plotting
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x_positions = np.arange(len(merged_data))
+
+    # Bar width and offsets
+    bar_width = 0.4
+
+    # Plot bars for Predict and Best programs
+    merged_data = merged_data.sort_values(by="best_program", ascending=True).reset_index(drop=True)
+
+    ax.bar(x_positions - bar_width / 2, merged_data["predict_score"], width=bar_width, color="#56B4E9", label="Baseline")
+    ax.bar(x_positions + bar_width / 2, merged_data["best_score"], width=bar_width, color="red", label="Best Program")
+
+
+    for i, row in merged_data.iterrows():
+        ax.text(
+            x_positions[i],
+            -0.04,  # Adjusted position closer to the axis
+            row["benchmark"],
+            fontsize=10,
+            ha="right",
+            va="top",
+            rotation=45,
+            transform=ax.get_xaxis_transform()
+        )
+        ax.text(
+            x_positions[i],
+            -0.10,  # Further below the benchmark name
+            f"({row['best_program']})",
+            fontsize=8,
+            ha="right",
+            va="top",
+            rotation=45,
+            transform=ax.get_xaxis_transform()
+        )
+
+    # Customize the plot
+    ax.set_xlim(-0.5, len(merged_data) - 0.5)
+    ax.set_ylabel("Score")
+    optimized = "optimized" if optimizers else "unoptimized"
+    ax.set_title(f"Baseline vs. Best Performing Programs ({optimized}) for {model}")
+    ax.legend()
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
+    ax.tick_params(axis="x", bottom=False, labelbottom=False)  # Hide default x-axis labels
+
+    plt.tight_layout()
+    filename = f"{model}_best_program_{optimizers}.png"
+    plt.savefig(filename, bbox_inches="tight", dpi=400)
+
+    print(f"Plot saved as {filename}")
+
+OPTIMIZER_COLORS = {}  # Initialize global optimizer colors
+
+
+def plot_optimizer_specific(
+    data_df,
+    optimizers,
+    model,
+    benchmark_to_categories=None,
+    benchmark_categories=None,
+    programs=[],
+):
+    """
+    Plot optimizer-specific benchmark scores for specified optimizers.
+
+    Args:
+        data_df (pd.DataFrame): The input DataFrame containing benchmark data.
+        optimizers (list): List of optimizers to include in the plot.
+        model (str): Name of the model used in the experiment.
+        benchmark_to_categories (dict, optional): A mapping from benchmarks to categories for highlighting.
+        benchmark_categories (list, optional): List of benchmark categories to include.
+        programs (list, optional): List of programs to filter the data.
+    """
+    # Filter benchmarks based on categories
+    if benchmark_categories and benchmark_to_categories:
+        selected_benchmarks = [
+            b for b, c in benchmark_to_categories.items() if c in benchmark_categories
+        ]
+        data_df = data_df[data_df["benchmark"].isin(selected_benchmarks)]
+
+    # Filter programs if provided
+    if programs:
+        data_df = data_df[data_df["program"].isin(programs)]
+
+    # Filter optimizers based on the provided list
+    data_df = data_df[data_df["optimizer"].isin(optimizers)]
+
+    # Sort optimizers based on the predefined order
+    sorted_optimizers = [
+        opt
+        for opt in [
+            "Baseline",
+            "BootstrapFewShot",
+            "BootstrapFewShotWithRandomSearch",
+            "MIPROv2",
+        ]
+        if opt in optimizers
     ]
-    fig.legend(handles=legend_handles, title="Optimizer", loc="upper left")
 
-    # Adjust layout and save the figure
-    plt.tight_layout(rect=[0, 0, 1, 0.96])  # To leave space for the suptitle and legend
-    plt.savefig(f"{directory_path}_percentage_gain_by_benchmark.png", dpi=300)
-    plt.close()
+    # Group by benchmark and optimizer to calculate mean scores
+    grouped = data_df.groupby(["benchmark", "optimizer"])["score"].mean().unstack()
 
+    # Ensure all optimizers are represented in the DataFrame
+    for optimizer in sorted_optimizers:
+        if optimizer not in grouped.columns:
+            grouped[optimizer] = float("nan")
 
-def analyze_experiments(data_df):
-    # Total cost, total input tokens, and total output tokens
-    total_cost = data_df["cost"].sum() + data_df["optimizer_cost"].sum()
-    total_input_tokens = (
-        data_df["input_tokens"].sum() + data_df["optimizer_input_tokens"].sum()
-    )
-    # total_input_tokens in terms of millions string (xx M)
-    total_input_tokens = f"{total_input_tokens / 1_000_000} M"
+    # Reorder optimizers and sort benchmarks
+    grouped = grouped[sorted_optimizers]
 
-    total_output_tokens = (
-        data_df["output_tokens"].sum() + data_df["optimizer_output_tokens"].sum()
-    )
-    # total_output_tokens in terms of millions string (xx M)
-    total_output_tokens = f"{total_output_tokens / 1_000_000} M"
-
-    # Calculate average performance increase for each optimizer, excluding outliers
-    performance_increase = {}
-    optimizers = data_df["optimizer"].unique()
-
-    for optimizer in optimizers:
-        # Filter data for the current optimizer and baseline
-        optimizer_data = data_df[data_df["optimizer"] == optimizer]
-        baseline_data = data_df[
-            (data_df["optimizer"] == "Baseline")
-            & (data_df["benchmark"].isin(optimizer_data["benchmark"]))
-            & (data_df["program"].isin(optimizer_data["program"]))
-        ]
-
-        # Merge to calculate performance increase over baseline for matching benchmark/program combinations
-        merged_data = pd.merge(
-            optimizer_data[["benchmark", "program", "score"]],
-            baseline_data[["benchmark", "program", "score"]],
-            on=["benchmark", "program"],
-            suffixes=("", "_baseline"),
+    # Sort benchmarks by categories if mapping is provided
+    if benchmark_to_categories:
+        grouped = grouped.reindex(
+            sorted(grouped.index, key=lambda x: benchmark_to_categories.get(x, "zzz"))
         )
 
-        # Calculate performance increase as a percentage
-        merged_data["performance_increase"] = (
-            (merged_data["score"] - merged_data["score_baseline"])
-            / merged_data["score_baseline"]
-        ) * 100
+    # Assign consistent colors to optimizers
+    cmap = plt.get_cmap("tab10")  # Default color palette
+    new_colors = {}
+    for idx, optimizer in enumerate(sorted_optimizers):
+        if optimizer not in OPTIMIZER_COLORS:
+            new_colors[optimizer] = cmap(
+                len(OPTIMIZER_COLORS) + len(new_colors)
+            )  # Assign unique color
+        else:
+            new_colors[optimizer] = OPTIMIZER_COLORS[optimizer]
+    OPTIMIZER_COLORS.update(new_colors)
 
-        # Exclude outliers using the IQR method
-        Q1 = merged_data["performance_increase"].quantile(0.25)
-        Q3 = merged_data["performance_increase"].quantile(0.75)
-        IQR = Q3 - Q1
-        non_outliers = merged_data[
-            (merged_data["performance_increase"] >= Q1 - 1.5 * IQR)
-            & (merged_data["performance_increase"] <= Q3 + 1.5 * IQR)
-        ]
+    fig, ax = plt.subplots(figsize=(12, 9))
+    # Plot bar chart
 
-        # Calculate the mean performance increase for this optimizer
-        avg_performance_increase = non_outliers["performance_increase"].mean()
-        performance_increase[optimizer] = avg_performance_increase
-
-    average_optimizer_cost = (
-        data_df.groupby("optimizer")["optimizer_cost"].mean().to_dict()
+    grouped.plot(
+        kind="bar",
+        ax=ax,
+        alpha=0.8,
+        edgecolor="black",
+        color=[OPTIMIZER_COLORS[optimizer] for optimizer in sorted_optimizers],
     )
 
-    # Compile results
-    results = {
-        "total_cost": total_cost,
-        "total_input_tokens": total_input_tokens,
-        "total_output_tokens": total_output_tokens,
-        "average_performance_increase (excluding outliers)": performance_increase,
-        "average_optimizer_cost": average_optimizer_cost,
-    }
-
-    return results
-
-
-def get_programs(data_df):
-    # Get the unique programs from the data
-    programs = data_df["program"].unique()
-
-    # Convert the programs list to a text format, each program on a new line
-    programs_text = "\n".join(programs)
-
-    return programs_text
-
-
-def display_benchmark_performance(data_df, selected_benchmarks):
-    # Filter data for the selected benchmarks
-    filtered_data = data_df[data_df["benchmark"].isin(selected_benchmarks)]
-
-    # Sort the data for better readability
-    filtered_data = filtered_data.sort_values(by=["benchmark", "program", "optimizer"])
-
-    # for the same benchmark and program, None should always come first
-
-    # Create a human-readable table
-    performance_table = filtered_data.pivot_table(
-        index=["benchmark", "program"],
-        columns="optimizer",
-        values="score",
-        aggfunc="mean",
-    )
-
-    # Reorder columns to ensure "None (Baseline)" is always first
-    if "Baseline" in performance_table.columns:
-        cols = ["Baseline"] + [
-            col for col in performance_table.columns if col != "Baseline"
-        ]
-        performance_table = performance_table[cols]
-
-    # Return the performance table
-    return performance_table
-
-
-def compare_all_programs_with_cot_baseline(data_df):
-    # Filter data to only include rows where optimizer is "Baseline"
-    baseline_data = data_df[data_df["optimizer"] == "Baseline"]
-
-    # Initialize a dictionary to store comparisons for each benchmark
-    comparisons = {}
-
-    # Group data by benchmark
-    benchmark_groups = baseline_data.groupby("benchmark")
-
-    for benchmark, group in benchmark_groups:
-        # Get the score for program "CoT" with optimizer "Baseline"
-        cot_score = group[group["program"].isin(["CoT", "ChainOfThought"])][
-            "score"
-        ].values
-
-        # Ensure "CoT" exists within the benchmark
-        if len(cot_score) == 0:
-            continue  # Skip if "CoT" is missing for this benchmark
-
-        cot_score = cot_score[0]  # Get the CoT score value
-
-        # Calculate the score difference for each program with respect to CoT
-        group["score_difference"] = group["score"] - cot_score
-
-        # Store the comparison results for this benchmark
-        comparisons[benchmark] = group[
-            ["program", "score", "score_difference"]
-        ].set_index("program")
-
-    return comparisons
-
-
-def compare_programs_with_reference_across_benchmarks(data_df):
-    # Filter data to only include rows where optimizer is "Baseline"
-    baseline_data = data_df[data_df["optimizer"] == "Baseline"]
-
-    # Initialize a list to store score differences for each program relative to the reference
-    score_diffs = []
-
-    # Group data by benchmark
-    benchmark_groups = baseline_data.groupby("benchmark")
-
-    for benchmark, group in benchmark_groups:
-        # Get the score for the reference program ("CoT" or "ChainOfThought") with optimizer "Baseline"
-        reference_score = group[group["program"].isin(["CoT", "ChainOfThought"])][
-            "score"
-        ].values
-
-        # Ensure that the reference program exists within the benchmark
-        if len(reference_score) == 0:
-            continue  # Skip if neither "CoT" nor "ChainOfThought" is present for this benchmark
-
-        reference_score = reference_score[0]  # Get the reference score value
-
-        # Calculate the score difference for each program with respect to the reference program
-        group["score_difference"] = group["score"] - reference_score
-
-        # Append the results for non-reference programs to the list
-        score_diffs.extend(
-            group[group["program"] != "CoT"][["program", "score_difference"]].values
+    # Add dotted average line for each optimizer
+    avg_scores = grouped.mean()
+    for optimizer, avg in avg_scores.items():
+        ax.axhline(
+            y=avg,
+            color=OPTIMIZER_COLORS[optimizer],
+            linestyle="dotted",
+            linewidth=1.5,
+            label=f"{optimizer} Avg",
         )
 
-    # Create a DataFrame from the collected score differences
-    score_diffs_df = pd.DataFrame(score_diffs, columns=["program", "score_difference"])
+    # Highlight benchmarks according to categories if mapping is provided
+    if benchmark_to_categories:
+        from matplotlib.patches import Patch
 
-    # Calculate the average score difference for each program across benchmarks
-    avg_score_diffs = (
-        score_diffs_df.groupby("program")["score_difference"].mean().reset_index()
+        category_colors = {}
+        unique_categories = set(benchmark_to_categories.values())
+        cmap_category = plt.get_cmap("Set2")
+        for idx, category in enumerate(unique_categories):
+            category_colors[category] = cmap_category(idx)
+
+        for idx, benchmark in enumerate(grouped.index):
+            if benchmark in benchmark_to_categories:
+                category = benchmark_to_categories[benchmark]
+                ax.get_xticklabels()[idx].set_backgroundcolor(category_colors[category])
+
+        # Add category legend
+        category_patches = [
+            Patch(facecolor=color, label=category)
+            for category, color in category_colors.items()
+        ]
+        fig.legend(
+            handles=category_patches,
+            title="Benchmark Categories",
+            loc="lower left",
+            bbox_to_anchor=(0, -0.05),
+            ncol=len(category_patches),
+            fontsize=10,
+            title_fontsize=12,
+        )
+
+    # Set plot title, labels, and legend
+    ax.set_title(
+        f"Optimizer-Specific Benchmark Scores ({model}, {'all programs' if not programs else ', '.join(programs)})",
+        fontsize=14,
     )
-    avg_score_diffs.columns = ["program", "average_score_difference"]
+    ax.set_xlabel("Benchmark", fontsize=12)
+    ax.set_ylabel("Score", fontsize=12)
+    ax.legend(title="Optimizers", fontsize=10, title_fontsize=12, loc="upper left")
 
-    return avg_score_diffs
+    # Adjust layout and save the plot
+    plt.tight_layout()
+    filename = f"{model}_optimizer_{'_'.join(optimizers)}_{'_'.join(programs)}.png"
+    plt.savefig(filename, bbox_inches="tight")
+    plt.show()
+
+    print(f"Plot saved as {filename}")
 
 
-def find_benchmarks_where_miprov2_performs_worse(data_df):
-    # Initialize a list to store benchmarks where MIPROv2 performs worse
-    underperforming_benchmarks = []
+def plot_optimizer_specific_with_budget(
+    data_df,
+    optimizers,
+    model,
+    benchmark_to_categories=None,
+    benchmark_categories=None,
+    programs=[],
+):
+    """
+    Plot optimizer-specific benchmark scores for specified optimizers.
 
-    # Group data by benchmark
-    benchmark_groups = data_df.groupby("benchmark")
+    Args:
+        data_df (pd.DataFrame): The input DataFrame containing benchmark data.
+        optimizers (list): List of optimizers to include in the plot.
+        model (str): Name of the model used in the experiment.
+        benchmark_to_categories (dict, optional): A mapping from benchmarks to categories for highlighting.
+        benchmark_categories (list, optional): List of benchmark categories to include.
+        programs (list, optional): List of programs to filter the data.
+    """
+    # Filter benchmarks based on categories
+    if benchmark_categories and benchmark_to_categories:
+        selected_benchmarks = [
+            b for b, c in benchmark_to_categories.items() if c in benchmark_categories
+        ]
+        data_df = data_df[data_df["benchmark"].isin(selected_benchmarks)]
 
-    for benchmark, group in benchmark_groups:
-        # Get MIPROv2 score for this benchmark
-        miprov2_score = group[group["optimizer"] == "MIPROv2"]["score"].values
+    # Filter programs if provided
+    if programs:
+        data_df = data_df[data_df["program"].isin(programs)]
 
-        # Ensure MIPROv2 exists within the benchmark
-        if len(miprov2_score) == 0:
-            continue  # Skip if MIPROv2 is not present in this benchmark
+    # Filter optimizers based on the provided list
+    data_df = data_df[data_df["optimizer"].isin(optimizers)]
 
-        miprov2_score = miprov2_score[0]
+    data_df["optimizer_cost"] = (
+        data_df["optimizer_input_tokens"]
+        + data_df["optimizer_output_tokens"]
+        + data_df["input_tokens"]
+        + data_df["output_tokens"]
+    )
+    # Sort optimizers based on the predefined order
+    sorted_optimizers = [
+        opt
+        for opt in [
+            "Baseline",
+            "BootstrapFewShot",
+            "MIPROv2",
+            "MIPROv2+",
+            "BootstrapFewShotWithRandomSearch",
+        ]
+        if opt in optimizers
+    ]
 
-        # Get scores of all other optimizers in the same benchmark
-        other_optimizers = group[group["optimizer"] != "MIPROv2"]
+    print(data_df[data_df["benchmark"] == "GSM8K"])
+    # Group by benchmark and optimizer to calculate mean scores
+    grouped = data_df.groupby(["benchmark", "optimizer"])["score"].mean().unstack()
 
-        # Check if MIPROv2 performs worse than any other optimizer
-        if miprov2_score < other_optimizers["score"].max():
-            # Calculate the score difference between MIPROv2 and other optimizers
-            other_optimizers["score_difference"] = (
-                miprov2_score - other_optimizers["score"]
-            )
+    # Ensure all optimizers are represented in the DataFrame
+    for optimizer in sorted_optimizers:
+        if optimizer not in grouped.columns:
+            grouped[optimizer] = float("nan")
 
-            # Store the benchmark information and the score differences
-            benchmark_info = {
-                "benchmark": benchmark,
-                "miprov2_score": miprov2_score,
-                "comparison": other_optimizers[
-                    ["optimizer", "score", "score_difference"]
-                ].set_index("optimizer"),
-            }
-            underperforming_benchmarks.append(benchmark_info)
+    # Reorder optimizers and sort benchmarks
+    grouped = grouped[sorted_optimizers]
 
-    return underperforming_benchmarks
+    # Sort benchmarks by categories if mapping is provided
+    if benchmark_to_categories:
+        grouped = grouped.reindex(
+            sorted(grouped.index, key=lambda x: benchmark_to_categories.get(x, "zzz"))
+        )
 
+    # Assign consistent colors to optimizers
+    cmap = plt.get_cmap("tab10")  # Default color palette
+    new_colors = {}
+    for idx, optimizer in enumerate(sorted_optimizers):
+        if optimizer not in OPTIMIZER_COLORS:
+            new_colors[optimizer] = cmap(
+                len(OPTIMIZER_COLORS) + len(new_colors)
+            )  # Assign unique color
+        else:
+            new_colors[optimizer] = OPTIMIZER_COLORS[optimizer]
+    OPTIMIZER_COLORS.update(new_colors)
+
+    fig, ax = plt.subplots(figsize=(12, 9))
+    # Plot bar chart
+
+    grouped.plot(
+        kind="bar",
+        ax=ax,
+        alpha=0.8,
+        edgecolor="black",
+        color=[OPTIMIZER_COLORS[optimizer] for optimizer in sorted_optimizers],
+    )
+
+    # Add dotted average line for each optimizer
+    # avg_scores = grouped.mean()
+    # for optimizer, avg in avg_scores.items():
+    #     ax.axhline(y=avg, color=OPTIMIZER_COLORS[optimizer], linestyle='dotted', linewidth=1.5, label=f'{optimizer} Avg')
+
+    # Highlight benchmarks according to categories if mapping is provided
+    if benchmark_to_categories:
+        from matplotlib.patches import Patch
+
+        category_colors = {}
+        unique_categories = set(benchmark_to_categories.values())
+        cmap_category = plt.get_cmap("Set2")
+        for idx, category in enumerate(unique_categories):
+            category_colors[category] = cmap_category(idx)
+
+        for idx, benchmark in enumerate(grouped.index):
+            if benchmark in benchmark_to_categories:
+                category = benchmark_to_categories[benchmark]
+                ax.get_xticklabels()[idx].set_backgroundcolor(category_colors[category])
+
+        # Add category legend
+        category_patches = [
+            Patch(facecolor=color, label=category)
+            for category, color in category_colors.items()
+        ]
+        fig.legend(
+            handles=category_patches,
+            title="Benchmark Categories",
+            loc="lower left",
+            bbox_to_anchor=(0, -0.05),
+            ncol=len(category_patches),
+            fontsize=10,
+            title_fontsize=12,
+        )
+
+    # ax2 = ax.twinx()
+    # bar_width = 0.8 / len(sorted_optimizers)
+    # for optimizer_idx, optimizer in enumerate(sorted_optimizers):
+    #     cost_data = data_df[data_df['optimizer'] == optimizer].groupby('benchmark')['optimizer_cost'].mean()
+    #     print(optimizer, cost_data)
+    #     x_positions = np.arange(len(cost_data)) + optimizer_idx * (bar_width - 0.05) + (bar_width / 2) - 0.30
+    #     ax2.scatter(x_positions, cost_data, label=f'{optimizer} Cost', marker='o', color="black")
+
+    ax2 = ax.twinx()
+    for benchmark in grouped.index:
+        cost_data = (
+            data_df[data_df["benchmark"] == benchmark]
+            .groupby("optimizer")["optimizer_cost"]
+            .mean()
+        )
+        cost_data = cost_data.reindex(sorted_optimizers)
+        x_positions = [
+            list(grouped.index).index(benchmark)
+            + i * (0.8 / (len(sorted_optimizers)) - 0.06)
+            - 0.20
+            for i in range(len(sorted_optimizers))
+        ]
+        # ax2.plot(x_positions, cost_data, label=f'{benchmark} Cost', linestyle='-', marker='x', linewidth=1.5, color="black")
+        ax2.scatter(x_positions, cost_data, color="black", zorder=5, marker="x", s=60)
+        for x, cost in zip(x_positions, cost_data):
+            ax2.plot([x, x], [0, cost], color="black", linestyle="-", linewidth=2)
+
+    ax2.spines["bottom"].set_position(
+        ("outward", 0)
+    )  # Align the bottom spine of ax2 with ax1
+    ax2.set_ylim(bottom=ax.get_ylim()[0])
+
+    ax2.set_ylabel(
+        "Optimization Cost (Total number of tokens, denoted by x)", color="black"
+    )
+    ax2.tick_params(axis="y", labelcolor="black")
+
+    # Set plot title, labels, and legend
+    ax.set_title(
+        f"Optimizer-Specific Benchmark Scores ({model}, {'all programs' if not programs else ', '.join(programs)})",
+        fontsize=14,
+    )
+    ax.set_xlabel("Benchmark", fontsize=12)
+    ax.set_ylabel("Score", fontsize=12)
+    ax.legend(title="Optimizers", fontsize=10, title_fontsize=12, loc="upper left")
+
+    # Adjust layout and save the plot
+    plt.tight_layout()
+    filename = (
+        f"{model}_optimizer_{'_'.join(optimizers)}_{'_'.join(programs)}_with_budget.png"
+    )
+    plt.savefig(filename, bbox_inches="tight")
+    plt.show()
+
+    print(f"Plot saved as {filename}")
+
+def compare_programs(data_df, model, optimized=False):
+    """
+    Plot the performance comparison of each program against Predict and CoT.
+
+    Args:
+        data_df (pd.DataFrame): The input DataFrame containing benchmark data.
+    """
+    # Ensure the necessary columns exist
+    required_columns = {"benchmark", "program", "score"}
+    if not required_columns.issubset(data_df.columns):
+        raise ValueError(f"The DataFrame must contain the following columns: {required_columns}")
+
+    # filter out all baseline scores 
+    data_df = data_df[data_df["optimizer"] == "Baseline"] if not optimized else data_df
+
+    # Prepare results storage
+    program_comparison = []
+
+    # Iterate over unique programs
+    for program in data_df["program"].unique():
+        if program == "CoT" or program == "Predict" or program=="CoTBasedVote":
+            continue
+        # Filter data for the current program
+        program_data = data_df[data_df["program"] == program]
+
+        # Initialize counters
+        better_than_predict = 0
+        better_than_cot = 0
+        total_benchmarks = 0
+
+
+        # Compare with Predict and CoT for each benchmark
+        valid_bench = 0
+        predict_cost = 0
+        cot_cost = 0
+        program_cost = 0
+
+        for benchmark in program_data["benchmark"].unique():
+            
+            # Get scores for the current benchmark
+            scores = data_df[data_df["benchmark"] == benchmark]
+
+            if "Predict" in scores["program"].values and "CoT" in scores["program"].values:
+                valid_bench += 1
+
+            if optimized:
+                for optimizer in scores["optimizer"].unique():
+                    total_benchmarks += 1
+                    optimizer_scores = scores[scores["optimizer"] == optimizer]
+
+                    # Program score for this optimizer
+                    program_scores = optimizer_scores[optimizer_scores["program"] == program]["score"].values
+
+                    # Predict comparison for this optimizer
+                    if "Predict" in optimizer_scores["program"].values:
+                        predict_scores = optimizer_scores[optimizer_scores["program"] == "Predict"]["score"].values
+                        if any(program_score >= predict_score * 0.95 for program_score in program_scores for predict_score in predict_scores):
+                            better_than_predict += 1
+
+                    # CoT comparison for this optimizer
+                    if "CoT" in optimizer_scores["program"].values:
+                        cot_scores = optimizer_scores[optimizer_scores["program"] == "CoT"]["score"].values
+                        if any(program_score >= cot_score * 0.95 for program_score in program_scores for cot_score in cot_scores):
+                            better_than_cot += 1
+            else:
+                # Non-optimized: Use all scores
+                program_scores = scores[scores["program"] == program]["score"].values
+
+                # Predict comparison
+                if "Predict" in scores["program"].values:
+                    predict_scores = scores[scores["program"] == "Predict"]["score"].values
+                    if any(program_score >= predict_score * 0.95 for program_score in program_scores for predict_score in predict_scores):
+                        better_than_predict += 1
+
+                # CoT comparison
+                if "CoT" in scores["program"].values:
+                    cot_scores = scores[scores["program"] == "CoT"]["score"].values
+                    if any(program_score >= cot_score * 0.95 for program_score in program_scores for cot_score in cot_scores):
+                        better_than_cot += 1
+                total_benchmarks += 1
+
+        if valid_bench == 0:
+            continue
+
+        print(optimized, program, better_than_predict, better_than_cot, total_benchmarks)
+
+        # Calculate percentages
+        program_comparison.append({
+            "program": program,
+            "better_than_predict": (better_than_predict / total_benchmarks) * 100 if total_benchmarks > 0 else 0,
+            "better_than_cot": (better_than_cot / total_benchmarks) * 100 if total_benchmarks > 0 else 0,
+        })
+
+    # Convert results to a DataFrame
+    comparison_df = pd.DataFrame(program_comparison)
+    comparison_df = comparison_df.sort_values(by="program").reset_index(drop=True)
+
+
+    # Plot the results
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = range(len(comparison_df))
+    bar_width = 0.35
+
+    ax.bar(
+        [pos - bar_width / 2 for pos in x],
+        comparison_df["better_than_predict"],
+        width=bar_width,
+        color="#56B4E9",
+        label="Better/Within 5% (relatively) of Predict",
+    )
+    ax.bar(
+        [pos + bar_width / 2 for pos in x],
+        comparison_df["better_than_cot"],
+        width=bar_width,
+        color="#117733",
+        label="Better/Within 5% (relatively) of CoT",
+    )
+
+    # Customize x-axis
+    ax.set_xticks(x)
+    ax.set_xticklabels(comparison_df["program"], rotation=45, ha="right")
+    ax.set_ylabel("Percentage")
+    optimized = "optimized" if optimized else "unoptimized"
+    ax.set_title(f"Program Performance Comparison Against Predict and CoT ({model}, {optimized})")
+    ax.legend()
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
+
+    plt.tight_layout()
+    filename = f"{model}_program_comparison_{optimized}.png"
+    plt.savefig(filename, dpi=1000)
+    print(f"saved plot {filename}")
+
+# def compare_programs_merged(data_df, model):
+#     """
+#     Plot the performance comparison of each program against Predict and CoT
+#     for both optimized and unoptimized settings.
+
+#     Args:
+#         data_df (pd.DataFrame): The input DataFrame containing benchmark data.
+#         model (str): The name of the model used in the experiment.
+#     """
+#     # Ensure the necessary columns exist
+#     required_columns = {"benchmark", "program", "score", "optimizer"}
+#     if not required_columns.issubset(data_df.columns):
+#         raise ValueError(f"The DataFrame must contain the following columns: {required_columns}")
+
+#     # Helper function to calculate comparison data
+#     def calculate_comparison(data_df, optimized):
+#         filtered_df = data_df if optimized else data_df[data_df["optimizer"] == "Baseline"]
+#         program_comparison = []
+
+#         for program in filtered_df["program"].unique():
+#             if program in {"CoT", "Predict", "CoTBasedVote"}:
+#                 continue
+
+#             program_data = filtered_df[filtered_df["program"] == program]
+#             better_than_predict = 0
+#             better_than_cot = 0
+#             total_predict = 0
+#             total_cot = 0
+
+#             valid_bench = 0
+
+#             predict_cost = 0
+#             cot_cost = 0
+#             program_cost = 0
+
+#             for benchmark in program_data["benchmark"].unique():
+#                 scores = filtered_df[filtered_df["benchmark"] == benchmark]
+
+#                 if "Predict" in scores["program"].values and "CoT" in scores["program"].values:
+#                     valid_bench += 1
+
+#                 if optimized:
+#                     for optimizer in scores["optimizer"].unique():
+#                         optimizer_scores = scores[scores["optimizer"] == optimizer]
+#                         program_score = optimizer_scores[optimizer_scores["program"] == program]["score"].values[0]
+#                         # print(program_scores, optimizer, program)
+
+#                         if "Predict" in optimizer_scores["program"].values:
+#                             predict_data = optimizer_scores[optimizer_scores["program"] == "Predict"]
+#                             predict_score = predict_data["score"].values[0]
+#                             predict_cost = predict_data["input_tokens"] + predict_data["output_tokens"]
+#                             if program_score >= predict_score * 0.95:
+#                                 better_than_predict += 1
+#                             total_predict += 1
+
+
+#                         if "CoT" in optimizer_scores["program"].values:
+#                             cot_score = optimizer_scores[optimizer_scores["program"] == "CoT"]["score"].values[0]
+#                             if program_score >= cot_score * 0.95:
+#                                 better_than_cot += 1
+#                             total_cot += 1
+#                 else:
+#                     program_score = scores[(scores["program"] == program) & (scores["optimizer"]=="Baseline")]["score"].values[0]
+
+#                     if "Predict" in scores["program"].values:
+#                         predict_score = scores[(scores["program"] == "Predict") & (scores["optimizer"]=="Baseline")]["score"].values[0]
+#                         if program_score >= predict_score * 0.95:
+#                             better_than_predict += 1
+#                         total_predict += 1
+
+#                     if "CoT" in scores["program"].values:
+#                         cot_score = scores[(scores["program"] == "CoT") & (scores["optimizer"]=="Baseline")]["score"].values[0]
+#                         print(cot_score)
+#                         if program_score >= cot_score * 0.95:
+#                             better_than_cot += 1
+#                         total_cot += 1
+
+#             print(program, valid_bench)
+            
+#             if valid_bench == 0:
+#                 continue
+
+#             program_comparison.append({
+#                 "program": program,
+#                 f"better_than_predict_{'optimized' if optimized else 'unoptimized'}": (better_than_predict / total_predict) * 100 if total_predict > 0 else 0,
+#                 f"better_than_cot_{'optimized' if optimized else 'unoptimized'}": (better_than_cot / total_cot) * 100 if total_cot > 0 else 0,
+#             })
+
+#         return pd.DataFrame(program_comparison)
+
+#     # Calculate comparison data for both modes
+#     unoptimized_data = calculate_comparison(data_df, optimized=False)
+#     optimized_data = calculate_comparison(data_df, optimized=True)
+
+#     # Merge the data on the "program" column
+#     comparison_df = pd.merge(unoptimized_data, optimized_data, on="program", how="outer")
+
+#     comparison_df = comparison_df.sort_values(by="program").reset_index(drop=True)
+
+
+#     # Prepare data for plotting
+#     programs = comparison_df["program"]
+#     x_positions = range(len(programs))
+#     bar_width = 0.2
+
+#     # Define heights for bars
+#     heights = [
+#         comparison_df["better_than_predict_unoptimized"],
+#         comparison_df["better_than_predict_optimized"],
+#         comparison_df["better_than_cot_unoptimized"],
+#         comparison_df["better_than_cot_optimized"],
+#     ]
+
+#     # Define offsets for grouped bars
+#     offsets = [-1.5 * bar_width, -0.5 * bar_width, 0.5 * bar_width, 1.5 * bar_width]
+
+#     # Define colors and labels
+#     colors = ["#ADD8E6", "#00509E", "#FFDAB9", "#FF7F00"]
+#     labels = [
+#         "Better/Within 5% (relatively, same below) of Predict (unoptimized)",
+#         "Better/Within 5% of Predict (optimized)",
+#         "Better/Within 5% of CoT (unoptimized)",
+#         "Better/Within 5% of CoT (optimized)",
+#     ]
+#     fig, ax = plt.subplots(figsize=(18, 10))
+
+#     # Plot all bars in a single call
+#     for height, offset, color, label in zip(heights, offsets, colors, labels):
+#         ax.bar(
+#             [pos + offset for pos in x_positions],
+#             height,
+#             width=bar_width,
+#             color=color,
+#             label=label,
+#         )
+
+#     # Customize the plot
+#     ax.set_xticks(x_positions)
+#     ax.set_xticklabels(programs, rotation=45, ha="right", fontsize=20)
+#     ax.set_ylabel("Percentage", fontsize=20)
+#     ax.set_title(f"Program Performance Comparison Against Predict and CoT ({model})", fontsize=26)
+#     ax.legend(fontsize=14)
+#     ax.grid(axis="y", linestyle="--", alpha=0.7)
+
+#     plt.tight_layout()
+#     filename = f"{model}_program_comparison_combined.png"
+#     plt.savefig(filename, dpi=400)
+#     print(f"Saved plot {filename}")
+
+
+
+def compare_programs_merged(data_df, model, with_cost=False):
+    """
+    Plot the performance comparison of each program against Predict and CoT
+    for both optimized and unoptimized settings, including relative cost gains.
+
+    Args:
+        data_df (pd.DataFrame): The input DataFrame containing benchmark data.
+        model (str): The name of the model used in the experiment.
+    """
+    # Ensure the necessary columns exist
+    required_columns = {"benchmark", "program", "score", "optimizer", "input_tokens", "output_tokens"}
+    if not required_columns.issubset(data_df.columns):
+        raise ValueError(f"The DataFrame must contain the following columns: {required_columns}")
+
+    # Helper function to calculate comparison data
+    def calculate_comparison(data_df, optimized):
+        filtered_df = data_df if optimized else data_df[data_df["optimizer"] == "Baseline"]
+        program_comparison = []
+
+        for program in filtered_df["program"].unique():
+            if program in {"CoT", "Predict", "CoTBasedVote"}:
+                continue
+
+            program_data = filtered_df[filtered_df["program"] == program]
+            better_than_predict = 0
+            better_than_cot = 0
+
+            total_predict = 0
+            total_cot = 0
+
+            total_predict_cost = 0
+            total_cot_cost = 0
+            total_predict_program_cost = 0
+            total_cot_program_cost = 0
+
+            valid_bench = 0
+
+            for benchmark in program_data["benchmark"].unique():
+                scores = filtered_df[filtered_df["benchmark"] == benchmark]
+
+                if not ("Predict" in scores["program"].values and "CoT" in scores["program"].values):
+                    continue
+                else:
+                    valid_bench += 1
+
+                optimizers = scores["optimizer"].unique()
+                optimizers = [v for v in optimizers if v != "Baseline"] if optimized else ["Baseline"]
+                    
+                for optimizer in scores["optimizer"].unique():
+                    optimizer_scores = scores[scores["optimizer"] == optimizer]
+
+                    # Program cost for this optimizer under Predict branch
+                    if "Predict" in optimizer_scores["program"].values:
+                        predict_data = optimizer_scores[optimizer_scores["program"] == "Predict"]
+                        predict_score = predict_data["score"].values[0]
+                        predict_cost = predict_data["input_tokens"].values[0] + predict_data["output_tokens"].values[0]
+                        total_predict_cost += predict_cost
+
+                        program_cost = optimizer_scores[optimizer_scores["program"] == program]["input_tokens"].values[0] + \
+                                        optimizer_scores[optimizer_scores["program"] == program]["output_tokens"].values[0]
+                        total_predict_program_cost += program_cost
+
+                        if optimizer_scores[optimizer_scores["program"] == program]["score"].values[0] >= predict_score * 0.95:
+                            better_than_predict += 1
+                        total_predict += 1
+
+                    # Program cost for this optimizer under CoT branch
+                    if "CoT" in optimizer_scores["program"].values:
+                        cot_data = optimizer_scores[optimizer_scores["program"] == "CoT"]
+                        cot_score = cot_data["score"].values[0]
+                        cot_cost = cot_data["input_tokens"].values[0] + cot_data["output_tokens"].values[0]
+                        total_cot_cost += cot_cost
+
+                        program_cost = optimizer_scores[optimizer_scores["program"] == program]["input_tokens"].values[0] + \
+                                        optimizer_scores[optimizer_scores["program"] == program]["output_tokens"].values[0]
+                        total_cot_program_cost += program_cost
+
+                        if optimizer_scores[optimizer_scores["program"] == program]["score"].values[0] >= cot_score * 0.95:
+                            better_than_cot += 1
+                        total_cot += 1
+
+            if valid_bench == 0:
+                continue
+
+            program_comparison.append({
+                "program": program,
+                f"better_than_predict_{'optimized' if optimized else 'unoptimized'}": (better_than_predict / total_predict) * 100 if total_predict > 0 else 0,
+                f"better_than_cot_{'optimized' if optimized else 'unoptimized'}": (better_than_cot / total_cot) * 100 if total_cot > 0 else 0,
+                f"cost_gain_predict_{'optimized' if optimized else 'unoptimized'}": ((total_predict_program_cost) / total_predict_cost) * 100 if total_predict_cost > 0 else 0,
+                f"cost_gain_cot_{'optimized' if optimized else 'unoptimized'}": ((total_cot_program_cost) / total_cot_cost) * 100 if total_cot_cost > 0 else 0,
+            })
+
+
+        return pd.DataFrame(program_comparison)
+
+    # Calculate comparison data for both modes
+    unoptimized_data = calculate_comparison(data_df, optimized=False)
+    optimized_data = calculate_comparison(data_df, optimized=True)
+
+    # Merge the data on the "program" column
+    comparison_df = pd.merge(unoptimized_data, optimized_data, on="program", how="outer")
+
+    # Sort programs alphabetically
+    comparison_df = comparison_df.sort_values(by="program").reset_index(drop=True)
+
+    # Prepare data for plotting
+    programs = comparison_df["program"]
+    x_positions = range(len(programs))
+    bar_width = 0.2
+
+    # Define heights for bars
+    heights = [
+        comparison_df["better_than_predict_unoptimized"],
+        comparison_df["better_than_predict_optimized"],
+        comparison_df["better_than_cot_unoptimized"],
+        comparison_df["better_than_cot_optimized"],
+    ]
+
+    # Define offsets for grouped bars
+    offsets = [-1.5 * bar_width, -0.5 * bar_width, 0.5 * bar_width, 1.5 * bar_width]
+
+    # Define colors and labels
+    colors = ["#ADD8E6", "#00509E", "#FFDAB9", "#FF7F00"]
+    labels = [
+        "Better/Within 5% (relatively, same below) of Predict (unoptimized)",
+        "Better/Within 5% of Predict (optimized)",
+        "Better/Within 5% of CoT (unoptimized)",
+        "Better/Within 5% of CoT (optimized)",
+    ]
+    fig, ax = plt.subplots(figsize=(22, 12))
+
+    # Plot all bars
+    for height, offset, color, label in zip(heights, offsets, colors, labels):
+        ax.bar(
+            [pos + offset for pos in x_positions],
+            height,
+            width=bar_width,
+            color=color,
+            label=label,
+        )
+
+    # Plot relative cost gains as a line plot
+    if with_cost:
+        # Plot relative cost gains as points and connect them to zero
+        ax2 = ax.twinx()
+        cost_gain_colors = ["blue", "darkblue", "orange", "darkorange"]
+        cost_gain_data = [
+            comparison_df["cost_gain_predict_unoptimized"],  # Matches first bar group
+            comparison_df["cost_gain_predict_optimized"],   # Matches second bar group
+            comparison_df["cost_gain_cot_unoptimized"],     # Matches third bar group
+            comparison_df["cost_gain_cot_optimized"],       # Matches fourth bar group
+        ]
+        cost_gain_offsets = [-1.5 * bar_width, -0.5 * bar_width, 0.5 * bar_width, 1.5 * bar_width]
+        markers = ["o", "s", "o", "s"]  # Matches corresponding cost gain types
+        labels = ["Cost relative to Predict (unoptimized)", "Cost relative to Predict (optimized)", "Cost relative to CoT (unoptimized)", "Cost relative to CoT (optimized)"]
+
+        for data, offset, color, marker, label in zip(cost_gain_data, cost_gain_offsets, cost_gain_colors, markers, labels):
+            positions = [pos + offset for pos in x_positions]
+
+            # Draw thin lines from zero to the points
+            for x, y in zip(positions, data):
+                ax2.plot([x, x], [0, y], color=color, linewidth=0.8, alpha=0.7)  # Thin line from zero
+
+            # Plot the points
+            ax2.scatter(positions, data, color=color, label=label, marker=marker, s=100, edgecolors="black", alpha=0.8)
+        ax2.set_ylabel("Relative cost (%)", fontsize=20)
+        max_cost_gain = max(max(data) for data in cost_gain_data)
+        ax2.set_ylim(0, max_cost_gain * 1.2) 
+
+        ax2.legend(loc="upper right", fontsize=14)
+
+    # Customize the plot
+    ax.set_xticks(x_positions)
+    ax.set_xticklabels(programs, rotation=45, ha="right", fontsize=20)
+    ax.set_ylabel("Percentage of better performance experiment (%)", fontsize=20)
+    cost_title = "and Cost Gains "if with_cost else ""
+    ax.set_title(f"Program Performance {cost_title}Comparison ({model})", fontsize=26, pad=30)
+    ax.legend(loc="upper left", fontsize=14)
+    ax.set_ylim(0, 120)
+    ax.set_yticks(range(0, 101, 20)) 
+
+    
+    
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
+
+    plt.tight_layout()
+    with_cost = "with_cost" if with_cost else "without_cost"
+    filename = f"{model}_program_comparison_{with_cost}.png"
+    plt.savefig(filename, dpi=400)
+    print(f"Saved plot {filename}")
+    plt.show()
+
+# Benchmarks ['hover' 'IReRa' 'MMLU' 'GSM8K' 'HotpotQAConditional' 'HotpotQA'
+#  'HeartDisease' 'MATH' 'Iris' 'RAGQAArena' 'SWEVerifiedAnnotationTask'
+#  'Judge' 'HumanEval' 'Scone']
+
+benchmark_to_categories = {
+    "AppWorld": "Agent",
+    "MATH": "MATH",
+    "GSM8K": "MATH",
+    "hover": "Summarization",
+    "IReRa": "Knowledge",
+    "HotpotQA": "Knowledge",
+    "HotpotQAConditional": "Knowledge",
+    "RAGQAArena": "Knowledge",
+    "SWEVerifiedAnnotationTask": "Code",
+    "Judge": "Reasoning",
+    "HumanEval": "Code",
+    "Scone": "Reasoning",
+    "HeartDisease": "Classification",
+    "Iris": "Classification",
+    "MMLU": "Knowledge",
+}
 
 if __name__ == "__main__":
     import argparse
@@ -470,25 +1207,56 @@ if __name__ == "__main__":
     args = args.parse_args()
 
     file_path = args.file_path
-    data_df = extract_information_from_files(file_path)
-    # plot_scores_by_benchmark(file_path, data_df)
-    # plot_percentage_gain_by_benchmark(file_path, data_df)
-    results = analyze_experiments(data_df)
-    import rich
+    if file_path.endswith("csv"):
+        data_df = pd.read_csv(file_path)
+        data_df = canonicalize_program(data_df)
 
-    rich.print(results)
+    else:
+        data_df = extract_information_from_files(file_path)
+        data_df = canonicalize_program(data_df)
+        data_df.to_csv(f"{file_path.split('/')[-1]}_data.csv", index=False)
+        print(f"saved as {file_path.split('/')[-1]}_data.csv")
+
+   
+   
+    print((data_df["benchmark"].unique()))
+
+    import rich
+    plot_best_program(data_df, "gpt-4o-mini")
+    plot_best_program(data_df, "gpt-4o-mini", True)
+    # compare_programs(data_df, "gpt-4o-mini")
+    # compare_programs(data_df, "gpt-4o-mini", optimized=True)
+    compare_programs_merged(data_df, "gpt-4o-mini", False)
+    compare_programs_merged(data_df, "gpt-4o-mini", True)
+
+
 
     # Example usage
-    programs_list = get_programs(data_df)
-    comparisons = compare_all_programs_with_cot_baseline(data_df)
-    rich.print(comparisons)
+    # plot_program_specific(data_df, ['Predict', 'CoT'], "gpt-4o-mini", benchmark_to_categories)
+    # plot_program_specific(data_df, ['CoT', 'RAG', 'SimplifiedBaleen'], "gpt-4o-mini",  benchmark_to_categories)
+    # plot_program_specific(data_df, ['CoT', 'GeneratorCriticRanker', 'GeneratorCriticFuser'], "gpt-4o-mini", benchmark_to_categories)
 
-    avg_score_diffs = compare_programs_with_reference_across_benchmarks(data_df)
-    rich.print(avg_score_diffs)
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge", "Summarization", "Classification", "Reasoning", "Code", "MATH"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge"], ["Predict"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge"], ["CoT"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge"], ["RAG"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge"], ["SimplifiedBaleen"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge", "MATH", "Reasoning"], ["CoT"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge", "MATH", "Reasoning"], ["Predict"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge", "MATH", "Reasoning"], ["GeneratorCriticRanker"])
+    # plot_optimizer_specific(data_df, ["Baseline", "BootstrapFewShot", "BootstrapFewShotWithRandomSearch", "MIPROv2"], "gpt-4o-mini", benchmark_to_categories, ["Knowledge", "MATH", "Reasoning"], ["GeneratorCriticFuser"])
 
-    table = display_benchmark_performance(
-        data_df, ["HotpotQABench", "IrisBench", "GSM8KBench"]
-    )
-    print()
-    rich.print(f"[bold red]Results for {file_path.split('_')[1]}[/bold red]")
-    rich.print(table)
+    # plot_optimizer_specific_with_budget(
+    #     data_df,
+    #     [
+    #         "Baseline",
+    #         "BootstrapFewShot",
+    #         "BootstrapFewShotWithRandomSearch",
+    #         "MIPROv2",
+    #         "MIPROv2+",
+    #     ],
+    #     "gpt-4o-mini",
+    #     benchmark_to_categories,
+    #     ["Knowledge", "Summarization", "Classification", "Reasoning"],
+    #     ["CoT"],
+    # )
