@@ -1,4 +1,4 @@
-def parse_integer_answer(answer, only_first_line=True):
+def parse_integer_answer(answer, only_first_line=False):
     try:
         if only_first_line:
             answer = answer.strip().split("\n")[0]

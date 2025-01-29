@@ -108,6 +108,11 @@ def read_evaluation_records(file_path):
     file_path = pathlib.Path(file_path)
     records = []
 
+    # create the records file if it does not exist
+    if not (file_path / "evaluation_records.csv").exists():
+        # create empty records file without header
+        with open(f"{file_path}/evaluation_records.csv", "w") as f:
+            f.write("")
     with open(f"{file_path}/evaluation_records.csv", "r") as f:
         lines = f.readlines()
         for line in lines[1:]:
