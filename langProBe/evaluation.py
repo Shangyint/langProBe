@@ -8,6 +8,7 @@ from langProBe.benchmark import BenchmarkMeta, EvaluateBench, EvaluationResult
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks
 from langProBe.program import GeneratorCriticFuser, GeneratorCriticRanker
+from langProBe.analysis import extract_information_from_files
 import dspy
 
 
@@ -251,8 +252,6 @@ def evaluate(
                 ) as f:
                     f.write(",".join(evaluation_result.optimizer_program_scores))
 
-    # generate evaluation records
-    generate_evaluation_records(file_path)
 
 
 def evaluate_all(
@@ -283,6 +282,14 @@ def evaluate_all(
             missing_mode,
             program_class,
         )
+
+    df = extract_information_from_files(file_path)
+    df.to_csv(f"{file_path}/evaluation_results.csv", index=False)
+    df["model"] = lm.model
+
+    # generate evaluation records
+    generate_evaluation_records(file_path)
+
 
 
 if __name__ == "__main__":
