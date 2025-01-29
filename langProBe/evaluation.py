@@ -7,6 +7,7 @@ import sys
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench, EvaluationResult
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks
+from langProBe.program import GeneratorCriticFuser, GeneratorCriticRanker
 import dspy
 
 
@@ -121,6 +122,11 @@ def read_evaluation_records(file_path):
     return records
 
 
+program_class_mapping = {
+    "single": [dspy.Predict, dspy.ChainOfThought],
+    "archon": [GeneratorCriticFuser, GeneratorCriticRanker],
+}
+
 def evaluate(
     benchmark_meta: BenchmarkMeta,
     lm,
@@ -131,6 +137,7 @@ def evaluate(
     dataset_mode=None,
     use_devset=False,
     missing_mode=False,
+    program_class="all",
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -138,6 +145,7 @@ def evaluate(
     rm: Retrieval model to use
     optimizers: List[type(Teleprompter) | (type(Teleprompter), kwargs_for_compile)]
     missing_mode: only evaluate experiments without a result file
+    program_class: the program class to evaluate
     """
     dataset_mode = dataset_mode or benchmark_meta.dataset_mode
     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode)
@@ -172,6 +180,11 @@ def evaluate(
         )
 
     for program in benchmark_meta.program:
+        if program_class != "all":
+            available_program_classes = program_class_mapping[program_class]
+            if not isinstance(program, tuple(available_program_classes)):
+                continue
+
         program_name = getattr(program, "_name", program.__class__.__name__)
 
         evaluate_baseline_flag = True
@@ -252,6 +265,7 @@ def evaluate_all(
     dataset_mode=None,
     use_devset=False,
     missing_mode=False,
+    program_class="all",
 ):
     benchmarks = register_all_benchmarks(benchmarks)
     if missing_mode:
@@ -267,6 +281,7 @@ def evaluate_all(
             dataset_mode,
             use_devset,
             missing_mode,
+            program_class,
         )
 
 
@@ -361,6 +376,13 @@ if __name__ == "__main__":
         default=False,
     )
 
+    parser.add_argument(
+        "--program_class",
+        help="The program class to evaluate, available options: single, archon, all",
+        type=str,
+        default="all",
+    )
+
     args = parser.parse_args()
 
     suppress_dspy_output = args.suppress_dspy_output
@@ -423,4 +445,5 @@ if __name__ == "__main__":
         num_threads=args.num_threads,
         use_devset=args.use_devset,
         missing_mode=args.missing_mode,
+        program_class=args.program_class,
     )
