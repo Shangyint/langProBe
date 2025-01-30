@@ -128,6 +128,7 @@ program_class_mapping = {
     "archon": [GeneratorCriticFuser, GeneratorCriticRanker],
 }
 
+
 def evaluate(
     benchmark_meta: BenchmarkMeta,
     lm,
@@ -253,7 +254,6 @@ def evaluate(
                     f.write(",".join(evaluation_result.optimizer_program_scores))
 
 
-
 def evaluate_all(
     benchmarks,
     lm,
@@ -289,7 +289,6 @@ def evaluate_all(
 
     # generate evaluation records
     generate_evaluation_records(file_path)
-
 
 
 if __name__ == "__main__":
