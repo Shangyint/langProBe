@@ -112,10 +112,10 @@ program_mapping = {
 }
 
 optimizer_mapping = {
-    "BootstrapFewShotInfer_20Rules_10Candidates": "RIO*",
-    "BootstrapFewShotInfer_10Rules_10Candidates": "RIO",
-    "MIPROv2": "MIPROv2",
-    "MIPROv2+": "MIPROv2*",
+    "BootstrapFewShotInfer_20Rules_10Candidates": "RuleInfer",
+    "BootstrapFewShotInfer_10Rules_10Candidates": "RuleInfer-lite",
+    "MIPROv2": "MIPROv2-lite",
+    "MIPROv2+": "MIPROv2",
     "Baseline": "Baseline",
     "BootstrapFewShot": "BootstrapFewShot",
     "BootstrapFewShotWithRandomSearch": "BootstrapFewShotWithRandomSearch",
@@ -136,8 +136,11 @@ def canonicalize_program(data_df):
         "benchmark",
     ] = "SWEBenchValidity"
     data_df["program"] = data_df["program"].replace(program_mapping)
-    data_df["optimizer"] = data_df["optimizer"].replace(optimizer_mapping)
     data_df["benchmark"] = data_df["benchmark"].apply(lambda x: x.replace("Bench", ""))
+    return data_df
+
+def canonicalize_optimizer(data_df):
+    data_df["optimizer"] = data_df["optimizer"].replace(optimizer_mapping)
     return data_df
 
 
@@ -580,7 +583,6 @@ def plot_best_program_combined(data_df, model, benchmark_to_categories):
             start_index = benchmarks_in_category.index[0]
             x_pos = x_positions[start_index]  # Absolute x-position in the main plot
             category_positions.append((category, x_pos))
-            print(category, x_pos)
     # category_positions[-1] = ("Reasoning", 1)
 
     category_ax.set_ylim(0, 1)
@@ -705,11 +707,11 @@ def plot_best_program_combined_multi_lms(data_dfs, models, benchmark_to_categori
         drop=True
     )
 
-    fig, ax = plt.subplots(figsize=(13, 8))
+    fig, ax = plt.subplots(figsize=(20, 6))
     x_positions = np.arange(len(avg_scores))
 
     # Bar width
-    bar_width = 0.25
+    bar_width = 0.3
 
     # Plot bars
     ax.bar(
@@ -762,9 +764,9 @@ def plot_best_program_combined_multi_lms(data_dfs, models, benchmark_to_categori
                     (row["avg_unoptimized_score"] - baseline) / baseline
                 ) * 100
             ax.text(
-                x_positions[i],
+                x_positions[i] -0.05,
                 row["avg_unoptimized_score"] + 0.02,  # Position above the bar
-                f"{unoptimized_change:+.1f}%",
+                f"{unoptimized_change:+.3g}%",
                 fontsize=9,
                 ha="center",
                 color="black",
@@ -792,9 +794,9 @@ def plot_best_program_combined_multi_lms(data_dfs, models, benchmark_to_categori
                 y_position = row["avg_optimized_score"] + 0.04
 
             ax.text(
-                x_positions[i] + bar_width,
+                x_positions[i] + bar_width -0.05,
                 y_position,  # Position above the bar
-                f"{optimized_change:+.1f}%",
+                f"{optimized_change:+.3g}%",
                 fontsize=9,
                 ha="center",
                 color="black",
@@ -1114,7 +1116,6 @@ def plot_cost_gains(
 
     # Convert to DataFrame
     total_costs = pd.DataFrame(cost_comparisons)
-    print(total_costs)
 
     # Filter out negative gains (we only show programs that increase cost)
     total_costs = total_costs[total_costs["relative_gain"] > 0]
@@ -2498,6 +2499,16 @@ def ensure_data_df(data_df):
         else:
             data_df["benchmark"] = data_df["filename"].apply(lambda x: x.split("_")[0])
             data_df["program"] = data_df["filename"].apply(lambda x: x.split("_")[1])
+    # drop columns filename and file_name (if they exist)
+    if "filename" in data_df.columns:
+        data_df = data_df.drop(columns=["filename"])
+    if "file_name" in data_df.columns:
+        data_df = data_df.drop(columns=["file_name"])
+    # drop same rows with the same benchmark and program and optimizer
+    data_df["benchmark"] = data_df["benchmark"].astype(str).str.strip()
+    data_df["program"] = data_df["program"].astype(str).str.strip()
+    data_df["optimizer"] = data_df["optimizer"].astype(str).str.strip()
+    data_df = data_df.drop_duplicates(subset=["benchmark", "program", "optimizer"], keep="first")
     return data_df
 
 
@@ -2561,12 +2572,13 @@ if __name__ == "__main__":
     if file_path:
         if file_path.endswith("csv"):
             data_df = pd.read_csv(file_path)
-            ensure_data_df(data_df)
             data_df = canonicalize_program(data_df)
+            data_df = ensure_data_df(data_df)
 
         else:
             data_df = extract_information_from_files(file_path)
             data_df = canonicalize_program(data_df)
+            data_df = ensure_data_df(data_df)
             data_df.to_csv(f"{file_path.split('/')[-1]}_data.csv", index=False)
             print(f"saved as {file_path.split('/')[-1]}_data.csv")
 
@@ -2604,27 +2616,18 @@ if __name__ == "__main__":
             plot_best_program_combined(data_df, args.model, benchmark_to_categories)
 
             compare_programs_merged(data_df, args.model, False)
-            compare_programs_merged(
-                data_df,
-                args.model,
-                True,
-                ["GeneratorCriticRanker20", "GeneratorCriticFuser20"],
-            )
+            compare_programs_merged(data_df, args.model, True, ["GeneratorCriticRanker20", "GeneratorCriticFuser20"])
 
             compare_programs_merged_performance_increase(data_df, args.model, False)
-            compare_programs_merged_performance_increase(
-                data_df,
-                args.model,
-                True,
-                ["GeneratorCriticRanker20", "GeneratorCriticFuser20"],
-            )
+            compare_programs_merged_performance_increase(data_df, args.model, True, ["GeneratorCriticRanker20", "GeneratorCriticFuser20"])
 
         if args.plot_type == "optimizer":
             all_comparison_dfs = {
                 args.model: {
-                    args.model: data_df,
+                    args.model: canonicalize_optimizer(data_df),
                 }
             }
+
             process_comparison_dfs(all_comparison_dfs, args.model)
 
     file_paths = args.file_paths
@@ -2640,8 +2643,9 @@ if __name__ == "__main__":
         for file_path, model in zip(file_paths, models):
             if file_path.endswith("csv"):
                 data_df = pd.read_csv(file_path)
-                ensure_data_df(data_df)
                 data_df = canonicalize_program(data_df)
+                data_df = ensure_data_df(data_df)
+                
 
             else:
                 data_df = extract_information_from_files(file_path)
