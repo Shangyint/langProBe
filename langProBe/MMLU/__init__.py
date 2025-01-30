@@ -1,13 +1,6 @@
 from typing import Any, Callable
 from .MMLU_data import MMLUBench
-from .MMLU_program import (
-    MMLUPredict,
-    MMLUCoT,
-    MMLURAG,
-    MMLUSimplifiedBaleen,
-    MMLUGeneratorCriticRanker,
-    MMLUGeneratorCriticFuser,
-)
+from .MMLU_program import *
 from langProBe.benchmark import Benchmark, BenchmarkMeta
 
 benchmark: Callable[[], Benchmark] = MMLUBench
@@ -18,6 +11,8 @@ programs = [
     MMLUSimplifiedBaleen,
     MMLUGeneratorCriticRanker,
     MMLUGeneratorCriticFuser,
+    MMLUGeneratorCriticFuser_20,
+    MMLUGeneratorCriticRanker_20,
 ]
 
 

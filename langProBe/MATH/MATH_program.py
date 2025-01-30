@@ -16,4 +16,6 @@ class GenerateAnswerBasic(dspy.Signature):
 MATHPredict = program.Predict(GenerateAnswerBasic)
 MATHCoT = program.CoT(GenerateAnswerBasic)
 MATHGeneratorCriticFuser = program.GeneratorCriticFuser(GenerateAnswerBasic)
+MATHGeneratorCriticFuser_20 = program.GeneratorCriticFuser(GenerateAnswerBasic, n=20)
 MATHGeneratorCriticRanker = program.GeneratorCriticRanker(GenerateAnswerBasic)
+MATHGeneratorCriticRanker_20 = program.GeneratorCriticRanker(GenerateAnswerBasic, n=20)

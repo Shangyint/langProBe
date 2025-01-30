@@ -21,3 +21,8 @@ HumanEvalPredict = program.Predict(CodeProblem)
 HumanEvalCoT = program.CoT(CodeProblem)
 HumanEvalGeneratorCriticFuser = program.GeneratorCriticFuser(CodeProblem)
 HumanEvalGeneratorCriticRanker = program.GeneratorCriticRanker(CodeProblem)
+
+HumanEvalGeneratorCriticFuser_20 = program.GeneratorCriticFuser(CodeProblem, n=20)
+HumanEvalGeneratorCriticRanker_20 = program.GeneratorCriticRanker(CodeProblem, n=20)
+
+

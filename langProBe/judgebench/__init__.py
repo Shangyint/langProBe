@@ -1,10 +1,5 @@
 from .judgebench_data import JudgeBench
-from .judgebench_program import (
-    JudgePredict,
-    JudgeCoT,
-    JudgeGeneratorCriticFuser,
-    JudgeGeneratorCriticRanker,
-)
+from .judgebench_program import *
 
 from langProBe.benchmark import BenchmarkMeta
 
@@ -25,7 +20,7 @@ def llm_judge_eval(gold, pred, target: str = None):
 benchmark = [
     BenchmarkMeta(
         JudgeBench,
-        [JudgePredict, JudgeCoT, JudgeGeneratorCriticFuser, JudgeGeneratorCriticRanker],
+        [JudgePredict, JudgeCoT, JudgeGeneratorCriticFuser, JudgeGeneratorCriticRanker, JudgeGeneratorCriticFuser_20, JudgeGeneratorCriticRanker_20],
         llm_judge_eval,
     )
 ]

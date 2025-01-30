@@ -17,4 +17,7 @@ class LLMJudgeSignature(dspy.Signature):
 JudgePredict = program.Predict(LLMJudgeSignature)
 JudgeCoT = program.CoT(LLMJudgeSignature)
 JudgeGeneratorCriticFuser = program.GeneratorCriticFuser(LLMJudgeSignature)
+JudgeGeneratorCriticFuser_20 = program.GeneratorCriticFuser(LLMJudgeSignature, n=20)
 JudgeGeneratorCriticRanker = program.GeneratorCriticRanker(LLMJudgeSignature)
+JudgeGeneratorCriticRanker_20 = program.GeneratorCriticRanker(LLMJudgeSignature, n=20)
+

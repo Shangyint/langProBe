@@ -15,4 +15,6 @@ class Sig(dspy.Signature):
 IrisPredict = program.Predict(Sig)
 IrisCot = program.CoT(Sig)
 IrisGeneratorCriticRanker = program.GeneratorCriticRanker(Sig)
+IrisGeneratorCriticRanker_20 = program.GeneratorCriticRanker(Sig, n=20)
 IrisGeneratorCriticFuser = program.GeneratorCriticFuser(Sig)
+IrisGeneratorCriticFuser_20 = program.GeneratorCriticFuser(Sig, n=20)
