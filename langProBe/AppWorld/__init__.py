@@ -35,6 +35,7 @@ APPWORLD_OPTIMIZERS = [
         langProBe_configs=dict(
             use_valset=True, name="BootstrapFewShotWithRandomSearch"
         ),
+        name="BootstrapFewShotWithRandomSearch"
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.MIPROv2,
@@ -47,6 +48,7 @@ APPWORLD_OPTIMIZERS = [
             teacher=appworld_teacher,
         ),
         langProBe_configs=dict(use_valset=True, name="MIPROv2"),
+        name="MIPROv2"
     ),
 ]
 
