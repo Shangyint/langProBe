@@ -21,6 +21,7 @@ APPWORLD_OPTIMIZERS = [
         init_args=dict(max_errors=1000, max_labeled_demos=0, max_bootstrapped_demos=2),
         compile_args=dict(teacher=appworld_teacher),
         langProBe_configs=dict(use_valset=False, name="BootstrapFewShot"),
+        name="BootstrapFewShot"
     ),
     OptimizerConfig(
         optimizer=dspy.teleprompt.BootstrapFewShotWithRandomSearch,
