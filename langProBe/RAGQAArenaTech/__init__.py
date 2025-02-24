@@ -4,6 +4,10 @@ from .RAGQAArenaTech_program import *
 from langProBe.benchmark import BenchmarkMeta
 import dspy
 
+eval_lm = dspy.LM("openai/gpt-4o")
+eval_module = dspy.evaluate.SemanticF1()
+eval_module.set_lm(eval_lm)
+
 benchmark = [
     BenchmarkMeta(
         RAGQAArenaBench,
@@ -17,6 +21,6 @@ benchmark = [
             RAGQAGeneratorCriticFuser_20,
             RAGQAGeneratorCriticRanker_20,
         ],
-        dspy.evaluate.SemanticF1(),
+        eval_module,
     )
 ]
