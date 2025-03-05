@@ -1,0 +1,21 @@
+local_cache
+*__pycache__
+.DS_Store
+temp
+
+scratchpad.ipynb
+langProBe/AppWorld/data/
+langProBe/AppWorld/experiments/
+langProBe/AppWorld/.conda/
+*.csv
+*.png
+
+data/
+
+# result files
+*.txt
+*.model
+*.stat
+*.json
+
+.dspy_cache/
