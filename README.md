@@ -55,7 +55,7 @@ This file defines the data used for this benchmark. It should download the data,
 #### `bench_name_program.py`
 This file defines programs for this benchmark. There are a few requirements for customized programs:
 1. `setup_lm(lm:str, api_key:str, api_base:str)` - your program should support setting up lm with `setup_lm` method. We recommend the LiteLLM library.
-2. program should provide a callable interface (through `__call__` method). The arguments will be a dictionary (`**kwargs`) of input keys to their actual values. For example, a question-answering dataset may use the following input `program(question="what is 1 + 1?")`. The answer should be a **DotDict** with respect field. The same example could be `return DotDict({"answer": "2"})`.
+2. the program should provide a callable interface (through `__call__` method). The arguments will be a dictionary (`**kwargs`) of input keys to their actual values. For example, a question-answering dataset may use the following input `program(question="what is 1 + 1?")`. The answer should be a **DotDict** with respect field. The same example could be `return DotDict({"answer": "2"})`.
 
 #### `bench_name_utils.py`
 This file defines utility functions for this benchmark.
