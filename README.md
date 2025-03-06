@@ -5,6 +5,8 @@ LangProBe (language program benchmark) measures the architectures and optimizati
 ## Installation
 
 ```bash
+conda create -n langprobe python=3.10 -y
+conda activate langprobe
 pip install -r requirements.txt
 ```
 

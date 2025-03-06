@@ -11,3 +11,5 @@ ipython==8.17.2
 huggingface-hub==0.25.0
 numpy==1.24.3
 math-verify==0.6.0
+langchain_community
+pybind11>=2.12
