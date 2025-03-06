@@ -1,9 +1,8 @@
-dspy>=2.5.40
+dspy>=2.6
 requests
 shortuuid
 seaborn
 langchain
-
 black==23.11.0
 sentence-transformers==2.2.2
 sentencepiece==0.1.99
@@ -11,5 +10,4 @@ torch==2.1.1
 ipython==8.17.2
 huggingface-hub==0.25.0
 numpy==1.24.3
-
 math-verify==0.6.0
