@@ -9,7 +9,7 @@ from .irera_utils import (
     extract_labels_from_strings,
     supported_signatures,
 )
-import langProBe.program as program
+import langProBe.dspy_program as dspy_program
 import os
 
 
@@ -19,11 +19,11 @@ state = json.load(open(state_path, "r"))
 global_config = IreraConfig.from_dict(state["config"])
 
 
-class IReRaPredict(dspy.Module):
+class IReRaPredict(dspy_program.LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, config: IreraConfig = global_config):
         super().__init__()
         self.config = config
-        self.predict = program.Predict(
+        self.predict = dspy_program.Predict(
             supported_signatures[config.infer_signature_name]
         )
 
@@ -37,7 +37,7 @@ class IReRaPredict(dspy.Module):
         return dspy.Prediction(predictions=parsed_outputs)
 
 
-class IReRaCOT(dspy.Module):
+class IReRaCOT(dspy_program.LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, config: IreraConfig = global_config):
         super().__init__()
         self.config = config
@@ -56,7 +56,7 @@ class IReRaCOT(dspy.Module):
         return dspy.Prediction(predictions=parsed_outputs)
 
 
-class IReRaRetrieve(dspy.Module):
+class IReRaRetrieve(dspy_program.LangProBeDSPyMetaProgram, dspy.Module):
     """Infer-Retrieve. Sets the Retriever, initializes the prior."""
 
     def __init__(self, config: IreraConfig = global_config):
@@ -107,7 +107,7 @@ class IReRaRetrieve(dspy.Module):
         return scores
 
 
-class IReRaRetrieveRank(dspy.Module):
+class IReRaRetrieveRank(dspy_program.LangProBeDSPyMetaProgram, dspy.Module):
     """Infer-Retrieve-Rank, as defined in https://arxiv.org/abs/2401.12178."""
 
     def __init__(self, config: IreraConfig = global_config):

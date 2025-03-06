@@ -43,7 +43,7 @@ class HeartDiseaseVote(HeartDiseaseInput):
     )
 
 
-class HeartDiseaseClassify(dspy.Module):
+class HeartDiseaseClassify(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.classify = [
             dspy.ChainOfThought(HeartDiseaseSignature, temperature=0.7 + i * 0.01)

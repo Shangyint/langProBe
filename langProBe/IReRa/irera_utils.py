@@ -12,6 +12,8 @@ import sentence_transformers
 from sentence_transformers import SentenceTransformer
 from functools import lru_cache
 
+from langProBe.dspy_program import LangProBeDSPyMetaProgram
+
 
 def normalize(
     label: str,
@@ -449,7 +451,7 @@ class Retriever:
         return query_to_score
 
 
-class Infer(dspy.Module):
+class Infer(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, config: IreraConfig):
         super().__init__()
         self.config = config
@@ -495,7 +497,7 @@ class Chunker:
             snippet_idx += 1
 
 
-class Rank(dspy.Module):
+class Rank(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, config: IreraConfig):
         super().__init__()
 

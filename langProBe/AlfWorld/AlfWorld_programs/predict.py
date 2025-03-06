@@ -36,7 +36,7 @@ The environment will provide an observation for every action. The observation 'N
     past_steps = dspy.InputField(description="Past actions and observations", format=str)
     action = dspy.OutputField(description="Next action to be taken", format=str)
 
-class AlfWorldPredict(dspy.Module):
+class AlfWorldPredict(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, max_steps=40):
         self.module = dspy.Predict(signature=AlfWorldSignature)
         self.max_steps = max_steps

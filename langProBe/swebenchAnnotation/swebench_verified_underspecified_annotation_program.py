@@ -31,7 +31,7 @@ class UnderspecifiedSignature(dspy.Signature):
     score: str = dspy.OutputField(desc="The score from 0 to 3 based on the criteria")
 
 
-class UnderspecifiedAnnotationPredict(dspy.Module):
+class UnderspecifiedAnnotationPredict(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.underspcification_predictor = dspy_program.Predict(UnderspecifiedSignature)
 
@@ -56,7 +56,7 @@ class UnderspecifiedAnnotationPredict(dspy.Module):
         return dspy.Prediction(**output)
 
 
-class UnderspecifiedAnnotationCoT(dspy.Module):
+class UnderspecifiedAnnotationCoT(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.underspcification_predictor = dspy.ChainOfThought(UnderspecifiedSignature)
 
@@ -81,7 +81,7 @@ class UnderspecifiedAnnotationCoT(dspy.Module):
         return dspy.Prediction(**output)
 
 
-class UnderspecifiedAnnotationGeneratorCriticFuser(dspy.Module):
+class UnderspecifiedAnnotationGeneratorCriticFuser(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.underspcification_predictor = dspy_program.GeneratorCriticFuser(
             UnderspecifiedSignature
@@ -108,7 +108,7 @@ class UnderspecifiedAnnotationGeneratorCriticFuser(dspy.Module):
         return dspy.Prediction(**output)
 
 
-class UnderspecifiedAnnotationGeneratorCriticRanker(dspy.Module):
+class UnderspecifiedAnnotationGeneratorCriticRanker(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.underspcification_predictor = dspy_program.GeneratorCriticRanker(
             UnderspecifiedSignature

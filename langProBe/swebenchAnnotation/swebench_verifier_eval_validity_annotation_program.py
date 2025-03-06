@@ -34,7 +34,7 @@ class EvaluationValiditySignature(dspy.Signature):
     )
 
 
-class EvaluationValidityPredict(dspy.Module):
+class EvaluationValidityPredict(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.evaluation_validity_predictor = dspy_program.Predict(
             EvaluationValiditySignature
@@ -61,7 +61,7 @@ class EvaluationValidityPredict(dspy.Module):
         return dspy.Prediction(**output)
 
 
-class EvaluationValidityCoT(dspy.Module):
+class EvaluationValidityCoT(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.evaluation_validity_predictor = dspy.ChainOfThought(
             EvaluationValiditySignature
@@ -88,7 +88,7 @@ class EvaluationValidityCoT(dspy.Module):
         return dspy.Prediction(**output)
 
 
-class EvaluationValidityGeneratorCriticRanker(dspy.Module):
+class EvaluationValidityGeneratorCriticRanker(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.evaluation_validity_predictor = dspy_program.GeneratorCriticRanker(
             EvaluationValiditySignature
@@ -115,7 +115,7 @@ class EvaluationValidityGeneratorCriticRanker(dspy.Module):
         return dspy.Prediction(**output)
 
 
-class EvaluationValidityGeneratorCriticFuser(dspy.Module):
+class EvaluationValidityGeneratorCriticFuser(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         self.evaluation_validity_predictor = dspy_program.GeneratorCriticFuser(
             EvaluationValiditySignature

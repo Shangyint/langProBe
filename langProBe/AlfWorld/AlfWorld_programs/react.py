@@ -4,6 +4,8 @@ from langProBe.AlfWorld.AlfWorld_utils.alfworld_server_manager import alfworld_m
 
 import dspy
 
+from langProBe.dspy_program import LangProBeDSPyMetaProgram
+
 class AlfWorldReactSignature(dspy.Signature):
     """You are a super intelligent AI Assistant whose job is to complete my household tasks by taking actions in my house. To complete the task, you will determine the next action to be taken, and the environment will provide you with the observation after the action is taken, based on which, you will determine the next action to be taken.
 
@@ -66,7 +68,7 @@ class AlfWorldEnvTool(DSPyTool):
             return "Task completed successfully. You can now call Finish[]."
         return obs
 
-class AlfWorldReAct(dspy.Module):
+class AlfWorldReAct(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, max_steps=40):
         self.tool = AlfWorldEnvTool()
         self.module = dspy.ReAct(signature=AlfWorldReactSignature, tools=[self.tool], max_iters=max_steps)

@@ -6,7 +6,7 @@ from .predict import AlfWorldSignature
 
 import dspy
 
-class AlfWorldCoT(dspy.Module):
+class AlfWorldCoT(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, max_steps=40):
         self.module = dspy.ChainOfThought(signature=AlfWorldSignature)
         self.max_steps = max_steps

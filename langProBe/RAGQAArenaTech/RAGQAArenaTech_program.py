@@ -6,11 +6,11 @@ import ujson
 import os
 import requests
 import langProBe.dspy_program as dspy_program
-from langProBe.dspy_program import deduplicate
+from langProBe.dspy_program import LangProBeDSPyMetaProgram, deduplicate
 from .RAGQAArenaTech_utils import GenerateSearchQuery
 
 
-class SimplifiedBaleen(dspy.Module):
+class SimplifiedBaleen(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, num_docs=5, max_hops=2):
         Path("langProBe/RAGQAArenaTech/data").mkdir(exist_ok=True)
 
@@ -70,7 +70,7 @@ class SimplifiedBaleen(dspy.Module):
         return self.respond(context=context, question=question)
 
 
-class RAG(dspy.Module):
+class RAG(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self, num_docs=5):
         Path("langProBe/RAGQAArenaTech/data").mkdir(exist_ok=True)
 

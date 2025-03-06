@@ -1,7 +1,7 @@
 import dspy
 
 
-class HoverMultiHopPredict(dspy.Module):
+class HoverMultiHopPredict(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         super().__init__()
         self.k = 7
@@ -34,7 +34,7 @@ class HoverMultiHopPredict(dspy.Module):
         return dspy.Prediction(retrieved_docs=hop1_docs + hop2_docs + hop3_docs)
 
 
-class HoverMultiHop(dspy.Module):
+class HoverMultiHop(LangProBeDSPyMetaProgram, dspy.Module):
     def __init__(self):
         super().__init__()
         self.k = 7
