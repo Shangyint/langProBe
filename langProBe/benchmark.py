@@ -176,7 +176,7 @@ class EvaluateBench(ABC):
         )
         self.benchmark = benchmark
         self.program = program
-        self.program.setup_lm(lm, api_key=api_key, api_base=api_base)
+        self.program.set_lm(dspy.LM(lm, api_key=api_key, api_base=api_base))
         self.metric = metric
         self.optimizers = optimizers
         self.num_threads = num_threads

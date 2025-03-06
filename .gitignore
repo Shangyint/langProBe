@@ -19,3 +19,4 @@ data/
 *.json
 
 .dspy_cache/
+.evaluation_*/
