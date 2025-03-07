@@ -435,7 +435,9 @@ if __name__ == "__main__":
         ".HeartDisease",
         ".judgebench",
         ".humaneval",
-        ".MedQA"
+        ".MedQA",
+        ".PubMedQA",
+        ".MedMCQA"
     ]
 
     benchmarks = (
