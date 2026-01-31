@@ -98,6 +98,7 @@ def __init__(self):
 |----------|------------------|---------|
 | `RulesInductionProgramINFER` | `random.uniform(0.9, 1.0)` | Diverse rule generation for optimization |
 | `HeartDiseaseClassify` | `0.7, 0.71, 0.72` | Ensemble of classifiers with slight variations |
+| `ArchonGenerator` (and related) | Default (via `n` parameter) | Multiple diverse completions through DSPy's internal handling |
 
 ### Why Diversity Matters
 
@@ -109,14 +110,50 @@ def __init__(self):
    - Training/optimization phase (rule induction)
    - Ensemble prediction (multiple perspectives)
 
+## Location 3: Archon Generator Programs (Implicit Diversity via `n` parameter)
+
+### Classes: `ArchonGenerator`, `GeneratorCriticRanker`, `GeneratorCriticFuser`, etc.
+
+**File:** `langProBe/dspy_program.py`  
+**Line:** 128
+
+### Purpose
+The Archon family of programs use the `n` parameter to generate multiple diverse responses without explicitly setting temperature.
+
+### Implementation Details
+
+```python
+class ArchonGenerator(LangProBeDSPyMetaProgram, dspy.Module):
+    def __init__(self, signature, n=5):
+        # For dspy, n responses are generated with a single model now.
+        verified_signature = dspy.ensure_signature(signature)
+        self.prog = dspy.ChainOfThought(verified_signature, n=n)
+        self.output_field = list(verified_signature.output_fields.keys())[0]
+```
+
+### Key Points
+
+1. **Default n=5:** Generates 5 diverse responses using DSPy's default temperature handling
+2. **Used by Multiple Programs:**
+   - `GeneratorCriticRanker` - Generates responses, critiques them, and ranks them
+   - `GeneratorCriticFuser` - Generates responses, critiques them, and fuses them into one
+   - `GeneratorRanker` - Generates responses and ranks them
+   - `GeneratorFuser` - Generates responses and fuses them
+
+3. **Diversity Mechanism:**
+   - Relies on DSPy's internal handling of the `n` parameter
+   - DSPy typically uses temperature and/or sampling to generate diverse completions
+   - Temperature is not explicitly set, so it uses the default LM configuration
+
 ## Related Files
 
 - `langProBe/optimizers.py` - Contains optimizer configurations and rule induction logic
 - `langProBe/HeartDisease/HeartDisease_program.py` - Example of ensemble approach with temperature variation
-- `langProBe/dspy_program.py` - Base classes for DSPy programs in LangProBe
+- `langProBe/dspy_program.py` - Base classes for DSPy programs, includes Archon components
 
 ## Notes
 
 - The temperature modification in `RulesInductionProgramINFER` is temporary and restored after generation (in the non-teacher_settings case)
 - The use of `random.uniform()` means each rule induction gets a slightly different temperature, adding another layer of diversity
+- Archon-based programs (`ArchonGenerator`, `GeneratorCriticRanker`, etc.) achieve diversity through the `n` parameter, which generates multiple completions
 - Other programs in the repository may use DSPy's default temperature settings unless explicitly overridden
