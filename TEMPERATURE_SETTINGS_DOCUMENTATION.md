@@ -46,7 +46,9 @@ def forward(self, examples_text):
    - This generates a random temperature between 0.9 and 1.0 for each rule induction
    - High temperature ensures diverse natural language rules
 
-2. **Restoration:** The original temperature is saved and restored after generation (when not using teacher_settings)
+2. **Restoration:** 
+   - When NOT using teacher_settings: The original temperature is saved and restored after generation
+   - When using teacher_settings: The temperature change is scoped to the context manager, so DSPy handles restoration automatically
 
 3. **Why Diverse Rules Matter:**
    - The `BootstrapFewShotInfer` optimizer generates multiple candidate programs (default: 10)
@@ -153,7 +155,9 @@ class ArchonGenerator(LangProBeDSPyMetaProgram, dspy.Module):
 
 ## Notes
 
-- The temperature modification in `RulesInductionProgramINFER` is temporary and restored after generation (in the non-teacher_settings case)
+- **Temperature Restoration:**
+  - In `RulesInductionProgramINFER`, when NOT using teacher_settings, the original temperature is explicitly saved and restored
+  - When using teacher_settings, the temperature change is scoped to the context manager (`dspy.settings.context`), so DSPy handles restoration automatically
 - The use of `random.uniform()` means each rule induction gets a slightly different temperature, adding another layer of diversity
 - Archon-based programs (`ArchonGenerator`, `GeneratorCriticRanker`, etc.) achieve diversity through the `n` parameter, which generates multiple completions
 - Other programs in the repository may use DSPy's default temperature settings unless explicitly overridden
